@@ -1,0 +1,8 @@
+node_modules
+.venv
+dist
+__pycache__
+**/__pycache__
+*.pyc
+.git
+agentv2/chaintrace.db

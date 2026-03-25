@@ -1,0 +1,25 @@
+# FastAPI - 用于构建API的现代Web框架
+fastapi
+
+# Uvicorn - 用于运行FastAPI应用的高性能ASGI服务器
+uvicorn[standard]
+
+# Netmiko - 用于通过SSH简化多厂商网络设备管理的库
+netmiko
+
+# python-dotenv - 用于从.env文件加载环境变量
+python-dotenv
+
+# Google Generative AI - 用于与Gemini模型进行交互
+google-generativeai>=0.7.0
+
+# SQLModel - 用于与数据库交互的现代化ORM，结合了SQLAlchemy和Pydantic
+sqlmodel
+
+# passlib[bcrypt] - 用于安全存储密码（bcrypt 哈希算法）
+# bcrypt 必须锁定在 3.x，4.x 与 passlib 1.7.4 不兼容
+passlib[bcrypt]
+bcrypt==3.2.2
+
+# python-jose[cryptography] - 用于 JWT 令牌的生成与验证
+python-jose[cryptography]

@@ -1,0 +1,675 @@
+{
+  "devices": [
+    {
+      "id": "RTR01-NYC",
+      "name": "Core Router NYC",
+      "ipAddress": "192.168.1.1",
+      "type": "Router"
+    },
+    {
+      "id": "SW01-SFO",
+      "name": "Access Switch SFO",
+      "ipAddress": "10.10.5.254",
+      "type": "Switch"
+    },
+    {
+      "id": "FW01-LON",
+      "name": "Edge Firewall London",
+      "ipAddress": "203.0.113.1",
+      "type": "Firewall"
+    },
+    {
+      "id": "H3C",
+      "name": "h3c",
+      "ipAddress": "192.168.1.25",
+      "type": "Router"
+    },
+    {
+      "id": "CISCO",
+      "name": "CISCO",
+      "ipAddress": "192.168.234.25",
+      "type": "Router"
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password": "admin",
+      "role": "admin"
+    },
+    {
+      "id": 2,
+      "username": "operator1",
+      "password": "password",
+      "role": "operator"
+    },
+    {
+      "id": 3,
+      "username": "net_admin",
+      "password": "password123",
+      "role": "operator"
+    }
+  ],
+  "audit_log": [
+    {
+      "timestamp": "2025-09-28T02:09:17.267034Z",
+      "username": "admin",
+      "action": "创建了新配置模板 'fffff'。"
+    },
+    {
+      "timestamp": "2025-09-26T02:14:31.430366Z",
+      "username": "admin",
+      "action": "将设备 'CISCO' 回滚至版本 6 (新版本为 8)。"
+    },
+    {
+      "timestamp": "2025-09-25T08:12:34.517652Z",
+      "username": "admin",
+      "action": "将配置非交互式地推送到设备 'CISCO'。"
+    },
+    {
+      "timestamp": "2025-09-25T08:12:32.667450Z",
+      "username": "admin",
+      "action": "为设备 'CISCO' 添加了新配置 (版本 7)。"
+    },
+    {
+      "timestamp": "2025-09-25T07:59:24.408147Z",
+      "username": "admin",
+      "action": "通过交互式会话为设备 'CISCO' 保存并审计了新配置 (版本 6)。"
+    },
+    {
+      "timestamp": "2025-09-25T07:21:13.230745Z",
+      "username": "admin",
+      "action": "创建了新配置模板 'telnet'。"
+    },
+    {
+      "timestamp": "2025-09-25T07:20:07.256027Z",
+      "username": "admin",
+      "action": "通过批量部署模板 'dfsffdsf' 更新了设备 'CISCO' (版本 5)。"
+    },
+    {
+      "timestamp": "2025-09-24T03:17:49.805212Z",
+      "username": "admin",
+      "action": "创建了新合规策略 'asd'。"
+    },
+    {
+      "timestamp": "2025-09-24T03:17:43.226676Z",
+      "username": "admin",
+      "action": "创建了新配置模板 'asd'。"
+    },
+    {
+      "timestamp": "2025-09-22T07:53:17.527804Z",
+      "username": "admin",
+      "action": "通过批量部署模板 'dfsffdsf' 更新了设备 'CISCO' (版本 3)。"
+    },
+    {
+      "timestamp": "2025-09-22T07:52:37.649810Z",
+      "username": "admin",
+      "action": "创建了新配置模板 'dfsffdsf'。"
+    },
+    {
+      "timestamp": "2025-09-22T07:06:49.084204Z",
+      "username": "admin",
+      "action": "通过交互式会话为设备 'CISCO' 保存并审计了新配置 (版本 2)。"
+    },
+    {
+      "timestamp": "2025-09-22T06:41:16.337639Z",
+      "username": "admin",
+      "action": "添加了新设备 'CISCO' (ID: CISCO)。"
+    },
+    {
+      "timestamp": "2025-09-18T04:54:17.279484Z",
+      "username": "admin",
+      "action": "创建了新合规策略 'telnet'。"
+    },
+    {
+      "timestamp": "2025-09-18T04:36:54.670676Z",
+      "username": "admin",
+      "action": "通过交互式会话为设备 'H3C' 保存并审计了新配置 (版本 3)。"
+    },
+    {
+      "timestamp": "2025-09-18T03:44:11.468599Z",
+      "username": "admin",
+      "action": "通过交互式会话为设备 'H3C' 保存并审计了新配置 (版本 2)。"
+    },
+    {
+      "timestamp": "2025-09-18T01:50:00.569187Z",
+      "username": "admin",
+      "action": "添加了新设备 'h3c' (ID: H3C)。"
+    },
+    {
+      "timestamp": "2025-09-17T06:25:11.832227Z",
+      "username": "admin",
+      "action": "删除了设备 'h3c' (ID: H3C)。"
+    },
+    {
+      "timestamp": "2025-09-17T06:00:27.733386Z",
+      "username": "admin",
+      "action": "添加了新设备 'h3c' (ID: H3C)。"
+    }
+  ],
+  "templates": [
+    {
+      "id": "1629ac5f-25b8-4605-946e-3b65218151fd",
+      "name": "dfsffdsf",
+      "content": "sdfsffsfs"
+    },
+    {
+      "id": "0ea38efa-7f84-42bf-b41a-7db4850ca9af",
+      "name": "asd",
+      "content": "sad"
+    },
+    {
+      "id": "4066237f-b726-4b35-a47b-419d17afed78",
+      "name": "telnet",
+      "content": "telnet service enable"
+    },
+    {
+      "id": "ca1219ea-0e20-40fe-a7cb-ad9ef8324df0",
+      "name": "fffff",
+      "content": "fffff"
+    }
+  ],
+  "policies": [
+    {
+      "id": "2013354b-8f9a-4597-8168-12df673faca6",
+      "name": "telnet",
+      "severity": "critical",
+      "description": "用于",
+      "rule": "禁止使用telnet",
+      "enabled": true
+    },
+    {
+      "id": "b4efca6a-0bbf-4b18-b0d8-2697f162f29a",
+      "name": "asd",
+      "severity": "medium",
+      "description": "asd",
+      "rule": "asd",
+      "enabled": true
+    }
+  ],
+  "settings": {
+    "is_ai_analysis_enabled": true
+  },
+  "blockchains": {
+    "RTR01-NYC": [
+      {
+        "index": 0,
+        "timestamp": "2023-01-01T10:00:00Z",
+        "data": {
+          "deviceId": "RTR01-NYC",
+          "version": 1,
+          "operator": "system_init",
+          "config": "hostname RTR01-NYC\n!\ninterface GigabitEthernet0/0\n ip address 192.168.1.1 255.255.255.0\n no shutdown\n!\nrouter ospf 1\n network 192.168.1.0 0.0.0.255 area 0\n!\nend",
+          "diff": "+ hostname RTR01-NYC\n+ !\n+ interface GigabitEthernet0/0\n+  ip address 192.168.1.1 255.255.255.0\n+  no shutdown\n+ !\n+ router ospf 1\n+  network 192.168.1.0 0.0.0.255 area 0\n+ !\n+ end",
+          "changeType": "initial",
+          "summary": "初始系统配置。",
+          "analysis": "这是设备的第一个配置区块，用于建立基线。",
+          "security_risks": "无。这是一个标准的初始设置。",
+          "compliance_report": {
+            "overall_status": "passed",
+            "results": []
+          }
+        },
+        "prev_hash": "0",
+        "hash": "6063ef39d94a89ccdd600b79573de812be905951718f40c98a66e3a566dd15de"
+      }
+    ],
+    "SW01-SFO": [
+      {
+        "index": 0,
+        "timestamp": "2023-01-02T11:30:00Z",
+        "data": {
+          "deviceId": "SW01-SFO",
+          "version": 1,
+          "operator": "system_init",
+          "config": "hostname SW01-SFO\n!\nvlan 10\n name USERS\n!\ninterface FastEthernet0/1\n switchport mode access\n switchport access vlan 10\n!\nend",
+          "diff": "+ hostname SW01-SFO\n+ !\n+ vlan 10\n+  name USERS\n+ !\n+ interface FastEthernet0/1\n+  switchport mode access\n+  switchport access vlan 10\n+ !\n+ end",
+          "changeType": "initial",
+          "summary": "初始系统配置。",
+          "analysis": "这是设备的第一个配置区块，用于建立基线。",
+          "security_risks": "无。这是一个标准的初始设置。",
+          "compliance_report": {
+            "overall_status": "passed",
+            "results": []
+          }
+        },
+        "prev_hash": "0",
+        "hash": "12d1ee9b351262266de4c859b4955229ba29122676dbbcc1ec96c5991fd34f51"
+      }
+    ],
+    "FW01-LON": [
+      {
+        "index": 0,
+        "timestamp": "2023-01-03T09:00:00Z",
+        "data": {
+          "deviceId": "FW01-LON",
+          "version": 1,
+          "operator": "system_init",
+          "config": "hostname FW01-LON\n!\nip access-list extended INCOMING_FILTER\n permit tcp any host 203.0.113.1 eq 443\n deny ip any any log\n!\ninterface GigabitEthernet0/1\n ip access-group INCOMING_FILTER in\n!\nend",
+          "diff": "+ hostname FW01-LON\n+ !\n+ ip access-list extended INCOMING_FILTER\n+  permit tcp any host 203.0.113.1 eq 443\n+  deny ip any any log\n+ !\n+ interface GigabitEthernet0/1\n+  ip access-group INCOMING_FILTER in\n+ !\n+ end",
+          "changeType": "initial",
+          "summary": "初始系统配置。",
+          "analysis": "这是设备的第一个配置区块，用于建立基线。",
+          "security_risks": "无。这是一个标准的初始设置。",
+          "compliance_report": {
+            "overall_status": "passed",
+            "results": []
+          }
+        },
+        "prev_hash": "0",
+        "hash": "895879abbb4d81659ae1f224c152b9f9b5debccc17ac7bac819debb361b523ba"
+      }
+    ],
+    "H3C": [
+      {
+        "index": 0,
+        "timestamp": "2025-09-18T01:50:00.569129Z",
+        "data": {
+          "deviceId": "H3C",
+          "version": 1,
+          "operator": "system_init",
+          "config": "hostname h3c\n!\n! Initial configuration created by ChainTrace.",
+          "diff": "+ hostname h3c\n+ !\n+ ! Initial configuration created by ChainTrace.",
+          "changeType": "initial",
+          "summary": "设备已创建。",
+          "analysis": "这是新设备的第一个配置区块...",
+          "security_risks": "无。",
+          "compliance_report": {
+            "overall_status": "passed",
+            "results": []
+          }
+        },
+        "prev_hash": "0",
+        "hash": "e2528e18c763db9f3289a9499f857051675c0427428e1b8995bc91c95b6b8816"
+      },
+      {
+        "index": 1,
+        "timestamp": "2025-09-18T03:44:11.468509Z",
+        "data": {
+          "deviceId": "H3C",
+          "version": 2,
+          "operator": "admin",
+          "config": "#\n version 7.1.064, Release 0427P22\n#\n sysname H3C\n#\n system-working-mode standard\n xbar load-single\n password-recovery enable\n lpu-type f-series\n#\nvlan 1\n#\ninterface Serial1/0\n#\ninterface Serial2/0\n#\ninterface Serial3/0\n#\ninterface Serial4/0\n#\ninterface NULL0\n#\ninterface GigabitEthernet0/0\n port link-mode route\n combo enable copper\n ip address 192.168.1.25 255.255.255.0\n#\ninterface GigabitEthernet0/1\n port link-mode route\n combo enable copper\n ip address 192.168.2.25 255.255.255.0\n#\ninterface GigabitEthernet0/2\n port link-mode route\n combo enable copper\n ip address 192.168.8.25 255.255.255.0\n#\ninterface GigabitEthernet5/0\n port link-mode route\n combo enable copper\n#\ninterface GigabitEthernet5/1\n port link-mode route\n combo enable copper\n#\ninterface GigabitEthernet6/0\n port link-mode route\n combo enable copper\n#\ninterface GigabitEthernet6/1\n port link-mode route\n combo enable copper\n#\n scheduler logfile size 16\n#\nline class aux\n user-role network-operator\n#\nline class console\n user-role network-admin\n#\nline class tty\n user-role network-operator\n#\nline class vty\n user-role network-operator\n#\nline aux 0\n user-role network-operator\n#\nline con 0\n user-role network-admin\n#\nline vty 0 4\n authentication-mode scheme\n user-role network-operator\n protocol inbound ssh\n#\nline vty 5 63\n user-role network-operator\n#\n ssh server enable\n#\ndomain system\n#\n domain default enable system\n#\nrole name level-0\n description Predefined level-0 role\n#\nrole name level-1\n description Predefined level-1 role\n#\nrole name level-2\n description Predefined level-2 role\n#\nrole name level-3\n description Predefined level-3 role\n#\nrole name level-4\n description Predefined level-4 role\n#\nrole name level-5\n description Predefined level-5 role\n#\nrole name level-6\n description Predefined level-6 role\n#\nrole name level-7\n description Predefined level-7 role\n#\nrole name level-8\n description Predefined level-8 role\n#\nrole name level-9\n description Predefined level-9 role\n#\nrole name level-10\n description Predefined level-10 role\n#\nrole name level-11\n description Predefined level-11 role\n#\nrole name level-12\n description Predefined level-12 role\n#\nrole name level-13\n description Predefined level-13 role\n#\nrole name level-14\n description Predefined level-14 role\n#\nuser-group system\n#\nlocal-user admin class manage\n password hash $h$6$PV0tzZFfSy3WH1Dr$JrndwEPyCqO4D8ZHr4XIUOlz2AmGGJCPGhJBH5e/BJ8S0BksyYZ25ziySJ85fRonlfnmQnswd5s6QLkHMsZmgA==\n service-type ssh\n authorization-attribute user-role network-admin\n authorization-attribute user-role network-operator\n#\nreturn",
+          "changeType": "update",
+          "diff": "- hostname h3c\n- !\n- ! Initial configuration created by ChainTrace.\n+ #\n+  version 7.1.064, Release 0427P22\n+ #\n+  sysname H3C\n+ #\n+  system-working-mode standard\n+  xbar load-single\n+  password-recovery enable\n+  lpu-type f-series\n+ #\n+ vlan 1\n+ #\n+ interface Serial1/0\n+ #\n+ interface Serial2/0\n+ #\n+ interface Serial3/0\n+ #\n+ interface Serial4/0\n+ #\n+ interface NULL0\n+ #\n+ interface GigabitEthernet0/0\n+  port link-mode route\n+  combo enable copper\n+  ip address 192.168.1.25 255.255.255.0\n+ #\n+ interface GigabitEthernet0/1\n+  port link-mode route\n+  combo enable copper\n+  ip address 192.168.2.25 255.255.255.0\n+ #\n+ interface GigabitEthernet0/2\n+  port link-mode route\n+  combo enable copper\n+  ip address 192.168.8.25 255.255.255.0\n+ #\n+ interface GigabitEthernet5/0\n+  port link-mode route\n+  combo enable copper\n+ #\n+ interface GigabitEthernet5/1\n+  port link-mode route\n+  combo enable copper\n+ #\n+ interface GigabitEthernet6/0\n+  port link-mode route\n+  combo enable copper\n+ #\n+ interface GigabitEthernet6/1\n+  port link-mode route\n+  combo enable copper\n+ #\n+  scheduler logfile size 16\n+ #\n+ line class aux\n+  user-role network-operator\n+ #\n+ line class console\n+  user-role network-admin\n+ #\n+ line class tty\n+  user-role network-operator\n+ #\n+ line class vty\n+  user-role network-operator\n+ #\n+ line aux 0\n+  user-role network-operator\n+ #\n+ line con 0\n+  user-role network-admin\n+ #\n+ line vty 0 4\n+  authentication-mode scheme\n+  user-role network-operator\n+  protocol inbound ssh\n+ #\n+ line vty 5 63\n+  user-role network-operator\n+ #\n+  ssh server enable\n+ #\n+ domain system\n+ #\n+  domain default enable system\n+ #\n+ role name level-0\n+  description Predefined level-0 role\n+ #\n+ role name level-1\n+  description Predefined level-1 role\n+ #\n+ role name level-2\n+  description Predefined level-2 role\n+ #\n+ role name level-3\n+  description Predefined level-3 role\n+ #\n+ role name level-4\n+  description Predefined level-4 role\n+ #\n+ role name level-5\n+  description Predefined level-5 role\n+ #\n+ role name level-6\n+  description Predefined level-6 role\n+ #\n+ role name level-7\n+  description Predefined level-7 role\n+ #\n+ role name level-8\n+  description Predefined level-8 role\n+ #\n+ role name level-9\n+  description Predefined level-9 role\n+ #\n+ role name level-10\n+  description Predefined level-10 role\n+ #\n+ role name level-11\n+  description Predefined level-11 role\n+ #\n+ role name level-12\n+  description Predefined level-12 role\n+ #\n+ role name level-13\n+  description Predefined level-13 role\n+ #\n+ role name level-14\n+  description Predefined level-14 role\n+ #\n+ user-group system\n+ #\n+ local-user admin class manage\n+  password hash $h$6$PV0tzZFfSy3WH1Dr$JrndwEPyCqO4D8ZHr4XIUOlz2AmGGJCPGhJBH5e/BJ8S0BksyYZ25ziySJ85fRonlfnmQnswd5s6QLkHMsZmgA==\n+  service-type ssh\n+  authorization-attribute user-role network-admin\n+  authorization-attribute user-role network-operator\n+ #\n+ return",
+          "summary": "AI分析失败",
+          "analysis": "AI调用失败: Timeout of 600.0s exceeded, last exception: 503 failed to connect to all addresses; last error: UNAVAILABLE: ipv4:142.251.215.234:443: ConnectEx: Connection timed out (A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.\r\n -- 10060)",
+          "security_risks": "无法评估。",
+          "compliance_report": null
+        },
+        "prev_hash": "e2528e18c763db9f3289a9499f857051675c0427428e1b8995bc91c95b6b8816",
+        "hash": "fd4744d5872606f87c533005e718663fff6efd5b077cef2bbfbd02fc1bc2ff4e"
+      },
+      {
+        "index": 2,
+        "timestamp": "2025-09-18T04:36:54.670575Z",
+        "data": {
+          "deviceId": "H3C",
+          "version": 3,
+          "operator": "admin",
+          "config": "#\n version 7.1.064, Release 0427P22\n#\n sysname H3C\n#\n system-working-mode standard\n xbar load-single\n password-recovery enable\n lpu-type f-series\n#\nvlan 1\n#\ninterface Serial1/0\n#\ninterface Serial2/0\n#\ninterface Serial3/0\n#\ninterface Serial4/0\n#\ninterface NULL0\n#\ninterface GigabitEthernet0/0\n port link-mode route\n combo enable copper\n ip address 192.168.1.25 255.255.255.0\n#\ninterface GigabitEthernet0/1\n port link-mode route\n combo enable copper\n ip address 192.168.2.25 255.255.255.0\n#\ninterface GigabitEthernet0/2\n port link-mode route\n combo enable copper\n ip address 192.168.8.25 255.255.255.0\n#\ninterface GigabitEthernet5/0\n port link-mode route\n combo enable copper\n#\ninterface GigabitEthernet5/1\n port link-mode route\n combo enable copper\n#\ninterface GigabitEthernet6/0\n port link-mode route\n combo enable copper\n#\ninterface GigabitEthernet6/1\n port link-mode route\n combo enable copper\n#\n scheduler logfile size 16\n#\nline class aux\n user-role network-operator\n#\nline class console\n user-role network-admin\n#\nline class tty\n user-role network-operator\n#\nline class vty\n user-role network-operator\n#\nline aux 0\n user-role network-operator\n#\nline con 0\n user-role network-admin\n#\nline vty 0 4\n authentication-mode scheme\n user-role network-operator\n protocol inbound ssh\n#\nline vty 5 63\n user-role network-operator\n#\n ssh server enable\n#\ndomain system\n#\n domain default enable system\n#\nrole name level-0\n description Predefined level-0 role\n#\nrole name level-1\n description Predefined level-1 role\n#\nrole name level-2\n description Predefined level-2 role\n#\nrole name level-3\n description Predefined level-3 role\n#\nrole name level-4\n description Predefined level-4 role\n#\nrole name level-5\n description Predefined level-5 role\n#\nrole name level-6\n description Predefined level-6 role\n#\nrole name level-7\n description Predefined level-7 role\n#\nrole name level-8\n description Predefined level-8 role\n#\nrole name level-9\n description Predefined level-9 role\n#\nrole name level-10\n description Predefined level-10 role\n#\nrole name level-11\n description Predefined level-11 role\n#\nrole name level-12\n description Predefined level-12 role\n#\nrole name level-13\n description Predefined level-13 role\n#\nrole name level-14\n description Predefined level-14 role\n#\nuser-group system\n#\nlocal-user admin class manage\n password hash $h$6$PV0tzZFfSy3WH1Dr$JrndwEPyCqO4D8ZHr4XIUOlz2AmGGJCPGhJBH5e/BJ8S0BksyYZ25ziySJ85fRonlfnmQnswd5s6QLkHMsZmgA==\n service-type ssh\n authorization-attribute user-role network-admin\n authorization-attribute user-role network-operator\n#\nreturn",
+          "changeType": "update",
+          "diff": "",
+          "summary": "本次配置变更前后内容完全一致，没有实际改动。",
+          "analysis": "由于前后配置完全相同，本次操作未对设备功能、性能或现有网络行为产生任何影响。这可能是一次配置保存操作，或者是一次空变更。",
+          "security_risks": "本次配置无任何实际改动，因此未引入新的安全风险，也未解决任何现有安全漏洞。现有配置中SSH已启用，且管理员账户已配置，需要确保密码强度及SSH服务配置的安全性，例如通过ACL限制SSH访问源IP。",
+          "compliance_report": null
+        },
+        "prev_hash": "fd4744d5872606f87c533005e718663fff6efd5b077cef2bbfbd02fc1bc2ff4e",
+        "hash": "1f358a4ed9195f32961255ccc6595731bbae284ad52f4362ae19ae2577bb1317"
+      }
+    ],
+    "CISCO": [
+      {
+        "index": 0,
+        "timestamp": "2025-09-22T06:41:16.337559Z",
+        "data": {
+          "deviceId": "CISCO",
+          "version": 1,
+          "operator": "system_init",
+          "config": "hostname CISCO\n!\n! Initial configuration created by ChainTrace.",
+          "diff": "+ hostname CISCO\n+ !\n+ ! Initial configuration created by ChainTrace.",
+          "changeType": "initial",
+          "summary": "设备已创建。",
+          "analysis": "这是新设备的第一个配置区块...",
+          "security_risks": "无。",
+          "compliance_report": {
+            "overall_status": "passed",
+            "results": []
+          }
+        },
+        "prev_hash": "0",
+        "hash": "c7f73c0fa8be272d17045132644bc725a686fb16bdad5f0896f329dac4f947e3"
+      },
+      {
+        "index": 1,
+        "timestamp": "2025-09-22T07:06:49.083744Z",
+        "data": {
+          "deviceId": "CISCO",
+          "version": 2,
+          "operator": "admin",
+          "config": "Building configuration...\n\n  \nCurrent configuration : 2209 bytes\n!\n! Last configuration change at 14:52:10 CST Mon Sep 22 2025\n!\nversion 15.7\nservice timestamps debug datetime msec\nservice timestamps log datetime msec\nno service password-encryption\n!\nhostname R1\n!\nboot-start-marker\nboot-end-marker\n!\n!\n!\nno aaa new-model\n!\n!\n!\nclock timezone CST 8 0\nmmi polling-interval 60\nno mmi auto-configure\nno mmi pvc\nmmi snmp-timeout 180\n!\n!\n!\n!\n!\nno ip icmp rate-limit unreachable\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n\n\n!\n!\n!\n!\nno ip domain lookup\nip domain name lab.local\nno ip cef\nno ipv6 cef\n!\nmultilink bundle-name authenticated\n!\n!\n!\n!\n!\n!\n!\n!\n!\nusername admin privilege 15 secret 5 $1$Gq2t$yIXpZZdO0rxbFnErdIkHP1\n!\nredundancy\n!\n!\nip tcp synwait-time 5\n! \n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\ninterface Ethernet0/0\n ip address 192.168.234.25 255.255.255.0\n ip information-reply\n duplex auto\n!\ninterface Ethernet0/1\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet0/2\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet0/3\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet1/0\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet1/1\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet1/2\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet1/3\n no ip address\n shutdown\n duplex auto\n!\ninterface Serial2/0\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial2/1\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial2/2\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial2/3\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial3/0\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial3/1\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial3/2\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial3/3\n no ip address\n shutdown\n serial restart-delay 0\n!\nip forward-protocol nd\n!\n!\nno ip http server\nno ip http secure-server\nip ssh time-out 60\nip ssh version 2\nip ssh server algorithm mac hmac-sha1 hmac-sha2-256\n!\nipv6 ioam timestamp\n!\n!\n!\ncontrol-plane\n!\n!\n!\n!\n!\n!\n!\n!\nline con 0\n exec-timeout 0 0\n privilege level 15\n logging synchronous\nline aux 0\n exec-timeout 0 0\n privilege level 15\n logging synchronous\nline vty 0 4\n login local\n transport input ssh\n!\n!\nend\n",
+          "changeType": "update",
+          "diff": "- hostname CISCO\n- ! Initial configuration created by ChainTrace.\n+ Building configuration...\n+ \n+   \n+ Current configuration : 2209 bytes\n+ ! Last configuration change at 14:52:10 CST Mon Sep 22 2025\n+ version 15.7\n+ service timestamps debug datetime msec\n+ service timestamps log datetime msec\n+ no service password-encryption\n+ hostname R1\n+ boot-start-marker\n+ boot-end-marker\n+ no aaa new-model\n+ clock timezone CST 8 0\n+ mmi polling-interval 60\n+ no mmi auto-configure\n+ no mmi pvc\n+ mmi snmp-timeout 180\n+ no ip icmp rate-limit unreachable\n+ \n+ \n+ no ip domain lookup\n+ ip domain name lab.local\n+ no ip cef\n+ no ipv6 cef\n+ multilink bundle-name authenticated\n+ username admin privilege 15 secret 5 $1$Gq2t$yIXpZZdO0rxbFnErdIkHP1\n+ redundancy\n+ ip tcp synwait-time 5\n+ ! \n+ interface Ethernet0/0\n+  ip address 192.168.234.25 255.255.255.0\n+  ip information-reply\n+  duplex auto\n+ interface Ethernet0/1\n+  no ip address\n+  shutdown\n+  duplex auto\n+ interface Ethernet0/2\n+  no ip address\n+  shutdown\n+  duplex auto\n+ interface Ethernet0/3\n+  no ip address\n+  shutdown\n+  duplex auto\n+ interface Ethernet1/0\n+  no ip address\n+  shutdown\n+  duplex auto\n+ interface Ethernet1/1\n+  no ip address\n+  shutdown\n+  duplex auto\n+ interface Ethernet1/2\n+  no ip address\n+  shutdown\n+  duplex auto\n+ interface Ethernet1/3\n+  no ip address\n+  shutdown\n+  duplex auto\n+ interface Serial2/0\n+  no ip address\n+  shutdown\n+  serial restart-delay 0\n+ interface Serial2/1\n+  no ip address\n+  shutdown\n+  serial restart-delay 0\n+ interface Serial2/2\n+  no ip address\n+  shutdown\n+  serial restart-delay 0\n+ interface Serial2/3\n+  no ip address\n+  shutdown\n+  serial restart-delay 0\n+ interface Serial3/0\n+  no ip address\n+  shutdown\n+  serial restart-delay 0\n+ interface Serial3/1\n+  no ip address\n+  shutdown\n+  serial restart-delay 0\n+ interface Serial3/2\n+  no ip address\n+  shutdown\n+  serial restart-delay 0\n+ interface Serial3/3\n+  no ip address\n+  shutdown\n+  serial restart-delay 0\n+ ip forward-protocol nd\n+ no ip http server\n+ no ip http secure-server\n+ ip ssh time-out 60\n+ ip ssh version 2\n+ ip ssh server algorithm mac hmac-sha1 hmac-sha2-256\n+ ipv6 ioam timestamp\n+ control-plane\n+ line con 0\n+  exec-timeout 0 0\n+  privilege level 15\n+  logging synchronous\n+ line aux 0\n+  exec-timeout 0 0\n+  privilege level 15\n+  logging synchronous\n+ line vty 0 4\n+  login local\n+  transport input ssh\n+ end",
+          "summary": "AI分析失败",
+          "analysis": "AI调用时发生未知错误: 504 The request timed out. Please try again.",
+          "security_risks": "无法评估。",
+          "compliance_report": {
+            "overall_status": "passed",
+            "results": [
+              {
+                "policy_id": "2013354b-8f9a-4597-8168-12df673faca6",
+                "policy_name": "telnet",
+                "status": "passed",
+                "details": "新配置中的VTY行（line vty 0 4）已配置'transport input ssh'，明确禁止了Telnet访问，仅允许SSH连接，符合禁止使用Telnet的策略要求。"
+              }
+            ]
+          }
+        },
+        "prev_hash": "c7f73c0fa8be272d17045132644bc725a686fb16bdad5f0896f329dac4f947e3",
+        "hash": "4f74aad74d8b73abf3f274b5ff3790eb3fb45b2cc77e96c2565530f2d78e60db"
+      },
+      {
+        "index": 2,
+        "timestamp": "2025-09-22T07:53:17.527673Z",
+        "data": {
+          "deviceId": "CISCO",
+          "version": 3,
+          "operator": "admin",
+          "config": "sdfsffsfs",
+          "changeType": "update",
+          "diff": "-Building configuration...\n-\n-  \n-Current configuration : 2209 bytes\n-!\n-! Last configuration change at 14:52:10 CST Mon Sep 22 2025\n-!\n-version 15.7\n-service timestamps debug datetime msec\n-service timestamps log datetime msec\n-no service password-encryption\n-!\n-hostname R1\n-!\n-boot-start-marker\n-boot-end-marker\n-!\n-!\n-!\n-no aaa new-model\n-!\n-!\n-!\n-clock timezone CST 8 0\n-mmi polling-interval 60\n-no mmi auto-configure\n-no mmi pvc\n-mmi snmp-timeout 180\n-!\n-!\n-!\n-!\n-!\n-no ip icmp rate-limit unreachable\n-!\n-!\n-!\n-!\n-!\n-!\n-!\n-!\n-!\n-\n-!\n-!\n-!\n-!no ip domain lookup\n-ip domain name lab.local\n-no ip cef\n-no ipv6 cef\n-!\n-multilink bundle-name authenticated\n-!\n-!\n-!\n-!\n-!\n-!\n-!\n-!\n-username admin privilege 15 secret 5 $1$Gq2t$yIXpZZdO0rxbFnErdIkHP1\n-!\n-redundancy\n-!\n-!\n-ip tcp synwait-time 5\n-!\n-!\n-!\n-!\n-!\n-!\n-!\n-!\n-!\n-!\n-!\n-interface Ethernet0/0\n- ip address 192.168.234.25 255.255.255.0\n- ip information-reply\n- duplex auto\n-!\n-interface Ethernet0/1\n- no ip address\n- shutdown\n- duplex auto\n-!\n-interface Ethernet0/2\n- no ip address\n- shutdown\n- duplex auto\n-!\n-interface Ethernet0/3\n- no ip address\n- shutdown\n- duplex auto\n-!\n-interface Ethernet1/0\n- no ip address\n- shutdown\n- duplex auto\n-!\n-interface Ethernet1/1\n- no ip address\n- shutdown\n- duplex auto\n-!\n-interface Ethernet1/2\n- no ip address\n- shutdown\n- duplex auto\n-!\n-interface Ethernet1/3\n- no ip address\n- shutdown\n- duplex auto\n-!\n-interface Serial2/0\n- no ip address\n- shutdown\n- serial restart-delay 0\n-!\n-interface Serial2/1\n- no ip address\n- shutdown\n- serial restart-delay 0\n-!\n-interface Serial2/2\n- no ip address\n- shutdown\n- serial restart-delay 0\n-!\n-interface Serial2/3\n- no ip address\n- shutdown\n- serial restart-delay 0\n-!\n-interface Serial3/0\n- no ip address\n- shutdown\n- serial restart-delay 0\n-!\n-interface Serial3/1\n- no ip address\n- shutdown\n- serial restart-delay 0\n-!\n-interface Serial3/2\n- no ip address\n- shutdown\n- serial restart-delay 0\n-!\n-interface Serial3/3\n- no ip address\n- shutdown\n- serial restart-delay 0\n-!\n-ip forward-protocol nd\n-!\n-!\n-no ip http server\n-no ip http secure-server\n-ip ssh time-out 60\n-ip ssh version 2\n-ip ssh server algorithm mac hmac-sha1 hmac-sha2-256\n-!\n-ipv6 ioam timestamp\n-!\n-!\n-!\n-control-plane\n-!\n-!\n-!\n-!\n-!\n-!\n-!\n-!\n-line con 0\n- exec-timeout 0 0\n- privilege level 15\n- logging synchronous\n-line aux 0\n- exec-timeout 0 0\n- privilege level 15\n- logging synchronous\n-line vty 0 4\n- login local\n- transport input ssh\n-!\n-!\n-end\n+sdfsffsfs",
+          "summary": "此配置变更将设备原有完整且运行正常的配置替换为无效文本，导致设备功能完全丢失。",
+          "analysis": "这是一个极其不寻常且严重的配置错误或恶意行为。原配置包含主机名、IP地址、用户账户、SSH服务、接口配置等关键网络功能。新配置仅为一串无意义的字符\"sdfsffsfs\"，这意味着设备的运行配置被彻底清除或损坏。一旦应用此配置，路由器将失去所有网络连接能力、管理接口和服务，导致其无法正常工作，形同砖头。这可能是由于操作失误、配置上传错误、文件损坏或蓄意破坏造成的。",
+          "security_risks": "1. 拒绝服务 (DoS): 设备将停止路由和转发流量，导致其所连接的所有网络和依赖该设备提供服务的系统完全中断。\n2. 管理失控: 现有的SSH和Console访问将失效，使得远程管理成为不可能，需要物理访问才能恢复。如果设备重启，可能会加载一个空的或默认配置，其默认凭证和开放端口可能可能造成新的安全漏洞。\n3. 网络暴露: 如果该路由器是网络边界或安全域的隔离点，其配置丢失可能导致内部网络对外部的意外暴露，绕过原有的安全策略（如防火墙规则、访问控制列表等）。\n4. 数据泄露/篡改风险: 虽然直接风险较低，但如果设备因配置丢失而重启并加载不安全的默认设置，攻击者可能利用此机会进行进一步渗透，甚至可能通过中间人攻击截获或篡改流量（如果设备恢复到某种基本转发状态）。\n5. 合规性违规: 关键网络设备的非计划停机和配置丢失可能导致违反行业监管和内部安全合规性要求。",
+          "compliance_report": {
+            "overall_status": "passed",
+            "results": [
+              {
+                "policy_id": "2013354b-8f9a-4597-8168-12df673faca6",
+                "policy_name": "telnet",
+                "status": "passed",
+                "details": "新配置'sdfsffsfs'并非有效的Cisco IOS配置命令，因此它不会启用telnet服务。现有配置中'line vty'下的'transport input ssh'命令已明确禁止telnet，新配置未能修改或引入违反此规则的配置。"
+              }
+            ]
+          }
+        },
+        "prev_hash": "4f74aad74d8b73abf3f274b5ff3790eb3fb45b2cc77e96c2565530f2d78e60db",
+        "hash": "de1a01677423ae12694d6dcd9c87298589449a63c78facfe4fe96a278cb785e1"
+      },
+      {
+        "index": 3,
+        "timestamp": "2025-09-23T06:20:16.359072Z",
+        "data": {
+          "deviceId": "CISCO",
+          "version": 4,
+          "operator": "admin",
+          "config": "Building configuration...\n\n  \nCurrent configuration : 2209 bytes\n!\n! Last configuration change at 14:52:10 CST Mon Sep 22 2025\n!\nversion 15.7\nservice timestamps debug datetime msec\nservice timestamps log datetime msec\nno service password-encryption\n!\nhostname R1\n!\nboot-start-marker\nboot-end-marker\n!\n!\n!\nno aaa new-model\n!\n!\n!\nclock timezone CST 8 0\nmmi polling-interval 60\nno mmi auto-configure\nno mmi pvc\nmmi snmp-timeout 180\n!\n!\n!\n!\n!\nno ip icmp rate-limit unreachable\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n\n\n!\n!\n!\n!\nno ip domain lookup\nip domain name lab.local\nno ip cef\nno ipv6 cef\n!\nmultilink bundle-name authenticated\n!\n!\n!\n!\n!\n!\n!\n!\n!\nusername admin privilege 15 secret 5 $1$Gq2t$yIXpZZdO0rxbFnErdIkHP1\n!\nredundancy\n!\n!\nip tcp synwait-time 5\n! \n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\ninterface Ethernet0/0\n ip address 192.168.234.25 255.255.255.0\n ip information-reply\n duplex auto\n!\ninterface Ethernet0/1\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet0/2\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet0/3\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet1/0\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet1/1\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet1/2\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet1/3\n no ip address\n shutdown\n duplex auto\n!\ninterface Serial2/0\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial2/1\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial2/2\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial2/3\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial3/0\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial3/1\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial3/2\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial3/3\n no ip address\n shutdown\n serial restart-delay 0\n!\nip forward-protocol nd\n!\n!\nno ip http server\nno ip http secure-server\nip ssh time-out 60\nip ssh version 2\nip ssh server algorithm mac hmac-sha1 hmac-sha2-256\n!\nipv6 ioam timestamp\n!\n!\n!\ncontrol-plane\n!\n!\n!\n!\n!\n!\n!\n!\nline con 0\n exec-timeout 0 0\n privilege level 15\n logging synchronous\nline aux 0\n exec-timeout 0 0\n privilege level 15\n logging synchronous\nline vty 0 4\n login local\n transport input ssh\n!\n!\nend\n",
+          "changeType": "update",
+          "diff": "- sdfsffsfs\n+ Building configuration...\n+ \n+   \n+ Current configuration : 2209 bytes\n+ !\n+ ! Last configuration change at 14:52:10 CST Mon Sep 22 2025\n+ !\n+ version 15.7\n+ service timestamps debug datetime msec\n+ service timestamps log datetime msec\n+ no service password-encryption\n+ !\n+ hostname R1\n+ !\n+ boot-start-marker\n+ boot-end-marker\n+ !\n+ !\n+ !\n+ no aaa new-model\n+ !\n+ !\n+ !\n+ clock timezone CST 8 0\n+ mmi polling-interval 60\n+ no mmi auto-configure\n+ no mmi pvc\n+ mmi snmp-timeout 180\n+ !\n+ !\n+ !\n+ !\n+ !\n+ no ip icmp rate-limit unreachable\n+ !\n+ !\n+ !\n+ !\n+ !\n+ !\n+ !\n+ !\n+ !\n+ !\n+ \n+ \n+ !\n+ !\n+ !\n+ !\n+ no ip domain lookup\n+ ip domain name lab.local\n+ no ip cef\n+ no ipv6 cef\n+ !\n+ multilink bundle-name authenticated\n+ !\n+ !\n+ !\n+ !\n+ !\n+ !\n+ !\n+ !\n+ !\n+ username admin privilege 15 secret 5 $1$Gq2t$yIXpZZdO0rxbFnErdIkHP1\n+ !\n+ redundancy\n+ !\n+ !\n+ ip tcp synwait-time 5\n+ ! \n+ !\n+ !\n+ !\n+ !\n+ !\n+ !\n+ !\n+ !\n+ !\n+ !\n+ !\n+ !\n+ interface Ethernet0/0\n+  ip address 192.168.234.25 255.255.255.0\n+  ip information-reply\n+  duplex auto\n+ !\n+ interface Ethernet0/1\n+  no ip address\n+  shutdown\n+  duplex auto\n+ !\n+ interface Ethernet0/2\n+  no ip address\n+  shutdown\n+  duplex auto\n+ !\n+ interface Ethernet0/3\n+  no ip address\n+  shutdown\n+  duplex auto\n+ !\n+ interface Ethernet1/0\n+  no ip address\n+  shutdown\n+  duplex auto\n+ !\n+ interface Ethernet1/1\n+  no ip address\n+  shutdown\n+  duplex auto\n+ !\n+ interface Ethernet1/2\n+  no ip address\n+  shutdown\n+  duplex auto\n+ !\n+ interface Ethernet1/3\n+  no ip address\n+  shutdown\n+  duplex auto\n+ !\n+ interface Serial2/0\n+  no ip address\n+  shutdown\n+  serial restart-delay 0\n+ !\n+ interface Serial2/1\n+  no ip address\n+  shutdown\n+  serial restart-delay 0\n+ !\n+ interface Serial2/2\n+  no ip address\n+  shutdown\n+  serial restart-delay 0\n+ !\n+ interface Serial2/3\n+  no ip address\n+  shutdown\n+  serial restart-delay 0\n+ !\n+ interface Serial3/0\n+  no ip address\n+  shutdown\n+  serial restart-delay 0\n+ !\n+ interface Serial3/1\n+  no ip address\n+  shutdown\n+  serial restart-delay 0\n+ !\n+ interface Serial3/2\n+  no ip address\n+  shutdown\n+  serial restart-delay 0\n+ !\n+ interface Serial3/3\n+  no ip address\n+  shutdown\n+  serial restart-delay 0\n+ !\n+ ip forward-protocol nd\n+ !\n+ !\n+ no ip http server\n+ no ip http secure-server\n+ ip ssh time-out 60\n+ ip ssh version 2\n+ ip ssh server algorithm mac hmac-sha1 hmac-sha2-256\n+ !\n+ ipv6 ioam timestamp\n+ !\n+ !\n+ !\n+ control-plane\n+ !\n+ !\n+ !\n+ !\n+ !\n+ !\n+ !\n+ !\n+ line con 0\n+  exec-timeout 0 0\n+  privilege level 15\n+  logging synchronous\n+ line aux 0\n+  exec-timeout 0 0\n+  privilege level 15\n+  logging synchronous\n+ line vty 0 4\n+  login local\n+  transport input ssh\n+ !\n+ !\n+ end",
+          "summary": "AI分析失败",
+          "analysis": "AI调用时发生未知错误: 504 The request timed out. Please try again.",
+          "security_risks": "无法评估。",
+          "compliance_report": {
+            "overall_status": "passed",
+            "results": [
+              {
+                "policy_id": "2013354b-8f9a-4597-8168-12df673faca6",
+                "policy_name": "telnet",
+                "status": "passed",
+                "details": "新配置中的虚拟终端线路(line vty 0 4)明确指定了'transport input ssh'。这意味着该设备仅允许通过SSH进行远程管理访问，Telnet已被禁用，符合禁止使用Telnet的策略要求。"
+              }
+            ]
+          }
+        },
+        "prev_hash": "de1a01677423ae12694d6dcd9c87298589449a63c78facfe4fe96a278cb785e1",
+        "hash": "cdb485f56525c1676293d548267fd94a0e1b1235cb877ce6f32aca3cec534e01"
+      },
+      {
+        "index": 4,
+        "timestamp": "2025-09-25T07:20:07.255931Z",
+        "data": {
+          "deviceId": "CISCO",
+          "version": 5,
+          "operator": "admin",
+          "config": "sdfsffsfs",
+          "changeType": "update",
+          "diff": "- Building configuration...\n- \n-   \n- Current configuration : 2209 bytes\n- !\n- ! Last configuration change at 14:52:10 CST Mon Sep 22 2025\n- !\n- version 15.7\n- service timestamps debug datetime msec\n- service timestamps log datetime msec\n- no service password-encryption\n- !\n- hostname R1\n- !\n- boot-start-marker\n- boot-end-marker\n- !\n- !\n- !\n- no aaa new-model\n- !\n- !\n- !\n- clock timezone CST 8 0\n- mmi polling-interval 60\n- no mmi auto-configure\n- no mmi pvc\n- mmi snmp-timeout 180\n- !\n- !\n- !\n- !\n- !\n- no ip icmp rate-limit unreachable\n- !\n- !\n- !\n- !\n- !\n- !\n- !\n- !\n- !\n- !\n- \n- \n- !\n- !\n- !\n- !\n- no ip domain lookup\n- ip domain name lab.local\n- no ip cef\n- no ipv6 cef\n- !\n- multilink bundle-name authenticated\n- !\n- !\n- !\n- !\n- !\n- !\n- !\n- !\n- !\n- username admin privilege 15 secret 5 $1$Gq2t$yIXpZZdO0rxbFnErdIkHP1\n- !\n- redundancy\n- !\n- !\n- ip tcp synwait-time 5\n- ! \n- !\n- !\n- !\n- !\n- !\n- !\n- !\n- !\n- !\n- !\n- !\n- !\n- interface Ethernet0/0\n-  ip address 192.168.234.25 255.255.255.0\n-  ip information-reply\n-  duplex auto\n- !\n- interface Ethernet0/1\n-  no ip address\n-  shutdown\n-  duplex auto\n- !\n- interface Ethernet0/2\n-  no ip address\n-  shutdown\n-  duplex auto\n- !\n- interface Ethernet0/3\n-  no ip address\n-  shutdown\n-  duplex auto\n- !\n- interface Ethernet1/0\n-  no ip address\n-  shutdown\n-  duplex auto\n- !\n- interface Ethernet1/1\n-  no ip address\n-  shutdown\n-  duplex auto\n- !\n- interface Ethernet1/2\n-  no ip address\n-  shutdown\n-  duplex auto\n- !\n- interface Ethernet1/3\n-  no ip address\n-  shutdown\n-  duplex auto\n- !\n- interface Serial2/0\n-  no ip address\n-  shutdown\n-  serial restart-delay 0\n- !\n- interface Serial2/1\n-  no ip address\n-  shutdown\n-  serial restart-delay 0\n- !\n- interface Serial2/2\n-  no ip address\n-  shutdown\n-  serial restart-delay 0\n- !\n- interface Serial2/3\n-  no ip address\n-  shutdown\n-  serial restart-delay 0\n- !\n- interface Serial3/0\n-  no ip address\n-  shutdown\n-  serial restart-delay 0\n- !\n- interface Serial3/1\n-  no ip address\n-  shutdown\n-  serial restart-delay 0\n- !\n- interface Serial3/2\n-  no ip address\n-  shutdown\n-  serial restart-delay 0\n- !\n- interface Serial3/3\n-  no ip address\n-  shutdown\n-  serial restart-delay 0\n- !\n- ip forward-protocol nd\n- !\n- !\n- no ip http server\n- no ip http secure-server\n- ip ssh time-out 60\n- ip ssh version 2\n- ip ssh server algorithm mac hmac-sha1 hmac-sha2-256\n- !\n- ipv6 ioam timestamp\n- !\n- !\n- !\n- control-plane\n- !\n- !\n- !\n- !\n- !\n- !\n- !\n- !\n- line con 0\n-  exec-timeout 0 0\n-  privilege level 15\n-  logging synchronous\n- line aux 0\n-  exec-timeout 0 0\n-  privilege level 15\n-  logging synchronous\n- line vty 0 4\n-  login local\n-  transport input ssh\n- !\n- !\n- end\n+ sdfsffsfs",
+          "summary": "AI分析失败",
+          "analysis": "无法连接到 Google AI 服务（请求超时）。请检查服务器的网络连接、防火墙和代理设置。",
+          "security_risks": "无法评估。",
+          "compliance_report": {
+            "overall_status": "passed",
+            "results": [
+              {
+                "policy_id": "2013354b-8f9a-4597-8168-12df673faca6",
+                "policy_name": "telnet",
+                "status": "passed",
+                "details": "新配置'sdfsffsfs'不包含任何启用或配置telnet的命令，因此不违反禁止使用telnet的策略。"
+              },
+              {
+                "policy_id": "b4efca6a-0bbf-4b18-b0d8-2697f162f29a",
+                "policy_name": "asd",
+                "status": "not_applicable",
+                "details": "策略规则“asd”过于模糊，无法根据提供的配置'sdfsffsfs'进行有效审计。"
+              }
+            ]
+          }
+        },
+        "prev_hash": "cdb485f56525c1676293d548267fd94a0e1b1235cb877ce6f32aca3cec534e01",
+        "hash": "82e87a9d900cbb9f5f72b02f9223a4bb51ceac21b9c3378485c83029a1ae5a59"
+      },
+      {
+        "index": 5,
+        "timestamp": "2025-09-25T07:59:24.408016Z",
+        "data": {
+          "deviceId": "CISCO",
+          "version": 6,
+          "operator": "admin",
+          "config": "Building configuration...\n\n  \nCurrent configuration : 2218 bytes\n!\n! Last configuration change at 15:57:55 CST Thu Sep 25 2025 by admin\n!\nversion 15.7\nservice timestamps debug datetime msec\nservice timestamps log datetime msec\nno service password-encryption\n!\nhostname R1\n!\nboot-start-marker\nboot-end-marker\n!\n!\n!\nno aaa new-model\n!\n!\n!\nclock timezone CST 8 0\nmmi polling-interval 60\nno mmi auto-configure\nno mmi pvc\nmmi snmp-timeout 180\n!\n!\n!\n!\n!\nno ip icmp rate-limit unreachable\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n\n\n!\n!\n!\n!\nno ip domain lookup\nip domain name lab.local\nno ip cef\nno ipv6 cef\n!\nmultilink bundle-name authenticated\n!\n!\n!\n!\n!\n!\n!\n!\n!\nusername admin privilege 15 secret 5 $1$Gq2t$yIXpZZdO0rxbFnErdIkHP1\n!\nredundancy\n!\n!\nip tcp synwait-time 5\n! \n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\ninterface Ethernet0/0\n ip address 192.168.234.25 255.255.255.0\n ip information-reply\n duplex auto\n!\ninterface Ethernet0/1\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet0/2\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet0/3\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet1/0\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet1/1\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet1/2\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet1/3\n no ip address\n shutdown\n duplex auto\n!\ninterface Serial2/0\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial2/1\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial2/2\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial2/3\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial3/0\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial3/1\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial3/2\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial3/3\n no ip address\n shutdown\n serial restart-delay 0\n!\nip forward-protocol nd\n!\n!\nno ip http server\nno ip http secure-server\nip ssh time-out 60\nip ssh version 2\nip ssh server algorithm mac hmac-sha1 hmac-sha2-256\n!\nipv6 ioam timestamp\n!\n!\n!\ncontrol-plane\n!\n!\n!\n!\n!\n!\n!\n!\nline con 0\n exec-timeout 0 0\n privilege level 15\n logging synchronous\nline aux 0\n exec-timeout 0 0\n privilege level 15\n logging synchronous\nline vty 0 4\n login local\n transport input ssh\n!\n!\nend\n",
+          "changeType": "update",
+          "summary": "这份新配置为路由器R1设置了一个基础的操作环境。它包括了主机名、时间戳服务、时区，并创建了一个特权级为15的管理员用户。网络接口方面，Ethernet0/0被配置了IP地址，而所有其他以太网和串行接口均被禁用。控制平面访问通过SSH进行，并配置了控制台和VTY线路的认证和授权。同时，一些不安全的默认服务如HTTP服务器被禁用。然而，配置中存在几处显著的安全风险，例如未加密的密码服务、控制台无超时设置以及ICMP侦察的可能性。",
+          "analysis": "1.  **通用配置 (General Configuration):**\n    *   `version 15.7`: 运行Cisco IOS 15.7版本。\n    *   `service timestamps debug datetime msec`, `service timestamps log datetime msec`: 调试和日志信息将包含详细的时间戳，有助于故障排除和事件追踪。\n    *   `no service password-encryption`: **这是一个重要的安全风险。** 此命令导致配置中所有未来添加的类型7密码（例如SNMP社区字符串）将以明文形式显示。虽然当前`admin`用户的密码是`secret`加密的（类型5），但此命令仍会影响其他密码类型。\n    *   `hostname R1`: 将设备命名为R1，便于识别。\n    *   `no aaa new-model`: AAA（Authentication, Authorization, and Accounting）新模型被禁用，设备将使用传统的本地认证方式。对于VTY行，配置了`login local`，使用本地用户数据库认证。\n    *   `clock timezone CST 8 0`: 设置时区为CST (UTC+8)，用于正确的时间记录。\n    *   `no ip icmp rate-limit unreachable`: 未对ICMP不可达消息进行速率限制，这可能允许攻击者利用ICMP进行网络侦察或潜在的拒绝服务攻击。\n    *   `no ip domain lookup`: 禁用域名查找功能，避免输入错误命令时进行不必要的DNS查询，提高响应速度。这是一个良好的操作实践。\n    *   `ip domain name lab.local`: 设置设备的本地域名。\n    *   `no ip cef`, `no ipv6 cef`: 禁用了Cisco Express Forwarding (CEF)。CEF是Cisco路由器上默认且推荐的高性能转发机制。禁用CEF将导致路由器性能显著下降，转而使用基于进程的交换，可能使其更容易受到性能相关的拒绝服务（DoS）攻击。除非有特定（且罕见）的需求，否则应启用CEF。\n    *   `username admin privilege 15 secret 5 $1$Gq2t$yIXpZZdO0rxbFnErdIkHP1`: 创建了一个名为`admin`的用户，拥有最高特权级别15，密码经过MD5哈希加密存储。这是一个安全的用户配置。\n\n2.  **接口配置 (Interface Configuration):**\n    *   `interface Ethernet0/0`: 被配置了IP地址 `192.168.234.25 255.255.255.0`。这是设备上唯一启用并配置了IP地址的接口。\n        *   `ip information-reply`: 启用IP信息回复，意味着接口会回复ICMP信息请求。这可能被用于网络侦察。\n        *   `duplex auto`: 自动协商双工模式。\n    *   所有其他以太网接口 (E0/1-E1/3) 和所有串行接口 (S2/0-S3/3) 都被`shutdown`（禁用）且`no ip address`（未配置IP地址）。这符合最小特权原则，只启用和配置必要的接口，减少了攻击面。\n\n3.  **IP 服务和安全 (IP Services and Security):**\n    *   `ip forward-protocol nd`: 启用ND协议转发，通常用于无IP地址配置（ip unnumbered）的接口。\n    *   `no ip http server`, `no ip http secure-server`: 禁用了HTTP和HTTPS管理界面，这是一个良好的安全实践，减少了攻击面。\n    *   `ip ssh time-out 60`: SSH连接在60秒不活动后超时。\n    *   `ip ssh version 2`: 强制使用更安全的SSHv2，禁用较老的SSHv1，这是一个良好的安全实践。\n    *   `ip ssh server algorithm mac hmac-sha1 hmac-sha2-256`: 指定了SSH服务器支持的MAC算法，增强了SSH的安全性。\n\n4.  **线路配置 (Line Configuration):**\n    *   `line con 0` (控制台) 和 `line aux 0` (辅助端口):\n        *   `exec-timeout 0 0`: **这是一个重要的安全风险。** 将执行超时设置为永不超时。这意味着即使控制台或辅助端口长时间无人使用，会话也会一直保持活跃，可能允许未经授权的物理访问。\n        *   `privilege level 15`: 登录后立即获得最高特权。\n        *   `logging synchronous`: 确保日志消息不会打断用户输入，提高用户体验。\n    *   `line vty 0 4` (虚拟终端):\n        *   `login local`: 使用本地定义的`username`进行认证。\n        *   `transport input ssh`: 仅允许通过SSH访问VTY线路，禁止了不安全的Telnet。这是一个良好的安全实践。",
+          "security_risks": "1.  **配置中密码未加密 (`no service password-encryption`)**: \n    *   **风险描述**: 此命令允许配置中可能出现的其他敏感密码（如SNMP社区字符串、PPP认证密码等）以明文形式存储，易于被发现和利用。虽然`admin`用户的密码是加密的，但此命令本身是个安全漏洞。\n    *   **建议**: 启用`service password-encryption`命令，对配置中的所有明文密码进行加密。\n\n2.  **控制台和辅助端口会话永不超时 (`exec-timeout 0 0`)**: \n    *   **风险描述**: 控制台和辅助端口的会话永不超时，意味着即使长时间无人操作，会话也会一直保持活跃。如果攻击者获得设备的物理访问权限，他们可以直接利用先前登录的特权会话，无需认证。这大大增加了未经授权访问的风险。\n    *   **建议**: 为`line con 0`和`line aux 0`配置一个合理的超时时间（例如`exec-timeout 5 0`表示5分钟），强制不活动会话断开，提高物理安全性。\n\n3.  **未限制ICMP不可达消息 (`no ip icmp rate-limit unreachable`)**: \n    *   **风险描述**: 未对ICMP不可达消息进行速率限制，可能被攻击者用于进行网络侦察，探测网络结构或通过发送大量请求来引发资源耗尽。\n    *   **建议**: 考虑根据网络安全策略和需求，配置ICMP速率限制，以减轻潜在的侦察和拒绝服务（DoS）攻击。\n\n4.  **IP信息回复功能 (`ip information-reply`)**: \n    *   **风险描述**: 在Ethernet0/0上启用`ip information-reply`允许接口回复IP信息请求。攻击者可以利用此功能获取接口的IP地址和子网掩码信息，从而帮助他们构建网络拓扑图，为后续攻击做准备。\n    *   **建议**: 如果不是明确需要，应禁用此功能以减少信息泄露。\n\n5.  **禁用CEF (`no ip cef`, `no ipv6 cef`)**: \n    *   **风险描述**: 虽然不是直接的安全漏洞，但禁用CEF会严重影响路由器的转发性能和吞吐量，使设备更容易受到基于性能的拒绝服务（DoS）攻击，因为数据包处理将占用更多CPU资源。\n    *   **建议**: 在大多数生产环境中，应启用CEF以确保最佳转发性能和安全性。仅在有特定原因时才禁用它。\n\n6.  **物理安全不足**: \n    *   **风险描述**: 尽管配置了强大的虚拟访问安全措施（如SSH），但如果设备的物理安全措施不足（例如，设备放置在无人看管且易于访问的地方），攻击者可能仍然可以通过物理端口（尤其是结合无超时设置的控制台）绕过大部分安全配置。\n    *   **建议**: 确保设备部署在受物理保护的安全环境中，限制对控制台和辅助端口的物理访问。\n\n7.  **默认启用服务/协议未全面审查**: \n    *   **风险描述**: 尽管禁用了HTTP/HTTPS，但Cisco IOS设备可能默认启用其他服务或协议（例如CDP、LLDP）。如果未对这些默认服务进行审查和禁用，它们可能会泄露网络拓扑信息，增加攻击面。\n    *   **建议**: 审查并禁用所有非必要的默认服务和协议，以减少攻击面。例如，考虑在不需要的接口上禁用CDP/LLDP。",
+          "compliance_report": {
+            "overall_status": "passed",
+            "results": [
+              {
+                "policy_id": "telnet",
+                "policy_name": "禁止使用telnet",
+                "status": "passed",
+                "details": "The `New Config` explicitly disallows Telnet access on VTY lines. The configuration 'line vty 0 4' contains 'transport input ssh', which restricts incoming connections to SSH only. There are no 'transport input telnet' or 'transport input all' commands present that would enable Telnet."
+              },
+              {
+                "policy_id": "asd",
+                "policy_name": "asd",
+                "status": "passed",
+                "details": "The string 'asd' was not found in the `New Config`. Assuming this policy requires the absence of the string 'asd'."
+              }
+            ]
+          }
+        },
+        "prev_hash": "82e87a9d900cbb9f5f72b02f9223a4bb51ceac21b9c3378485c83029a1ae5a59",
+        "hash": "57e9f8b769992bf88dcd807a8ae3f68bf022d9656c7403a6b70dc807202a8c09"
+      },
+      {
+        "index": 6,
+        "timestamp": "2025-09-25T08:12:32.667288Z",
+        "data": {
+          "deviceId": "CISCO",
+          "version": 7,
+          "operator": "admin",
+          "config": "hostname CISCO\n!\n! Initial configuration created by ChainTrace.",
+          "changeType": "rollback",
+          "summary": "本次回滚的目的是将设备的当前配置恢复到极简的“目标”配置，该目标配置仅包含主机名“CISCO”，这意味着几乎所有自定义或非默认的配置都将被清除。这通常用于将设备重置为基本、已知稳定的状态，以便进行重新配置或故障排除。",
+          "analysis": {
+            "rollback_purpose": "The goal is to revert the router 'R1' from its current complex configuration to a pristine, near-factory-default state, only retaining the hostname 'CISCO'. This configuration essentially clears all explicit settings, including IP addresses, user accounts, service configurations, and interface states, to eliminate any problematic configurations or potential security vulnerabilities introduced by the 'current' setup.",
+            "rollback_plan": [
+              "configure terminal",
+              "!",
+              "! Remove specific global configurations",
+              "no service timestamps debug datetime msec",
+              "no service timestamps log datetime msec",
+              "! 'no service password-encryption' and 'no aaa new-model' are left as is, as their 'no' state aligns with a minimal configuration where these features are not explicitly enabled, and adding their positive forms would introduce configuration not desired in the target.",
+              "no clock timezone CST 8 0",
+              "no mmi polling-interval 60",
+              "mmi auto-configure             ! Reverts 'no mmi auto-configure'",
+              "mmi pvc                        ! Reverts 'no mmi pvc'",
+              "no mmi snmp-timeout 180",
+              "!",
+              "ip icmp rate-limit unreachable ! Reverts 'no ip icmp rate-limit unreachable'",
+              "ip domain lookup               ! Reverts 'no ip domain lookup'",
+              "no ip domain name lab.local",
+              "ip cef                         ! Reverts 'no ip cef'",
+              "ipv6 cef                       ! Reverts 'no ipv6 cef'",
+              "no multilink bundle-name authenticated",
+              "!",
+              "no username admin",
+              "!",
+              "no redundancy",
+              "!",
+              "no ip tcp synwait-time 5",
+              "!",
+              "no ip forward-protocol nd",
+              "!",
+              "ip http server                 ! Reverts 'no ip http server'",
+              "ip http secure-server          ! Reverts 'no ip http secure-server'",
+              "no ip ssh time-out 60",
+              "no ip ssh version 2",
+              "no ip ssh server algorithm mac hmac-sha1 hmac-sha2-256",
+              "!",
+              "no ipv6 ioam timestamp",
+              "!",
+              "! Interface configurations",
+              "interface Ethernet0/0",
+              " no ip address 192.168.234.25 255.255.255.0",
+              " no ip information-reply",
+              " shutdown                     ! Explicitly shut down, as most interfaces are shut down by default in a minimal config",
+              " no duplex auto                 ! Remove explicit 'duplex auto'",
+              "exit",
+              "!",
+              "! For other interfaces (E0/1 to S3/3), remove explicit 'duplex auto' or 'serial restart-delay 0' if present.",
+              "! 'no ip address' and 'shutdown' are already in the 'no' state or explicitly present for most interfaces, aligning with defaults for a minimal config, so no further action is needed for those specific items.",
+              "interface Ethernet0/1",
+              " no duplex auto",
+              "exit",
+              "interface Ethernet0/2",
+              " no duplex auto",
+              "exit",
+              "interface Ethernet0/3",
+              " no duplex auto",
+              "exit",
+              "interface Ethernet1/0",
+              " no duplex auto",
+              "exit",
+              "interface Ethernet1/1",
+              " no duplex auto",
+              "exit",
+              "interface Ethernet1/2",
+              " no duplex auto",
+              "exit",
+              "interface Ethernet1/3",
+              " no duplex auto",
+              "exit",
+              "interface Serial2/0",
+              " no serial restart-delay 0",
+              "exit",
+              "interface Serial2/1",
+              " no serial restart-delay 0",
+              "exit",
+              "interface Serial2/2",
+              " no serial restart-delay 0",
+              "exit",
+              "interface Serial2/3",
+              " no serial restart-delay 0",
+              "exit",
+              "interface Serial3/0",
+              " no serial restart-delay 0",
+              "exit",
+              "interface Serial3/1",
+              " no serial restart-delay 0",
+              "exit",
+              "interface Serial3/2",
+              " no serial restart-delay 0",
+              "exit",
+              "interface Serial3/3",
+              " no serial restart-delay 0",
+              "exit",
+              "!",
+              "! Line configurations",
+              "line con 0",
+              " no exec-timeout",
+              " no privilege level",
+              " no logging synchronous",
+              "exit",
+              "line aux 0",
+              " no exec-timeout",
+              " no privilege level",
+              " no logging synchronous",
+              "exit",
+              "line vty 0 4",
+              " no login local",
+              " no transport input ssh",
+              "exit",
+              "!",
+              "! Finally, apply the target hostname",
+              "hostname CISCO",
+              "!",
+              "end",
+              "write memory"
+            ]
+          },
+          "security_risks": [
+            "**消除不安全访问凭证：** 移除了当前配置中的特权`admin`用户，防止旧的或泄露的凭证被恶意利用进行未经授权的设备访问。",
+            "**减少网络攻击面：** 清除了接口上的IP地址（特别是Ethernet0/0），并将所有接口置于默认的关闭状态，大大减少了设备暴露在网络上的攻击点。",
+            "**禁用潜在不安全服务：** 移除或恢复了`ip http server`、`ip ssh`等服务配置，确保没有不必要的服务运行或以不安全的方式配置，从而降低因服务漏洞导致的风险。",
+            "**清除不必要的复杂配置：** 将设备恢复到极简状态，移除了如`clock timezone`、`mmi`、`ip domain name`等所有非默认配置，减少了因复杂性引入的潜在配置错误和安全漏洞。",
+            "**解决配置引入的未知问题：** 彻底回滚到已知稳定和最小的配置，旨在解决当前（有问题）配置中可能存在的导致设备不稳定、性能下降或安全隐患的未知错误。"
+          ],
+          "compliance_report": null
+        },
+        "prev_hash": "57e9f8b769992bf88dcd807a8ae3f68bf022d9656c7403a6b70dc807202a8c09",
+        "hash": "706e0c1c4e7050a8c3f4cc0b890691765ff69dbc04e1e333f3ab50e6f07bd599"
+      },
+      {
+        "index": 7,
+        "timestamp": "2025-09-26T02:14:31.430064Z",
+        "data": {
+          "deviceId": "CISCO",
+          "version": 8,
+          "operator": "admin",
+          "config": "Building configuration...\n\n  \nCurrent configuration : 2218 bytes\n!\n! Last configuration change at 15:57:55 CST Thu Sep 25 2025 by admin\n!\nversion 15.7\nservice timestamps debug datetime msec\nservice timestamps log datetime msec\nno service password-encryption\n!\nhostname R1\n!\nboot-start-marker\nboot-end-marker\n!\n!\n!\nno aaa new-model\n!\n!\n!\nclock timezone CST 8 0\nmmi polling-interval 60\nno mmi auto-configure\nno mmi pvc\nmmi snmp-timeout 180\n!\n!\n!\n!\n!\nno ip icmp rate-limit unreachable\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n\n\n!\n!\n!\n!\nno ip domain lookup\nip domain name lab.local\nno ip cef\nno ipv6 cef\n!\nmultilink bundle-name authenticated\n!\n!\n!\n!\n!\n!\n!\n!\n!\nusername admin privilege 15 secret 5 $1$Gq2t$yIXpZZdO0rxbFnErdIkHP1\n!\nredundancy\n!\n!\nip tcp synwait-time 5\n! \n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\n!\ninterface Ethernet0/0\n ip address 192.168.234.25 255.255.255.0\n ip information-reply\n duplex auto\n!\ninterface Ethernet0/1\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet0/2\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet0/3\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet1/0\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet1/1\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet1/2\n no ip address\n shutdown\n duplex auto\n!\ninterface Ethernet1/3\n no ip address\n shutdown\n duplex auto\n!\ninterface Serial2/0\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial2/1\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial2/2\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial2/3\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial3/0\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial3/1\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial3/2\n no ip address\n shutdown\n serial restart-delay 0\n!\ninterface Serial3/3\n no ip address\n shutdown\n serial restart-delay 0\n!\nip forward-protocol nd\n!\n!\nno ip http server\nno ip http secure-server\nip ssh time-out 60\nip ssh version 2\nip ssh server algorithm mac hmac-sha1 hmac-sha2-256\n!\nipv6 ioam timestamp\n!\n!\n!\ncontrol-plane\n!\n!\n!\n!\n!\n!\n!\n!\nline con 0\n exec-timeout 0 0\n privilege level 15\n logging synchronous\nline aux 0\n exec-timeout 0 0\n privilege level 15\n logging synchronous\nline vty 0 4\n login local\n transport input ssh\n!\n!\nend\n",
+          "changeType": "rollback",
+          "summary": "本次回滚旨在将网络设备从一个仅包含主机名的极简配置状态，恢复到一个预定义的、功能完整的稳定配置。此操作通常用于纠正当前的配置问题或将设备恢复到已知可用的基线状态。",
+          "analysis": "本次回滚的目的是将网络设备的当前运行配置完全替换为一个已知的稳定配置。当前的配置非常基础，仅包含一个主机名（CISCO），而目标配置是一个功能齐全的路由器配置（R1），包括接口、路由、安全设置等。通过此次回滚，设备将恢复到预期的、生产就绪的状态，解决当前配置可能带来的功能缺失或问题，并建立一个稳定的运行环境。\n\n回滚计划 (Rollback Plan):\nconfigure terminal\nno hostname CISCO\nhostname R1\nversion 15.7\nservice timestamps debug datetime msec\nservice timestamps log datetime msec\nno service password-encryption\nno aaa new-model\nclock timezone CST 8 0\nmmi polling-interval 60\nno mmi auto-configure\nno mmi pvc\nmmi snmp-timeout 180\nno ip icmp rate-limit unreachable\nno ip domain lookup\nip domain name lab.local\nno ip cef\nno ipv6 cef\nmultilink bundle-name authenticated\nusername admin privilege 15 secret 5 $1$Gq2t$yIXpZZdO0rxbFnErdIkHP1\nredundancy\nip tcp synwait-time 5\ninterface Ethernet0/0\n ip address 192.168.234.25 255.255.255.0\n ip information-reply\n duplex auto\n exit\ninterface Ethernet0/1\n no ip address\n shutdown\n duplex auto\n exit\ninterface Ethernet0/2\n no ip address\n shutdown\n duplex auto\n exit\ninterface Ethernet0/3\n no ip address\n shutdown\n duplex auto\n exit\ninterface Ethernet1/0\n no ip address\n shutdown\n duplex auto\n exit\ninterface Ethernet1/1\n no ip address\n shutdown\n duplex auto\n exit\ninterface Ethernet1/2\n no ip address\n shutdown\n duplex auto\n exit\ninterface Ethernet1/3\n no ip address\n shutdown\n duplex auto\n exit\ninterface Serial2/0\n no ip address\n shutdown\n serial restart-delay 0\n exit\ninterface Serial2/1\n no ip address\n shutdown\n serial restart-delay 0\n exit\ninterface Serial2/2\n no ip address\n shutdown\n serial restart-delay 0\n exit\ninterface Serial2/3\n no ip address\n shutdown\n serial restart-delay 0\n exit\ninterface Serial3/0\n no ip address\n shutdown\n serial restart-delay 0\n exit\ninterface Serial3/1\n no ip address\n shutdown\n serial restart-delay 0\n exit\ninterface Serial3/2\n no ip address\n shutdown\n serial restart-delay 0\n exit\ninterface Serial3/3\n no ip address\n shutdown\n serial restart-delay 0\n exit\nip forward-protocol nd\nno ip http server\nno ip http secure-server\nip ssh time-out 60\nip ssh version 2\nip ssh server algorithm mac hmac-sha1 hmac-sha2-256\nipv6 ioam timestamp\nline con 0\n exec-timeout 0 0\n privilege level 15\n logging synchronous\n exit\nline aux 0\n exec-timeout 0 0\n privilege level 15\n logging synchronous\n exit\nline vty 0 4\n login local\n transport input ssh\n exit\nend\nwrite memory",
+          "security_risks": "1.  **访问中断风险：** 在回滚过程中，由于配置更改（特别是管理IP地址、SSH设置或VTY行配置），设备管理访问可能会暂时中断，导致操作员失联或需要物理访问设备。\n2.  **配置覆盖和意外删除：** 将当前配置替换为目标配置，可能会意外删除当前配置中可能存在但未在目标配置中明确定义或与目标配置冲突的任何临时或未保存的更改。\n3.  **弱密码/硬编码密码：** 目标配置中包含一个硬编码的加密用户密码 (`username admin privilege 15 secret 5 $1$Gq2t$yIXpZZdO0rxbFnErdIkHP1`)。尽管已加密，但在部署前应评估其强度，并在实际生产环境中考虑更改为更强的密码，以防彩虹表攻击或未来发现的弱点。\n4.  **未加密的服务密码：** 目标配置包含 `no service password-encryption`。这意味着如果将来添加任何非哈希（类型5）或非加密（类型7）密码，它们将以明文形式存储在配置中，构成严重的密码泄露风险。\n5.  **日志信息泄露：** `service timestamps debug datetime msec` 和 `service timestamps log datetime msec` 记录了详细的日志时间戳。在某些情况下，这些信息可能会向潜在攻击者提供系统活动模式的线索。\n6.  **老旧SSH算法：** 目标配置指定 `ip ssh server algorithm mac hmac-sha1 hmac-sha2-256`。其中 `hmac-sha1` 算法已被认为不够安全，尽管同时支持 `hmac-sha2-256`，但在可能的情况下应禁用或优先使用更强的算法，以提高SSH连接的安全性。",
+          "compliance_report": null
+        },
+        "prev_hash": "706e0c1c4e7050a8c3f4cc0b890691765ff69dbc04e1e333f3ab50e6f07bd599",
+        "hash": "02523a7d3e33fd33de95715c2bfed2a9a32ba9146170f9c5b31b06882d06bc0b"
+      }
+    ]
+  },
+  "deployment_history": [
+    {
+      "id": "65bc17af-7936-429f-8411-59a30cdc4067",
+      "timestamp": "2025-09-25T09:13:49.509036Z",
+      "operator": "admin",
+      "template_name": "telnet",
+      "status": "Completed with Errors",
+      "summary": "0 成功, 1 失败。",
+      "target_devices": [
+        "CISCO"
+      ],
+      "results": [
+        {
+          "device_id": "CISCO",
+          "device_name": "CISCO",
+          "status": "failure",
+          "message": "400: Configuration violates compliance policies: 禁止使用telnet"
+        }
+      ]
+    }
+  ]
+}

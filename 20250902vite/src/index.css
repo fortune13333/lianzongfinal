@@ -1,0 +1,261 @@
+/*
+  IDE Note: The "@tailwind" directives are correct.
+*/
+@import "xterm/css/xterm.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* --- DEFAULT ACCENT (Cyan) --- */
+  --color-primary-200: 165 243 252;
+  --color-primary-300: 103 232 249;
+  --color-primary-400: 34 211 238;
+  --color-primary-500: 6 182 212;
+  --color-primary-600: 8 145 178;
+  --color-primary-700: 14 116 144;
+  
+  /* --- DEFAULT BACKGROUND (Zinc - Dark Mode Base) --- */
+  --color-bg-50: 250 250 250;
+  --color-bg-100: 244 244 245;
+  --color-bg-200: 228 228 231;
+  --color-bg-300: 212 212 216;
+  --color-bg-400: 161 161 170;
+  --color-bg-500: 113 113 122;
+  --color-bg-600: 82 82 91;
+  --color-bg-700: 63 63 70;
+  --color-bg-800: 39 39 42;
+  --color-bg-900: 24 24 27;
+  --color-bg-950: 9 9 11;
+  
+  --color-text-100: 244 244 245;
+  --color-text-200: 228 228 231;
+  --color-text-300: 212 212 216;
+  --color-text-400: 161 161 170;
+  --color-text-500: 113 113 122;
+}
+
+/* --- ACCENT COLOR PALETTES --- */
+[data-theme="emerald"] {
+  --color-primary-200: 110 231 183;
+  --color-primary-300: 52 211 153;
+  --color-primary-400: 16 185 129;
+  --color-primary-500: 5 150 105;
+  --color-primary-600: 4 120 87;
+  --color-primary-700: 6 95 70;
+}
+
+[data-theme="amber"] {
+  --color-primary-200: 252 211 77;
+  --color-primary-300: 251 191 36;
+  --color-primary-400: 245 158 11;
+  --color-primary-500: 217 119 6;
+  --color-primary-600: 180 83 9;
+  --color-primary-700: 146 64 14;
+}
+
+[data-theme="violet"] {
+  --color-primary-200: 196 181 253;
+  --color-primary-300: 167 139 250;
+  --color-primary-400: 139 92 246;
+  --color-primary-500: 124 58 237;
+  --color-primary-600: 109 40 217;
+  --color-primary-700: 91 33 182;
+}
+
+[data-theme="rose"] {
+  --color-primary-200: 254 205 211;
+  --color-primary-300: 253 164 175;
+  --color-primary-400: 251 113 133;
+  --color-primary-500: 244 63 94;
+  --color-primary-600: 225 29 72;
+  --color-primary-700: 190 18 60;
+}
+
+/* --- DARK BACKGROUND VARIANTS --- */
+[data-bg-theme="slate"] {
+  --color-bg-50: 248 250 252;
+  --color-bg-100: 241 245 249;
+  --color-bg-200: 226 232 240;
+  --color-bg-300: 203 213 225;
+  --color-bg-400: 148 163 184;
+  --color-bg-500: 100 116 139;
+  --color-bg-600: 71 85 105;
+  --color-bg-700: 51 65 85;
+  --color-bg-800: 30 41 59;
+  --color-bg-900: 15 23 42;
+  --color-bg-950: 2 6 23;
+  
+  --color-text-100: 241 245 249;
+  --color-text-200: 226 232 240;
+  --color-text-300: 203 213 225;
+  --color-text-400: 148 163 184;
+  --color-text-500: 100 116 139;
+}
+
+[data-bg-theme="stone"] {
+  --color-bg-50: 250 250 249;
+  --color-bg-100: 245 245 244;
+  --color-bg-200: 231 229 228;
+  --color-bg-300: 214 211 209;
+  --color-bg-400: 168 162 158;
+  --color-bg-500: 120 113 108;
+  --color-bg-600: 87 83 78;
+  --color-bg-700: 68 64 60;
+  --color-bg-800: 41 37 36;
+  --color-bg-900: 28 25 23;
+  --color-bg-950: 12 10 9;
+
+  --color-text-100: 245 245 244;
+  --color-text-200: 231 229 228;
+  --color-text-300: 214 211 209;
+  --color-text-400: 168 162 158;
+  --color-text-500: 120 113 108;
+}
+
+/* --- DEEP SPACE THEME --- */
+[data-bg-theme="deep-space"] {
+  --color-bg-950: 11 15 25; 
+  --color-bg-900: 19 23 35; 
+  --color-bg-800: 30 35 50;
+  --color-bg-700: 45 50 70;
+  --color-bg-600: 60 65 85; 
+  --color-bg-500: 100 116 139; 
+  
+  --color-text-100: 255 255 255;
+  --color-text-200: 226 232 240;
+  --color-text-300: 148 163 184;
+  --color-text-400: 100 116 139;
+  --color-text-500: 71 85 105;
+}
+
+
+/*
+   --- LIGHT THEMES (based on mature, widely-used design systems) ---
+*/
+
+/* GitHub Primer Light — the most recognized developer light theme */
+[data-bg-theme="polaris"] {
+  --color-bg-950: 246 248 250;    /* #f6f8fa canvas-subtle  */
+  --color-bg-900: 255 255 255;    /* #ffffff white card     */
+  --color-bg-800: 243 244 246;    /* #f3f4f6 button default */
+  --color-bg-700: 208 215 222;    /* #d0d7de border / hover */
+  --color-bg-600: 246 248 250;    /* #f6f8fa input bg       */
+  --color-bg-500: 140 149 159;    /* #8c959f muted          */
+  --color-text-100: 31 35 40;     /* #1f2328 fg.default     */
+  --color-text-200: 36 41 47;     /* #24292f               */
+  --color-text-300: 87 96 106;    /* #57606a fg.muted       */
+  --color-text-400: 110 119 129;  /* #6e7781 fg.subtle      */
+  --color-text-500: 140 149 159;  /* #8c959f               */
+}
+
+/* Catppuccin Latte — most popular developer theme in 2024, warm beige base */
+[data-bg-theme="sky"] {
+  --color-bg-950: 239 241 245;    /* #eff1f5 base      */
+  --color-bg-900: 230 233 239;    /* #e6e9ef mantle    */
+  --color-bg-800: 204 208 218;    /* #ccd0da surface0  */
+  --color-bg-700: 172 176 190;    /* #acb0be surface2, hover */
+  --color-bg-600: 239 241 245;    /* #eff1f5 input bg  */
+  --color-bg-500: 140 143 161;    /* #8c8fa1 overlay0  */
+  --color-text-100: 76 79 105;    /* #4c4f69 text      */
+  --color-text-200: 92 95 119;    /* #5c5f77 subtext1  */
+  --color-text-300: 108 111 133;  /* #6c6f85 subtext0  */
+  --color-text-400: 124 127 147;  /* #7c7f93 overlay2  */
+  --color-text-500: 140 143 161;  /* #8c8fa1 overlay0  */
+}
+
+/* One Light (Atom/VS Code) — classic warm off-white editor theme */
+[data-bg-theme="mint"] {
+  --color-bg-950: 250 250 250;    /* #fafafa           */
+  --color-bg-900: 255 255 255;    /* #ffffff           */
+  --color-bg-800: 232 232 232;    /* #e8e8e8 button    */
+  --color-bg-700: 208 208 208;    /* #d0d0d0 hover     */
+  --color-bg-600: 250 250 250;    /* #fafafa input bg  */
+  --color-bg-500: 169 169 169;    /* #a9a9a9           */
+  --color-text-100: 56 58 66;     /* #383a42           */
+  --color-text-200: 56 58 66;     /* #383a42           */
+  --color-text-300: 105 108 119;  /* #696c77           */
+  --color-text-400: 160 161 167;  /* #a0a1a7           */
+  --color-text-500: 169 169 169;  /* #a9a9a9           */
+}
+
+/* Solarized Light — the timeless classic since 2011, iconic warm base */
+[data-bg-theme="lavender"] {
+  --color-bg-950: 253 246 227;    /* #fdf6e3 base3     */
+  --color-bg-900: 238 232 213;    /* #eee8d5 base2     */
+  --color-bg-800: 224 218 198;    /* button default    */
+  --color-bg-700: 197 190 170;    /* hover             */
+  --color-bg-600: 253 246 227;    /* #fdf6e3 input bg  */
+  --color-bg-500: 147 161 161;    /* #93a1a1 base1     */
+  --color-text-100: 88 110 117;   /* #586e75 base01    */
+  --color-text-200: 101 123 131;  /* #657b83 base00    */
+  --color-text-300: 101 123 131;  /* #657b83           */
+  --color-text-400: 131 148 150;  /* #839496 base0     */
+  --color-text-500: 147 161 161;  /* #93a1a1 base1     */
+}
+
+/* Fix invisible white/xx borders on light themes */
+[data-bg-theme="polaris"] .border-white\/10,
+[data-bg-theme="sky"] .border-white\/10,
+[data-bg-theme="mint"] .border-white\/10,
+[data-bg-theme="lavender"] .border-white\/10,
+[data-bg-theme="polaris"] .border-white\/20,
+[data-bg-theme="sky"] .border-white\/20,
+[data-bg-theme="mint"] .border-white\/20,
+[data-bg-theme="lavender"] .border-white\/20 {
+  border-color: rgb(var(--color-bg-700) / 0.5);
+}
+
+/* Dot Matrix Background Pattern */
+.bg-grid-pattern {
+  background-size: 40px 40px;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+}
+
+/* Adjust grid pattern for light themes to be dark dots */
+[data-bg-theme="sky"] .bg-grid-pattern,
+[data-bg-theme="mint"] .bg-grid-pattern,
+[data-bg-theme="lavender"] .bg-grid-pattern,
+[data-bg-theme="polaris"] .bg-grid-pattern {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+}
+
+/* Glassmorphism Utilities */
+.glass-panel {
+  @apply bg-bg-900/60 backdrop-blur-md border border-white/10 shadow-xl;
+}
+
+/* Fix glass panel for light themes */
+[data-bg-theme="sky"] .glass-panel,
+[data-bg-theme="mint"] .glass-panel,
+[data-bg-theme="lavender"] .glass-panel,
+[data-bg-theme="polaris"] .glass-panel {
+  @apply bg-bg-900/100 border-bg-700 shadow-sm;
+}
+
+.glass-input {
+  @apply bg-bg-950/50 border border-white/10 focus:border-primary-400/50 focus:ring-primary-400/20 placeholder-text-500 text-text-200;
+}
+
+/* Fix inputs for light themes */
+[data-bg-theme="sky"] .glass-input,
+[data-bg-theme="mint"] .glass-input,
+[data-bg-theme="lavender"] .glass-input,
+[data-bg-theme="polaris"] .glass-input {
+  @apply bg-bg-600 border-bg-700 text-text-100 placeholder-text-400 focus:border-primary-500 focus:ring-primary-500/30;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-bg-700 rounded-full hover:bg-bg-600;
+}

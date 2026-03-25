@@ -1,0 +1,184 @@
+{
+  "devices": [
+    {
+      "id": "RTR01-NYC",
+      "name": "1",
+      "ipAddress": "192.168.1.1",
+      "type": "Router"
+    },
+    {
+      "id": "SW01-SFO",
+      "name": "2",
+      "ipAddress": "10.10.5.254",
+      "type": "Switch"
+    }
+  ],
+  "blockchains": {
+    "RTR01-NYC": [
+      {
+        "index": 0,
+        "timestamp": "2025-09-05T07:07:03.577393Z",
+        "data": {
+          "deviceId": "RTR01-NYC",
+          "version": 1,
+          "operator": "system_init",
+          "config": "hostname 1\n!\n! Initial configuration created by ChainTrace.",
+          "diff": "+ hostname 1\n+ !\n+ ! Initial configuration created by ChainTrace.",
+          "changeType": "initial",
+          "summary": "设备已创建。",
+          "analysis": "这是新设备的第一个配置区块，用于建立基线。",
+          "security_risks": "无。这是一个标准的初始设置。"
+        },
+        "prev_hash": "0",
+        "hash": "38b22658c2b532222fa9ddb12c4889c9af2ae3fd452b1920c448750227df5d11"
+      },
+      {
+        "index": 1,
+        "timestamp": "2025-09-05T07:07:11.408647Z",
+        "data": {
+          "deviceId": "RTR01-NYC",
+          "version": 2,
+          "operator": "admin",
+          "config": "hostname 1\n!\n! Initial configuration created by ChainTrace.",
+          "diff": "",
+          "changeType": "update",
+          "summary": "此次配置更改没有实质性变动。",
+          "analysis": "此配置更改前后完全相同，未引入任何新的或修改现有的配置项。因此，设备的功能或行为没有发生任何改变。",
+          "security_risks": "未发现引入任何安全风险。"
+        },
+        "prev_hash": "38b22658c2b532222fa9ddb12c4889c9af2ae3fd452b1920c448750227df5d11",
+        "hash": "61ce4c5ca187d8edcf0d8f3865be8d9c652de6b8b1bea4cec4c417b201205ab2"
+      },
+      {
+        "index": 2,
+        "timestamp": "2025-09-05T07:30:16.113911Z",
+        "data": {
+          "deviceId": "RTR01-NYC",
+          "version": 3,
+          "operator": "admin",
+          "config": "hostname 1\n!\n! Initial configuration created by ChainTrace.",
+          "diff": "",
+          "changeType": "update",
+          "summary": "此配置更改未引入任何实际变动。",
+          "analysis": "新旧配置完全相同，因此没有实际的配置更改发生。这可能表示一次空操作，例如保存了未更改的配置，或者进行了验证性提交但没有内容变化。",
+          "security_risks": "未发现安全风险，因为没有引入新的配置或修改现有配置。"
+        },
+        "prev_hash": "61ce4c5ca187d8edcf0d8f3865be8d9c652de6b8b1bea4cec4c417b201205ab2",
+        "hash": "0e15de05350b5974f32ec469ea5b6fb8a45c7f7acc601b44df9e3f7297d268c0"
+      },
+      {
+        "index": 3,
+        "timestamp": "2025-09-05T08:04:22.654884Z",
+        "data": {
+          "deviceId": "RTR01-NYC",
+          "version": 4,
+          "operator": "admin",
+          "config": "hostname 1\n!\n! Initial configuration created ChainTrace.",
+          "diff": "- ! Initial configuration created by ChainTrace.\n+ ! Initial configuration created ChainTrace.",
+          "changeType": "update",
+          "summary": "用户禁用了AI分析。",
+          "analysis": "此配置变更在提交时未经过AI智能分析。",
+          "security_risks": "未进行安全评估，因为AI分析已被禁用。"
+        },
+        "prev_hash": "0e15de05350b5974f32ec469ea5b6fb8a45c7f7acc601b44df9e3f7297d268c0",
+        "hash": "a05637a7be7c7dae711cb0d2362b5bf8e4a886b0b242a182f21f6c6d1c5a9b18"
+      },
+      {
+        "index": 4,
+        "timestamp": "2025-09-05T08:07:33.741919Z",
+        "data": {
+          "deviceId": "RTR01-NYC",
+          "version": 5,
+          "operator": "operator1",
+          "config": "hostname 1\n!\n! Initial configuration created ChainTrace.",
+          "diff": "No textual changes detected.",
+          "changeType": "update",
+          "summary": "用户禁用了AI分析。",
+          "analysis": "此配置变更在提交时未经过AI智能分析。",
+          "security_risks": "未进行安全评估，因为AI分析已被禁用。"
+        },
+        "prev_hash": "a05637a7be7c7dae711cb0d2362b5bf8e4a886b0b242a182f21f6c6d1c5a9b18",
+        "hash": "0e4e91595aad5060222f93a5c33c67300378ba6d32d1702546391b5bd3dc1817"
+      },
+      {
+        "index": 5,
+        "timestamp": "2025-09-05T08:08:22.619289Z",
+        "data": {
+          "deviceId": "RTR01-NYC",
+          "version": 6,
+          "operator": "admin",
+          "config": "hostname 1\n!\n! Initial configuration created ChainTrace.",
+          "diff": "No textual changes detected.",
+          "changeType": "update",
+          "summary": "用户禁用了AI分析。",
+          "analysis": "此配置变更在提交时未经过AI智能分析。",
+          "security_risks": "未进行安全评估，因为AI分析已被禁用。"
+        },
+        "prev_hash": "0e4e91595aad5060222f93a5c33c67300378ba6d32d1702546391b5bd3dc1817",
+        "hash": "b427906f116be337dfd7a77b3cffc83225d233f5187849d16dfb9b6b7e24ba6f"
+      }
+    ],
+    "SW01-SFO": [
+      {
+        "index": 0,
+        "timestamp": "2025-09-05T08:06:11.735519Z",
+        "data": {
+          "deviceId": "SW01-SFO",
+          "version": 1,
+          "operator": "system_init",
+          "config": "hostname 2\n!\n! Initial configuration created by ChainTrace.",
+          "diff": "+ hostname 2\n+ !\n+ ! Initial configuration created by ChainTrace.",
+          "changeType": "initial",
+          "summary": "设备已创建。",
+          "analysis": "这是新设备的第一个配置区块，用于建立基线。",
+          "security_risks": "无。这是一个标准的初始设置。"
+        },
+        "prev_hash": "0",
+        "hash": "2e3cfda0151367d0904f39c864542d96240f7cac5df73a2aa4713a19125210c8"
+      },
+      {
+        "index": 1,
+        "timestamp": "2025-09-05T08:06:16.219850Z",
+        "data": {
+          "deviceId": "SW01-SFO",
+          "version": 2,
+          "operator": "admin",
+          "config": "hostname 2\n!\n! Initial configuration created by ChainTrace.",
+          "diff": "No textual changes detected.",
+          "changeType": "update",
+          "summary": "用户禁用了AI分析。",
+          "analysis": "此配置变更在提交时未经过AI智能分析。",
+          "security_risks": "未进行安全评估，因为AI分析已被禁用。"
+        },
+        "prev_hash": "2e3cfda0151367d0904f39c864542d96240f7cac5df73a2aa4713a19125210c8",
+        "hash": "250097a187706306340c9cd839cae0d3773a5504b1ec357e8272120891ac31f3"
+      }
+    ]
+  },
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password": "admin",
+      "role": "admin"
+    },
+    {
+      "id": 2,
+      "username": "operator1",
+      "password": "password",
+      "role": "operator"
+    },
+    {
+      "id": 3,
+      "username": "net_admin",
+      "password": "password123",
+      "role": "operator"
+    },
+    {
+      "id": 4,
+      "username": "fc1",
+      "password": "fc1",
+      "role": "operator"
+    }
+  ]
+}

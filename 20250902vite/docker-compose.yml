@@ -1,0 +1,11 @@
+services:
+  chaintrace:
+    build: .
+    ports:
+      - "8001:8001"
+    volumes:
+      # config.ini: edit on host, takes effect after restart
+      - ./agentv2/config.ini:/app/agentv2/config.ini
+      # database: persists on host at agentv2/chaintrace.db
+      - ./agentv2/chaintrace.db:/app/agentv2/chaintrace.db
+    restart: unless-stopped
