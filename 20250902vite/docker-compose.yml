@@ -1,11 +1,38 @@
 services:
   chaintrace:
     build: .
-    ports:
-      - "8001:8001"
+    # Port 8001 is now internal-only; nginx handles external traffic.
+    # Uncomment the line below if you want direct access without nginx.
+    # ports:
+    #   - "8001:8001"
     volumes:
       # config.ini: edit on host, takes effect after restart
       - ./agentv2/config.ini:/app/agentv2/config.ini
       # database: persists on host at agentv2/chaintrace.db
       - ./agentv2/chaintrace.db:/app/agentv2/chaintrace.db
+    environment:
+      # Override JWT secret via environment variable (recommended for production).
+      # CT_JWT_SECRET_KEY: "your-strong-random-secret-here"
+      - CT_JWT_SECRET_KEY=${CT_JWT_SECRET_KEY:-}
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/api/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      chaintrace:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles:
+      - https   # Only start nginx when: docker compose --profile https up

@@ -602,6 +602,7 @@ def leave_device_session_endpoint(device_id: str, session_id: str, actor: str = 
 async def poll_all_device_statuses(actor: str = Depends(get_current_actor), db: Session = Depends(get_db)):
     """并发检测所有设备的 TCP 22 端口连通性。模拟模式下返回随机数据。"""
     import asyncio, datetime as _dt, time as _time, random as _random
+    from datetime import timezone as _tz
 
     devices = db.query(models.Device).all()
 
@@ -610,7 +611,7 @@ async def poll_all_device_statuses(actor: str = Depends(get_current_actor), db: 
             d.id: {
                 "is_online": _random.random() > 0.15,
                 "latency_ms": _random.randint(1, 80) if _random.random() > 0.15 else None,
-                "last_checked": _dt.datetime.utcnow().isoformat() + "Z"
+                "last_checked": _dt.datetime.now(_tz.utc).isoformat().replace('+00:00', 'Z')
             } for d in devices
         }
 
@@ -624,9 +625,9 @@ async def poll_all_device_statuses(actor: str = Depends(get_current_actor), db: 
             except Exception:
                 pass
             latency = int((_time.monotonic() - start) * 1000)
-            return device_id, {"is_online": True, "latency_ms": latency, "last_checked": _dt.datetime.utcnow().isoformat() + "Z"}
+            return device_id, {"is_online": True, "latency_ms": latency, "last_checked": _dt.datetime.now(_tz.utc).isoformat().replace('+00:00', 'Z')}
         except Exception:
-            return device_id, {"is_online": False, "latency_ms": None, "last_checked": _dt.datetime.utcnow().isoformat() + "Z"}
+            return device_id, {"is_online": False, "latency_ms": None, "last_checked": _dt.datetime.now(_tz.utc).isoformat().replace('+00:00', 'Z')}
 
     results = await asyncio.gather(*[check_device(d.id, str(d.ipAddress)) for d in devices])
     return dict(results)
@@ -635,7 +636,7 @@ async def poll_all_device_statuses(actor: str = Depends(get_current_actor), db: 
 @router.get("/api/devices/{device_id}/export")
 def export_device_history(device_id: str, actor: str = Depends(get_current_actor), db: Session = Depends(get_db)) -> Dict[str, Any]:
     """导出指定设备的完整配置历史（含所有区块）为 JSON。"""
-    import datetime as _dt
+    from datetime import datetime as _dtcls, timezone as _tz
     device = crud.get_device_with_details(db, device_id)
     if not device:
         raise HTTPException(status_code=404, detail=f"设备 '{device_id}' 不存在。")
@@ -645,7 +646,7 @@ def export_device_history(device_id: str, actor: str = Depends(get_current_actor
         for b in sorted(device.blocks, key=lambda b: b.index)
     ]
     export_data: Dict[str, Any] = {
-        "exported_at": _dt.datetime.utcnow().isoformat() + "Z",
+        "exported_at": _dtcls.now(_tz.utc).isoformat().replace('+00:00', 'Z'),
         "exported_by": actor,
         "device": {"id": device.id, "name": device.name, "ipAddress": device.ipAddress, "type": device.type},
         "blocks": blocks,
@@ -657,7 +658,7 @@ def export_device_history(device_id: str, actor: str = Depends(get_current_actor
 @router.get("/api/backup")
 def full_system_backup(actor: str = Depends(get_current_actor), db: Session = Depends(get_db)) -> Dict[str, Any]:
     """导出系统全量备份（设备、区块链、策略、模板、审计日志）。"""
-    import datetime as _dt
+    from datetime import datetime as _dtcls, timezone as _tz
     data = crud.get_all_data(db)
     all_blockchains: Dict[str, Any] = {}
     for device in db.query(models.Device).all():
@@ -668,7 +669,7 @@ def full_system_backup(actor: str = Depends(get_current_actor), db: Session = De
         ]
     backup: Dict[str, Any] = {
         "backup_version": "1.0",
-        "created_at": _dt.datetime.utcnow().isoformat() + "Z",
+        "created_at": _dtcls.now(_tz.utc).isoformat().replace('+00:00', 'Z'),
         "created_by": actor,
         "devices": data.get("devices", []),
         "blockchains": all_blockchains,

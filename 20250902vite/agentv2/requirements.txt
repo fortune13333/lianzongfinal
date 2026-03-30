@@ -23,3 +23,6 @@ bcrypt==3.2.2
 
 # python-jose[cryptography] - 用于 JWT 令牌的生成与验证
 python-jose[cryptography]
+
+# alembic - 数据库迁移管理工具（替代手动 ALTER TABLE）
+alembic

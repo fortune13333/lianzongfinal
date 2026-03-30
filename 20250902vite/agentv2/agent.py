@@ -24,9 +24,19 @@ import crud
 # --- FastAPI App Initialization ---
 # Version updated to reflect the new privileged operator feature.
 app = FastAPI(title="ChainTrace Local Agent", version="8.5.0-privileged-operator")
+_cors_origins_str: str = config.get('security', 'allowed_origins', fallback='').strip()
+if _cors_origins_str:
+    _cors_origins = [o.strip() for o in _cors_origins_str.split(',') if o.strip()]
+else:
+    _cors_origins = ["*"]
+    logging.warning(
+        "安全警告: [security] allowed_origins 未配置，CORS 已设为允许所有来源 (*)。"
+        "生产环境请在 config.ini 中配置具体来源，例如: allowed_origins = http://localhost:5173, http://192.168.1.100:8001"
+    )
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_cors_origins,
     allow_credentials=False,  # JWT via Authorization header; credentials=True requires specific origins
     allow_methods=["*"],
     allow_headers=["*"],
@@ -44,20 +54,16 @@ if _dist_dir.exists():
 
 # --- Main Execution ---
 if __name__ == "__main__":
-    # Initialize the database and create tables if they don't exist.
-    init_db()
-    
-    # Use a database session to seed initial data if the DB is empty.
-    # This block now includes a robust check for database schema mismatches.
-    # 自动迁移: 为现有数据库添加新列（幂等操作，忽略已存在的列）
+    # --- Run Alembic migrations to bring the database schema up to date ---
     try:
-        from sqlalchemy import text as _text
-        with SessionLocal() as mig_db:
-            mig_db.execute(_text("ALTER TABLE devices ADD COLUMN tags TEXT"))
-            mig_db.commit()
-            logging.info("数据库迁移: 已为 devices 表添加 tags 列。")
-    except Exception:
-        pass  # 列已存在，忽略
+        from alembic.config import Config as AlembicConfig
+        from alembic import command as alembic_command
+        alembic_cfg = AlembicConfig(str(Path(__file__).parent / "alembic.ini"))
+        alembic_command.upgrade(alembic_cfg, "head")
+        logging.info("数据库迁移: Alembic upgrade to head 完成。")
+    except Exception as alembic_err:
+        logging.warning(f"Alembic 迁移失败，回退到 SQLAlchemy create_all: {alembic_err}")
+        init_db()  # fallback: create tables that don't exist
 
     try:
         with SessionLocal() as db:

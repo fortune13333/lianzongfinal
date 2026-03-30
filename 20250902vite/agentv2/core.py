@@ -14,9 +14,39 @@ from typing import Dict, List, Any, Optional, TypedDict, Tuple
 
 from pydantic import BaseModel
 
-# --- Basic Setup ---
+# --- Structured Logging Setup ---
+import logging.handlers as _log_handlers
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+_log_dir = Path(__file__).parent / "logs"
+_log_dir.mkdir(exist_ok=True)
+
+_root_logger = logging.getLogger()
+_root_logger.setLevel(logging.INFO)
+
+_formatter = logging.Formatter(
+    fmt="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%Y-%m-%dT%H:%M:%S"
+)
+
+# Console handler — always on
+_console_handler = logging.StreamHandler()
+_console_handler.setFormatter(_formatter)
+_root_logger.addHandler(_console_handler)
+
+# Rotating file handler — max 5 MB per file, keep 5 backups
+_file_handler = _log_handlers.RotatingFileHandler(
+    _log_dir / "chaintrace.log",
+    maxBytes=5 * 1024 * 1024,
+    backupCount=5,
+    encoding="utf-8"
+)
+_file_handler.setFormatter(_formatter)
+_root_logger.addHandler(_file_handler)
+
+# Suppress noisy third-party loggers
+logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+logging.getLogger("passlib").setLevel(logging.WARNING)
+logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 
 # --- Command-line Argument Parsing ---
 parser = argparse.ArgumentParser(description="ChainTrace Agent: A LAN collaboration server for network configuration tracking.")
@@ -186,24 +216,33 @@ class AIConfigCheckRequest(BaseModel):
 #     command: str
 
 # --- Security: Password Hashing & JWT ---
+import os as _os
 import secrets as _secrets
-import datetime as _datetime
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from passlib.context import CryptContext
 from jose import jwt as _jose_jwt
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Load JWT config from config.ini [security] section
+# Load JWT config — env var takes precedence over config.ini for security
 JWT_ALGORITHM: str = config.get('security', 'jwt_algorithm', fallback='HS256')
 JWT_EXPIRE_MINUTES: int = config.getint('security', 'jwt_expire_minutes', fallback=480)
+_env_jwt_key: str = _os.environ.get('CT_JWT_SECRET_KEY', '').strip()
 _raw_jwt_key: str = config.get('security', 'jwt_secret_key', fallback='').strip()
-if not _raw_jwt_key:
-    JWT_SECRET_KEY: str = _secrets.token_hex(32)
-    logging.warning("安全警告: JWT_SECRET_KEY 未在 config.ini [security] 中配置，已自动生成随机密钥。服务重启后所有已登录的 Token 将全部失效！建议在 config.ini 中配置固定密钥。")
-else:
+if _env_jwt_key:
+    JWT_SECRET_KEY: str = _env_jwt_key
+    logging.info("JWT 密钥已从环境变量 CT_JWT_SECRET_KEY 加载。")
+elif _raw_jwt_key:
     JWT_SECRET_KEY = _raw_jwt_key
     logging.info("JWT 密钥已从 config.ini [security] 加载。")
+else:
+    JWT_SECRET_KEY = _secrets.token_hex(32)
+    logging.warning(
+        "安全警告: JWT Secret 未配置（既未设置环境变量 CT_JWT_SECRET_KEY，"
+        "config.ini [security] jwt_secret_key 也为空）。已自动生成随机密钥，"
+        "服务重启后所有已登录的 Token 将全部失效！"
+        "建议设置环境变量 CT_JWT_SECRET_KEY 或在 config.ini 中配置固定密钥。"
+    )
 
 def verify_password(plain: str, hashed: str) -> bool:
     """验证明文密码与 bcrypt 哈希是否匹配。"""
@@ -215,7 +254,7 @@ def get_password_hash(password: str) -> str:
 
 def create_access_token(username: str) -> str:
     """生成包含用户名和过期时间的 JWT 访问令牌。"""
-    expire = _datetime.datetime.utcnow() + timedelta(minutes=JWT_EXPIRE_MINUTES)
+    expire = datetime.now(timezone.utc) + timedelta(minutes=JWT_EXPIRE_MINUTES)
     return _jose_jwt.encode({"sub": username, "exp": expire}, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 
 class TokenData(BaseModel):
