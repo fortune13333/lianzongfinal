@@ -3,6 +3,7 @@ import { Device } from '../types';
 import { TrashIcon, PlusIcon, EditIcon, ListIcon, GridIcon, SearchIcon, SortIcon } from './AIIcons';
 import AdminPanel from './admin/AdminPanel';
 import BulkDeployModal from './admin/BulkDeployModal';
+import ConfigSearchModal from './ConfigSearchModal';
 import { useStore } from '../store/useStore';
 import { hasPermission, canViewAdminPanel, ATOMIC_PERMISSIONS } from '../utils/permissions';
 import { toast } from 'react-hot-toast';
@@ -88,6 +89,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isInTerminalContext = false }) =>
   
   const [selectedDeviceIds, setSelectedDeviceIds] = useState<Set<string>>(new Set());
   const [isDeployModalOpen, setIsDeployModalOpen] = useState(false);
+  const [isConfigSearchOpen, setIsConfigSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState<'name' | 'ipAddress' | 'type'>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -241,6 +243,13 @@ const Dashboard: React.FC<DashboardProps> = ({ isInTerminalContext = false }) =>
                     <span>添加新设备</span>
                     </button>
                 )}
+                <button
+                    onClick={() => setIsConfigSearchOpen(true)}
+                    className="text-sm bg-bg-800 hover:bg-bg-700 text-text-300 hover:text-primary-300 font-medium py-2 px-3 rounded-md transition-colors duration-200"
+                    title="搜索历史配置"
+                >
+                    配置搜索
+                </button>
                 {canResetData && (
                     <>
                     <button
@@ -601,11 +610,17 @@ const Dashboard: React.FC<DashboardProps> = ({ isInTerminalContext = false }) =>
         <AdminPanel />
       )}
       {isDeployModalOpen && (
-          <BulkDeployModal 
+          <BulkDeployModal
               isOpen={isDeployModalOpen}
               onClose={() => setIsDeployModalOpen(false)}
               selectedDeviceIds={Array.from(selectedDeviceIds)}
               onDeploymentComplete={handleDeploymentComplete}
+          />
+      )}
+      {isConfigSearchOpen && (
+          <ConfigSearchModal
+              devices={devices}
+              onClose={() => setIsConfigSearchOpen(false)}
           />
       )}
     </div>

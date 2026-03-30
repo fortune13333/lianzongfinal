@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { User, ConfigTemplate, Policy } from '../../types';
+import { User, ConfigTemplate, Policy, Script, ScheduledTask } from '../../types';
 import { createApiUrl } from '../../utils/apiUtils';
 import { apiFetch } from '../../utils/apiFetch';
 import { toast } from 'react-hot-toast';
@@ -11,6 +11,9 @@ import UserManagement from './UserManagement';
 import ConfirmationModal from '../ConfirmationModal';
 import DeploymentHistory from './DeploymentHistory';
 import WriteTokenManagement from './WriteTokenManagement';
+import ScriptEditModal from '../ScriptEditModal';
+import ScriptExecuteModal from '../ScriptExecuteModal';
+import ScheduledTaskModal from './ScheduledTaskModal';
 import { useStore } from '../../store/useStore';
 import { hasPermission, ATOMIC_PERMISSIONS } from '../../utils/permissions';
 
@@ -20,7 +23,7 @@ type DeletionTarget =
     | { type: 'template'; item: ConfigTemplate }
     | { type: 'policy'; item: Policy };
 
-type AdminTab = 'audit' | 'users' | 'templates' | 'policies' | 'deployments' | 'tokens';
+type AdminTab = 'audit' | 'users' | 'templates' | 'policies' | 'deployments' | 'tokens' | 'scripts' | 'scheduledTasks';
 
 interface AdminPanelProps {
     // All props removed and replaced by useStore hook
@@ -36,9 +39,10 @@ const TabButton: React.FC<{ active: boolean; onClick: () => void; children: Reac
 );
 
 const AdminPanel: React.FC<AdminPanelProps> = () => {
-    const { 
-        currentUser, allUsers, auditLog, templates, policies, 
-        deploymentHistory, agentApiUrl, fetchData, writeTokens
+    const {
+        currentUser, allUsers, auditLog, templates, policies,
+        deploymentHistory, agentApiUrl, fetchData, writeTokens, scripts, scheduledTasks, devices,
+        deleteScript, deleteScheduledTask,
     } = useStore(state => ({
         currentUser: state.currentUser!,
         allUsers: state.allUsers,
@@ -49,11 +53,18 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
         agentApiUrl: state.settings.agentApiUrl,
         fetchData: state.fetchData,
         writeTokens: state.writeTokens,
+        scripts: state.scripts,
+        scheduledTasks: state.scheduledTasks,
+        devices: state.devices,
+        deleteScript: state.deleteScript,
+        deleteScheduledTask: state.deleteScheduledTask,
     }));
 
     const canManageUsers = hasPermission(currentUser, ATOMIC_PERMISSIONS.USER_MANAGE);
     const canManageTemplates = hasPermission(currentUser, ATOMIC_PERMISSIONS.TEMPLATE_MANAGE);
     const canManagePolicies = hasPermission(currentUser, ATOMIC_PERMISSIONS.POLICY_MANAGE);
+    const canManageScripts = hasPermission(currentUser, ATOMIC_PERMISSIONS.SCRIPT_MANAGE);
+    const canManageTasks = hasPermission(currentUser, ATOMIC_PERMISSIONS.TASK_MANAGE);
 
     const availableTabs = useMemo(() => {
         const tabs: AdminTab[] = [];
@@ -62,9 +73,11 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
         if (canManageTemplates) tabs.push('templates');
         if (canManagePolicies) tabs.push('policies');
         tabs.push('deployments');
-        if (canManageUsers) tabs.push('tokens'); // Only show if user can manage users (as it's an admin function)
+        if (canManageUsers) tabs.push('tokens');
+        if (canManageScripts) tabs.push('scripts');
+        if (canManageTasks) tabs.push('scheduledTasks');
         return tabs;
-    }, [canManageUsers, canManageTemplates, canManagePolicies]);
+    }, [canManageUsers, canManageTemplates, canManagePolicies, canManageScripts, canManageTasks]);
 
     const [activeTab, setActiveTab] = useState<AdminTab>(availableTabs[0]);
     const [isUserModalOpen, setIsUserModalOpen] = useState(false);
@@ -75,6 +88,13 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
     const [policyToEdit, setPolicyToEdit] = useState<Policy | null>(null);
     const [logFilter, setLogFilter] = useState('');
     const [deletionTarget, setDeletionTarget] = useState<DeletionTarget | null>(null);
+    // Script management state
+    const [isScriptModalOpen, setIsScriptModalOpen] = useState(false);
+    const [scriptToEdit, setScriptToEdit] = useState<Script | null>(null);
+    const [executeScript, setExecuteScript] = useState<Script | null>(null);
+    // Scheduled task state
+    const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+    const [taskToEdit, setTaskToEdit] = useState<ScheduledTask | null>(null);
     
     useEffect(() => {
         if (!availableTabs.includes(activeTab)) {
@@ -173,6 +193,8 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
                     {availableTabs.includes('policies') && <TabButton active={activeTab === 'policies'} onClick={() => setActiveTab('policies')}>合规策略</TabButton>}
                     {availableTabs.includes('deployments') && <TabButton active={activeTab === 'deployments'} onClick={() => setActiveTab('deployments')}>部署历史</TabButton>}
                     {availableTabs.includes('tokens') && <TabButton active={activeTab === 'tokens'} onClick={() => setActiveTab('tokens')}>写入令牌</TabButton>}
+                    {availableTabs.includes('scripts') && <TabButton active={activeTab === 'scripts'} onClick={() => setActiveTab('scripts')}>脚本库</TabButton>}
+                    {availableTabs.includes('scheduledTasks') && <TabButton active={activeTab === 'scheduledTasks'} onClick={() => setActiveTab('scheduledTasks')}>定时任务</TabButton>}
                 </div>
 
                 {activeTab === 'policies' && canManagePolicies && (
@@ -278,11 +300,108 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
                 {activeTab === 'tokens' && canManageUsers && (
                     <WriteTokenManagement tokens={writeTokens} />
                 )}
+
+                {activeTab === 'scripts' && canManageScripts && (
+                    <div className="bg-bg-950/50 rounded-md">
+                        <div className="p-4 flex justify-end">
+                            <button onClick={() => { setScriptToEdit(null); setIsScriptModalOpen(true); }} className="flex items-center gap-2 text-sm bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-3 rounded-md">
+                                <PlusIcon /> 创建新脚本
+                            </button>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm text-left text-text-300">
+                                <thead className="text-xs text-text-400 uppercase bg-bg-800/50">
+                                    <tr>
+                                        <th className="px-6 py-3">脚本名称</th>
+                                        <th className="px-6 py-3">适用类型</th>
+                                        <th className="px-6 py-3">描述</th>
+                                        <th className="px-6 py-3">创建者</th>
+                                        <th className="px-6 py-3 text-right">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {scripts.length === 0 ? (
+                                        <tr><td colSpan={5} className="text-center py-8 text-text-500">暂无脚本，点击右上角创建第一个脚本。</td></tr>
+                                    ) : scripts.map(script => (
+                                        <tr key={script.id} className="border-b border-bg-800 hover:bg-bg-800/50">
+                                            <td className="px-6 py-4 font-medium text-text-100">{script.name}</td>
+                                            <td className="px-6 py-4 text-text-400 text-xs">{script.device_type || '通用'}</td>
+                                            <td className="px-6 py-4 text-text-400 truncate max-w-xs">{script.description || '—'}</td>
+                                            <td className="px-6 py-4 text-text-400">{script.created_by}</td>
+                                            <td className="px-6 py-4 text-right space-x-2">
+                                                <button onClick={() => setExecuteScript(script)} className="font-medium text-green-400 hover:underline">执行</button>
+                                                <button onClick={() => { setScriptToEdit(script); setIsScriptModalOpen(true); }} className="font-medium text-primary-400 hover:underline">编辑</button>
+                                                <button onClick={() => { if (window.confirm(`确认删除脚本 "${script.name}"？`)) deleteScript(script.id); }} className="font-medium text-red-500 hover:underline">删除</button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'scheduledTasks' && canManageTasks && (
+                    <div className="bg-bg-950/50 rounded-md">
+                        <div className="p-4 flex justify-end">
+                            <button onClick={() => { setTaskToEdit(null); setIsTaskModalOpen(true); }} className="flex items-center gap-2 text-sm bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-3 rounded-md">
+                                <PlusIcon /> 创建定时任务
+                            </button>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm text-left text-text-300">
+                                <thead className="text-xs text-text-400 uppercase bg-bg-800/50">
+                                    <tr>
+                                        <th className="px-6 py-3">状态</th>
+                                        <th className="px-6 py-3">任务名称</th>
+                                        <th className="px-6 py-3">类型</th>
+                                        <th className="px-6 py-3">Cron</th>
+                                        <th className="px-6 py-3">最后执行</th>
+                                        <th className="px-6 py-3 text-right">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {scheduledTasks.length === 0 ? (
+                                        <tr><td colSpan={6} className="text-center py-8 text-text-500">暂无定时任务，点击右上角创建。</td></tr>
+                                    ) : scheduledTasks.map(task => (
+                                        <tr key={task.id} className="border-b border-bg-800 hover:bg-bg-800/50">
+                                            <td className="px-6 py-4">
+                                                <span className={`text-xs font-bold px-2 py-1 rounded-full ${task.is_enabled ? 'bg-green-900 text-green-300' : 'bg-bg-700 text-text-500'}`}>
+                                                    {task.is_enabled ? '启用' : '停用'}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 font-medium text-text-100">{task.name}</td>
+                                            <td className="px-6 py-4 text-text-400">{task.task_type === 'backup' ? '自动备份' : '拉取配置'}</td>
+                                            <td className="px-6 py-4 font-mono text-xs text-text-400">{task.cron_expr}</td>
+                                            <td className="px-6 py-4 text-text-400 text-xs">
+                                                {task.last_run ? (
+                                                    <span>
+                                                        {new Date(task.last_run).toLocaleString('zh-CN')}
+                                                        <span className={`ml-1 ${task.last_status === 'success' ? 'text-green-400' : 'text-red-400'}`}>
+                                                            {task.last_status === 'success' ? '✓' : '✗'}
+                                                        </span>
+                                                    </span>
+                                                ) : '—'}
+                                            </td>
+                                            <td className="px-6 py-4 text-right space-x-2">
+                                                <button onClick={() => { setTaskToEdit(task); setIsTaskModalOpen(true); }} className="font-medium text-primary-400 hover:underline">编辑</button>
+                                                <button onClick={() => { if (window.confirm(`确认删除定时任务 "${task.name}"？`)) deleteScheduledTask(task.id); }} className="font-medium text-red-500 hover:underline">删除</button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {isUserModalOpen && <UserEditModal userToEdit={userToEdit} allUsers={allUsers} currentUser={currentUser} agentApiUrl={agentApiUrl} onClose={() => setIsUserModalOpen(false)} onSave={() => { setIsUserModalOpen(false); fetchData(true); }} />}
             {isTemplateModalOpen && <TemplateEditModal templateToEdit={templateToEdit} currentUser={currentUser} agentApiUrl={agentApiUrl} onClose={() => setIsTemplateModalOpen(false)} onSave={() => { setIsTemplateModalOpen(false); fetchData(true); }} />}
             {isPolicyModalOpen && <PolicyEditModal policyToEdit={policyToEdit} currentUser={currentUser} agentApiUrl={agentApiUrl} onClose={() => setIsPolicyModalOpen(false)} onSave={() => { setIsPolicyModalOpen(false); fetchData(true); }} />}
+            {isScriptModalOpen && <ScriptEditModal scriptToEdit={scriptToEdit} onClose={() => { setIsScriptModalOpen(false); setScriptToEdit(null); }} />}
+            {executeScript && <ScriptExecuteModal script={executeScript} devices={devices} onClose={() => setExecuteScript(null)} />}
+            {isTaskModalOpen && <ScheduledTaskModal taskToEdit={taskToEdit} devices={devices} onClose={() => { setIsTaskModalOpen(false); setTaskToEdit(null); }} />}
         
             {deletionTarget && (
                 <ConfirmationModal

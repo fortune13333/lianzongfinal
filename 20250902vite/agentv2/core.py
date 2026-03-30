@@ -263,3 +263,22 @@ class TokenData(BaseModel):
 class LoginPayload(BaseModel):
     username: str
     password: str
+
+class ScriptPayload(BaseModel):
+    id: str
+    name: str
+    description: Optional[str] = None
+    content: str
+    device_type: Optional[str] = None
+
+class ScriptExecutePayload(BaseModel):
+    device_ids: List[str]
+
+class ScheduledTaskPayload(BaseModel):
+    id: str
+    name: str
+    description: Optional[str] = None
+    cron_expr: str
+    task_type: str   # "backup" | "config_pull"
+    device_ids: List[str]
+    is_enabled: bool = True

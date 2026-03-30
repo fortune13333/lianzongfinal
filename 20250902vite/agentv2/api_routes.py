@@ -31,8 +31,12 @@ from core import (
     DevicePayload, ConfigPayload, SubmissionPayload, AuditTriggerPayload, SessionPayload,
     UserUpdatePayload, ConfigTemplate as TemplatePayload, BulkDeployPayload, Policy as PolicyPayload, AISettingsPayload,
     RollbackPayload, BlockDict, AICommandGenerationRequest, AIConfigCheckRequest, WriteStartupPayload,
-    JWT_SECRET_KEY, JWT_ALGORITHM, verify_password, create_access_token, LoginPayload
+    JWT_SECRET_KEY, JWT_ALGORITHM, verify_password, create_access_token, LoginPayload,
+    ScriptPayload, ScriptExecutePayload, ScheduledTaskPayload,
 )
+from jinja2 import Environment, BaseLoader, TemplateError as Jinja2TemplateError
+
+_jinja_env = Environment(loader=BaseLoader(), autoescape=False)
 
 router = APIRouter()
 
@@ -358,9 +362,16 @@ def bulk_deploy_template(payload: BulkDeployPayload, actor: str = require_permis
                 raise Exception("在数据库中未找到设备元数据。")
             device_name_for_logs = device.name
 
-            rendered_config = template.content.replace("{{ device.name }}", device.name)
-            rendered_config = rendered_config.replace("{{ device.id }}", device.id)
-            rendered_config = rendered_config.replace("{{ device.ipAddress }}", device.ipAddress)
+            try:
+                _tmpl = _jinja_env.from_string(str(template.content))
+                rendered_config = _tmpl.render(device={
+                    "name": device.name,
+                    "id": device.id,
+                    "ipAddress": device.ipAddress,
+                    "type": device.type,
+                })
+            except Jinja2TemplateError as jinja_err:
+                raise Exception(f"Jinja2 模板渲染失败: {jinja_err}")
             
             # --- SECURITY FIX: Command Interception ---
             for command in rendered_config.splitlines():
@@ -654,6 +665,174 @@ def export_device_history(device_id: str, actor: str = Depends(get_current_actor
     }
     crud.log_action(db, actor, f"导出了设备 '{device_id}' 的配置历史（共 {len(blocks)} 个版本）。")
     return export_data
+
+# --- Feature: Config Full-Text Search ---
+@router.get("/api/search")
+def search_configs(
+    q: str,
+    device_id: Optional[str] = None,
+    actor: str = Depends(get_current_actor),
+    db: Session = Depends(get_db),
+) -> List[Dict[str, Any]]:
+    """在所有（或指定设备的）历史配置区块中全文搜索关键词。"""
+    if not q.strip():
+        return []
+    query = db.query(models.Block)
+    if device_id:
+        query = query.filter(models.Block.device_id == device_id)
+    blocks = query.all()
+    results: List[Dict[str, Any]] = []
+    q_lower = q.lower()
+    for block in blocks:
+        try:
+            data = json.loads(str(block.data))
+            config_text: str = data.get("config", "")
+            if q_lower not in config_text.lower():
+                continue
+            matched_lines = [ln for ln in config_text.splitlines() if q_lower in ln.lower()]
+            results.append({
+                "device_id": block.device_id,
+                "block_index": block.index,
+                "timestamp": block.timestamp,
+                "hash": block.hash,
+                "version": data.get("version"),
+                "matched_lines": matched_lines[:10],
+            })
+        except Exception:
+            continue
+    return results
+
+
+# --- Feature: Script CRUD ---
+@router.get("/api/scripts")
+def list_scripts(actor: str = Depends(get_current_actor), db: Session = Depends(get_db)) -> List[Dict[str, Any]]:
+    scripts = crud.get_scripts(db)
+    return [{"id": s.id, "name": s.name, "description": s.description, "content": s.content, "device_type": s.device_type, "created_by": s.created_by, "created_at": s.created_at.isoformat().replace('+00:00', 'Z') if s.created_at else None} for s in scripts]
+
+@router.post("/api/scripts", status_code=201)
+def create_script(payload: ScriptPayload, actor: str = require_permission("script:manage"), db: Session = Depends(get_db)) -> Dict[str, Any]:
+    if crud.get_script_by_name(db, payload.name):
+        raise HTTPException(status_code=409, detail=f"名为 '{payload.name}' 的脚本已存在。")
+    script = crud.create_script(db, payload, actor)
+    crud.log_action(db, actor, f"创建了脚本 '{payload.name}'。")
+    return {"id": script.id, "name": script.name, "description": script.description, "content": script.content, "device_type": script.device_type, "created_by": script.created_by}
+
+@router.put("/api/scripts/{script_id}")
+def update_script(script_id: str, payload: ScriptPayload, actor: str = require_permission("script:manage"), db: Session = Depends(get_db)) -> Dict[str, Any]:
+    existing = crud.get_script(db, script_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="未找到脚本。")
+    if existing.name != payload.name and crud.get_script_by_name(db, payload.name):
+        raise HTTPException(status_code=409, detail=f"名为 '{payload.name}' 的脚本已存在。")
+    script = crud.update_script(db, script_id, payload)
+    crud.log_action(db, actor, f"更新了脚本 '{payload.name}'。")
+    return {"id": script.id, "name": script.name, "description": script.description, "content": script.content, "device_type": script.device_type, "created_by": script.created_by}  # type: ignore
+
+@router.delete("/api/scripts/{script_id}", status_code=204)
+def delete_script(script_id: str, actor: str = require_permission("script:manage"), db: Session = Depends(get_db)) -> None:
+    script = crud.get_script(db, script_id)
+    if not script:
+        raise HTTPException(status_code=404, detail="未找到脚本。")
+    crud.delete_script(db, script_id)
+    crud.log_action(db, actor, f"删除了脚本 '{script.name}'。")
+    return
+
+@router.post("/api/scripts/{script_id}/execute")
+def execute_script(script_id: str, payload: ScriptExecutePayload, actor: str = require_permission("script:execute"), db: Session = Depends(get_db)) -> Dict[str, Any]:
+    """批量在指定设备上执行脚本（支持 Jinja2 渲染）。"""
+    script = crud.get_script(db, script_id)
+    if not script:
+        raise HTTPException(status_code=404, detail="未找到脚本。")
+
+    results: List[Dict[str, Any]] = []
+    for device_id in payload.device_ids:
+        device = crud.get_device(db, device_id)
+        if not device:
+            results.append({"device_id": device_id, "device_name": device_id, "status": "error", "output": "设备不存在。"})
+            continue
+
+        # Jinja2 render
+        try:
+            tmpl = _jinja_env.from_string(str(script.content))
+            rendered = tmpl.render(device={
+                "name": device.name, "id": device.id,
+                "ipAddress": device.ipAddress, "type": device.type,
+            })
+        except Jinja2TemplateError as e:
+            results.append({"device_id": device_id, "device_name": device.name, "status": "error", "output": f"Jinja2 渲染失败: {e}"})
+            continue
+
+        # Command interception check
+        intercept_error: Optional[str] = None
+        for line in rendered.splitlines():
+            violated = check_command_against_rules(line)
+            if violated:
+                intercept_error = f"命令违反拦截规则 '{violated}': '{line}'"
+                break
+        if intercept_error:
+            results.append({"device_id": device_id, "device_name": device.name, "status": "error", "output": intercept_error})
+            continue
+
+        if is_simulation_mode():
+            results.append({"device_id": device_id, "device_name": device.name, "status": "success", "output": f"[模拟模式] 脚本渲染结果:\n{rendered}"})
+            continue
+
+        device_info = get_device_info(device_id)
+        if not device_info:
+            results.append({"device_id": device_id, "device_name": device.name, "status": "error", "output": "设备未在 config.ini 中配置。"})
+            continue
+
+        try:
+            with ConnectHandler(**device_info) as net_connect:
+                net_connect.enable()
+                output: str = net_connect.send_config_set(rendered.splitlines())
+            results.append({"device_id": device_id, "device_name": device.name, "status": "success", "output": output})
+        except NetmikoBaseException as e:
+            results.append({"device_id": device_id, "device_name": device.name, "status": "error", "output": f"SSH 连接失败: {e}"})
+        except Exception as e:
+            results.append({"device_id": device_id, "device_name": device.name, "status": "error", "output": str(e)})
+
+    crud.log_action(db, actor, f"执行了脚本 '{script.name}'，共 {len(payload.device_ids)} 台设备。")
+    return {"script_name": script.name, "results": results}
+
+
+# --- Feature: Scheduled Tasks CRUD ---
+@router.get("/api/scheduled-tasks")
+def list_scheduled_tasks(actor: str = Depends(get_current_actor), db: Session = Depends(get_db)) -> List[Dict[str, Any]]:
+    tasks = crud.get_scheduled_tasks(db)
+    return [{"id": t.id, "name": t.name, "description": t.description, "cron_expr": t.cron_expr, "task_type": t.task_type, "device_ids": json.loads(str(t.device_ids)), "is_enabled": t.is_enabled, "created_by": t.created_by, "last_run": t.last_run.isoformat().replace('+00:00', 'Z') if t.last_run else None, "last_status": t.last_status} for t in tasks]
+
+@router.post("/api/scheduled-tasks", status_code=201)
+def create_scheduled_task(payload: ScheduledTaskPayload, actor: str = require_permission("task:manage"), db: Session = Depends(get_db)) -> Dict[str, Any]:
+    from scheduler import add_task_job
+    task = crud.create_scheduled_task(db, payload, actor)
+    add_task_job(task)
+    crud.log_action(db, actor, f"创建了定时任务 '{payload.name}' (cron: {payload.cron_expr})。")
+    return {"id": task.id, "name": task.name, "description": task.description, "cron_expr": task.cron_expr, "task_type": task.task_type, "device_ids": json.loads(str(task.device_ids)), "is_enabled": task.is_enabled, "created_by": task.created_by}
+
+@router.put("/api/scheduled-tasks/{task_id}")
+def update_scheduled_task(task_id: str, payload: ScheduledTaskPayload, actor: str = require_permission("task:manage"), db: Session = Depends(get_db)) -> Dict[str, Any]:
+    from scheduler import add_task_job, remove_task_job
+    existing = crud.get_scheduled_task(db, task_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="未找到定时任务。")
+    remove_task_job(task_id)
+    task = crud.update_scheduled_task(db, task_id, payload)
+    add_task_job(task)  # type: ignore
+    crud.log_action(db, actor, f"更新了定时任务 '{payload.name}'。")
+    return {"id": task.id, "name": task.name, "description": task.description, "cron_expr": task.cron_expr, "task_type": task.task_type, "device_ids": json.loads(str(task.device_ids)), "is_enabled": task.is_enabled, "created_by": task.created_by}  # type: ignore
+
+@router.delete("/api/scheduled-tasks/{task_id}", status_code=204)
+def delete_scheduled_task(task_id: str, actor: str = require_permission("task:manage"), db: Session = Depends(get_db)) -> None:
+    from scheduler import remove_task_job
+    task = crud.get_scheduled_task(db, task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="未找到定时任务。")
+    remove_task_job(task_id)
+    crud.delete_scheduled_task(db, task_id)
+    crud.log_action(db, actor, f"删除了定时任务 '{task.name}'。")
+    return
+
 
 @router.get("/api/backup")
 def full_system_backup(actor: str = Depends(get_current_actor), db: Session = Depends(get_db)) -> Dict[str, Any]:

@@ -12,6 +12,9 @@ export const ATOMIC_PERMISSIONS = {
     SYSTEM_RESET: 'system:reset',
     SYSTEM_SETTINGS: 'system:settings',
     STARTUP_WRITE: 'startup:write',
+    SCRIPT_MANAGE: 'script:manage',
+    SCRIPT_EXECUTE: 'script:execute',
+    TASK_MANAGE: 'task:manage',
 } as const;
 
 // A type for the permission strings
@@ -22,6 +25,8 @@ export const ADMIN_PANEL_PERMISSIONS: AtomicPermission[] = [
     ATOMIC_PERMISSIONS.USER_MANAGE,
     ATOMIC_PERMISSIONS.TEMPLATE_MANAGE,
     ATOMIC_PERMISSIONS.POLICY_MANAGE,
+    ATOMIC_PERMISSIONS.SCRIPT_MANAGE,
+    ATOMIC_PERMISSIONS.TASK_MANAGE,
 ];
 
 /**

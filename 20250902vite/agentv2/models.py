@@ -95,3 +95,27 @@ class WriteToken(Base):
     used_by = Column(String, nullable=True)
     used_at = Column(DateTime(timezone=True), nullable=True)
     used_on_device = Column(String, nullable=True)
+
+class Script(Base):
+    __tablename__ = "scripts"
+    id = Column(String, primary_key=True, index=True)
+    name = Column(String, unique=True, nullable=False)
+    description = Column(String, nullable=True)
+    content = Column(Text, nullable=False)
+    device_type = Column(String, nullable=True)  # e.g. "cisco_ios", or null = all types
+    created_by = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class ScheduledTask(Base):
+    __tablename__ = "scheduled_tasks"
+    id = Column(String, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    description = Column(String, nullable=True)
+    cron_expr = Column(String, nullable=False)   # cron syntax e.g. "0 2 * * *"
+    task_type = Column(String, nullable=False)   # "backup" or "config_pull"
+    device_ids = Column(Text, nullable=False)    # JSON list of device IDs, or '["all"]'
+    is_enabled = Column(Boolean, default=True, nullable=False)
+    created_by = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    last_run = Column(DateTime(timezone=True), nullable=True)
+    last_status = Column(String, nullable=True)  # "success" | "error" | null

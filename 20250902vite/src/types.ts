@@ -133,3 +133,43 @@ export interface WriteToken {
     expires_at: string;
     is_used: boolean;
 }
+
+export interface Script {
+  id: string;
+  name: string;
+  description?: string;
+  content: string;
+  device_type?: string;
+  created_by?: string;
+  created_at?: string;
+}
+
+export interface ScheduledTask {
+  id: string;
+  name: string;
+  description?: string;
+  cron_expr: string;
+  task_type: 'backup' | 'config_pull';
+  device_ids: string[];
+  is_enabled: boolean;
+  created_by?: string;
+  created_at?: string;
+  last_run?: string;
+  last_status?: 'success' | 'error' | null;
+}
+
+export interface ScriptExecutionResult {
+  device_id: string;
+  device_name?: string;
+  status: 'success' | 'error';
+  output: string;
+}
+
+export interface ConfigSearchResult {
+  device_id: string;
+  block_index: number;
+  timestamp: string;
+  hash: string;
+  version?: number;
+  matched_lines: string[];
+}

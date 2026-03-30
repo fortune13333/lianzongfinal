@@ -80,14 +80,16 @@ def seed_initial_data(db: Session):
 
 # --- Data Transformation ---
 def _format_data_for_frontend(
-    db_devices: List[models.Device], 
-    db_users: List[models.User], 
-    db_logs: List[models.AuditLog], 
-    db_templates: List[models.ConfigTemplate], 
-    db_policies: List[models.Policy], 
-    db_settings: List[models.Setting], 
+    db_devices: List[models.Device],
+    db_users: List[models.User],
+    db_logs: List[models.AuditLog],
+    db_templates: List[models.ConfigTemplate],
+    db_policies: List[models.Policy],
+    db_settings: List[models.Setting],
     db_deploy_history: List[models.DeploymentRecord],
-    db_write_tokens: List[models.WriteToken]
+    db_write_tokens: List[models.WriteToken],
+    db_scripts: Optional[List[models.Script]] = None,
+    db_scheduled_tasks: Optional[List[models.ScheduledTask]] = None,
 ) -> Dict[str, Any]:
     
     # --- ROBUSTNESS FIX START ---
@@ -139,7 +141,9 @@ def _format_data_for_frontend(
         "policies": [{"id": p.id, "name": p.name, "severity": p.severity, "description": p.description, "rule": p.rule, "enabled": p.enabled} for p in db_policies],
         "deployment_history": [{"id": h.id, "timestamp": h.timestamp.isoformat().replace('+00:00', 'Z'), "operator": h.operator, "template_name": h.template_name, "status": h.status, "summary": h.summary, "target_devices": json.loads(str(h.target_devices)), "results": json.loads(str(h.results))} for h in db_deploy_history],
         "settings": settings,
-        "write_tokens": [{"id": t.id, "token_value": t.token_value, "created_by_admin": t.created_by_admin, "created_at": t.created_at.isoformat().replace('+00:00', 'Z'), "expires_at": t.expires_at.isoformat().replace('+00:00', 'Z'), "is_used": t.is_used} for t in db_write_tokens]
+        "write_tokens": [{"id": t.id, "token_value": t.token_value, "created_by_admin": t.created_by_admin, "created_at": t.created_at.isoformat().replace('+00:00', 'Z'), "expires_at": t.expires_at.isoformat().replace('+00:00', 'Z'), "is_used": t.is_used} for t in db_write_tokens],
+        "scripts": [{"id": s.id, "name": s.name, "description": s.description, "content": s.content, "device_type": s.device_type, "created_by": s.created_by, "created_at": s.created_at.isoformat().replace('+00:00', 'Z') if s.created_at else None} for s in (db_scripts or [])],
+        "scheduled_tasks": [{"id": t.id, "name": t.name, "description": t.description, "cron_expr": t.cron_expr, "task_type": t.task_type, "device_ids": json.loads(str(t.device_ids)), "is_enabled": t.is_enabled, "created_by": t.created_by, "created_at": t.created_at.isoformat().replace('+00:00', 'Z') if t.created_at else None, "last_run": t.last_run.isoformat().replace('+00:00', 'Z') if t.last_run else None, "last_status": t.last_status} for t in (db_scheduled_tasks or [])],
     }
 
 # --- Generic CRUD ---
@@ -165,7 +169,9 @@ def get_all_data(db: Session) -> Dict[str, Any]:
     settings = db.query(models.Setting).all()
     deploy_history = db.query(models.DeploymentRecord).order_by(desc(models.DeploymentRecord.timestamp)).limit(100).all()
     write_tokens = db.query(models.WriteToken).order_by(desc(models.WriteToken.created_at)).limit(100).all()
-    return _format_data_for_frontend(devices, users, logs, templates, policies, settings, deploy_history, write_tokens)
+    scripts = db.query(models.Script).order_by(models.Script.name).all()
+    scheduled_tasks = db.query(models.ScheduledTask).all()
+    return _format_data_for_frontend(devices, users, logs, templates, policies, settings, deploy_history, write_tokens, scripts, scheduled_tasks)
 
 def reset_all_data(db: Session):
     for table in reversed(models.Base.metadata.sorted_tables):
@@ -382,3 +388,97 @@ def invalidate_write_token(db: Session, token: models.WriteToken, used_by: str, 
     db.commit()
     db.refresh(token)
     return token
+
+# --- Script ---
+def get_scripts(db: Session) -> List[models.Script]:
+    return db.query(models.Script).order_by(models.Script.name).all()
+
+def get_script(db: Session, script_id: str) -> Optional[models.Script]:
+    return db.query(models.Script).filter(models.Script.id == script_id).first()
+
+def get_script_by_name(db: Session, name: str) -> Optional[models.Script]:
+    return db.query(models.Script).filter(models.Script.name == name).first()
+
+def create_script(db: Session, script_payload: Any, created_by: str) -> models.Script:
+    db_script = models.Script(
+        id=script_payload.id,
+        name=script_payload.name,
+        description=script_payload.description,
+        content=script_payload.content,
+        device_type=script_payload.device_type,
+        created_by=created_by,
+    )
+    db.add(db_script)
+    db.commit()
+    db.refresh(db_script)
+    return db_script
+
+def update_script(db: Session, script_id: str, script_payload: Any) -> Optional[models.Script]:
+    db_script = get_script(db, script_id)
+    if db_script:
+        db_script.name = script_payload.name  # type: ignore
+        db_script.description = script_payload.description  # type: ignore
+        db_script.content = script_payload.content  # type: ignore
+        db_script.device_type = script_payload.device_type  # type: ignore
+        db.commit()
+        db.refresh(db_script)
+    return db_script
+
+def delete_script(db: Session, script_id: str) -> bool:
+    db_script = get_script(db, script_id)
+    if db_script:
+        db.delete(db_script)
+        db.commit()
+        return True
+    return False
+
+# --- ScheduledTask ---
+def get_scheduled_tasks(db: Session) -> List[models.ScheduledTask]:
+    return db.query(models.ScheduledTask).all()
+
+def get_scheduled_task(db: Session, task_id: str) -> Optional[models.ScheduledTask]:
+    return db.query(models.ScheduledTask).filter(models.ScheduledTask.id == task_id).first()
+
+def create_scheduled_task(db: Session, task_payload: Any, created_by: str) -> models.ScheduledTask:
+    db_task = models.ScheduledTask(
+        id=task_payload.id,
+        name=task_payload.name,
+        description=task_payload.description,
+        cron_expr=task_payload.cron_expr,
+        task_type=task_payload.task_type,
+        device_ids=json.dumps(task_payload.device_ids),
+        is_enabled=task_payload.is_enabled,
+        created_by=created_by,
+    )
+    db.add(db_task)
+    db.commit()
+    db.refresh(db_task)
+    return db_task
+
+def update_scheduled_task(db: Session, task_id: str, task_payload: Any) -> Optional[models.ScheduledTask]:
+    db_task = get_scheduled_task(db, task_id)
+    if db_task:
+        db_task.name = task_payload.name  # type: ignore
+        db_task.description = task_payload.description  # type: ignore
+        db_task.cron_expr = task_payload.cron_expr  # type: ignore
+        db_task.task_type = task_payload.task_type  # type: ignore
+        db_task.device_ids = json.dumps(task_payload.device_ids)  # type: ignore
+        db_task.is_enabled = task_payload.is_enabled  # type: ignore
+        db.commit()
+        db.refresh(db_task)
+    return db_task
+
+def delete_scheduled_task(db: Session, task_id: str) -> bool:
+    db_task = get_scheduled_task(db, task_id)
+    if db_task:
+        db.delete(db_task)
+        db.commit()
+        return True
+    return False
+
+def update_task_run_status(db: Session, task_id: str, status: str):
+    db_task = get_scheduled_task(db, task_id)
+    if db_task:
+        db_task.last_run = datetime.datetime.now(datetime.timezone.utc)  # type: ignore
+        db_task.last_status = status  # type: ignore
+        db.commit()

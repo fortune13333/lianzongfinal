@@ -1,7 +1,7 @@
 import React from 'react';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { Device, Block, AppSettings, User, AuditLogEntry, ConfigTemplate, Policy, BackendSettings, DeploymentRecord, WriteToken, DeviceStatus } from '../types';
+import { Device, Block, AppSettings, User, AuditLogEntry, ConfigTemplate, Policy, BackendSettings, DeploymentRecord, WriteToken, DeviceStatus, Script, ScheduledTask } from '../types';
 import { toast } from 'react-hot-toast';
 import { createApiUrl } from '../utils/apiUtils';
 import { apiFetch } from '../utils/apiFetch';
@@ -20,6 +20,8 @@ interface AppState {
     policies: Policy[];
     deploymentHistory: DeploymentRecord[];
     writeTokens: WriteToken[];
+    scripts: Script[];
+    scheduledTasks: ScheduledTask[];
     blockchains: Record<string, Block[]>;
     openDeviceIds: string[];
     activeDeviceId: string | null;
@@ -72,6 +74,14 @@ interface AppActions {
     pollDeviceStatuses: () => Promise<void>;
     startStatusPolling: () => void;
     stopStatusPolling: () => void;
+    // Script actions
+    createScript: (script: Script) => Promise<void>;
+    updateScript: (scriptId: string, script: Script) => Promise<void>;
+    deleteScript: (scriptId: string) => Promise<void>;
+    // ScheduledTask actions
+    createScheduledTask: (task: ScheduledTask) => Promise<void>;
+    updateScheduledTask: (taskId: string, task: ScheduledTask) => Promise<void>;
+    deleteScheduledTask: (taskId: string) => Promise<void>;
 }
 
 // --- Default State Definitions ---
@@ -100,6 +110,8 @@ const INITIAL_STATE: AppState = {
     policies: [],
     deploymentHistory: [],
     writeTokens: [],
+    scripts: [],
+    scheduledTasks: [],
     blockchains: {},
     openDeviceIds: [],
     activeDeviceId: null,
@@ -164,7 +176,7 @@ export const useStore = create<AppState & AppActions>()(
             fetchData: async (isSilent = false) => {
                 const { agentApiUrl } = get().settings;
                 if (!agentApiUrl) {
-                    set({ isLoading: false, agentMode: 'simulation', devices: [], blockchains: {}, allUsers: [], auditLog: [], templates: [], policies: [], deploymentHistory: [], writeTokens: [] });
+                    set({ isLoading: false, agentMode: 'simulation', devices: [], blockchains: {}, allUsers: [], auditLog: [], templates: [], policies: [], deploymentHistory: [], writeTokens: [], scripts: [], scheduledTasks: [] });
                     toast.error("未配置代理 API 地址，无法获取数据。");
                     return;
                 }
@@ -173,9 +185,9 @@ export const useStore = create<AppState & AppActions>()(
                     const url = createApiUrl(agentApiUrl, '/api/data');
                     const response = await apiFetch(url, { cache: 'no-cache' });
                     if (!response.ok) throw new Error(`无法连接到代理或代理返回错误 (${response.status})。`);
-                    
+
                     const data = await response.json();
-                    
+
                     const oldCurrentUser = get().currentUser;
                     let updatedCurrentUser = oldCurrentUser;
 
@@ -193,7 +205,7 @@ export const useStore = create<AppState & AppActions>()(
                             toast.error("您的账户已被修改或删除，请重新登录。");
                         }
                     }
-                    
+
                     set({
                         devices: data.devices,
                         blockchains: data.blockchains,
@@ -203,6 +215,8 @@ export const useStore = create<AppState & AppActions>()(
                         policies: data.policies,
                         deploymentHistory: data.deployment_history || [],
                         writeTokens: data.write_tokens || [],
+                        scripts: data.scripts || [],
+                        scheduledTasks: data.scheduled_tasks || [],
                         backendSettings: data.settings || DEFAULT_BACKEND_SETTINGS,
                         agentMode: 'live',
                         isLoading: false,
@@ -509,6 +523,98 @@ export const useStore = create<AppState & AppActions>()(
             stopStatusPolling: () => {
                 const id = get()._pollingIntervalId;
                 if (id) { clearInterval(id); set({ _pollingIntervalId: null }); }
+            },
+
+            // --- Script CRUD ---
+            createScript: async (script) => {
+                const { settings } = get();
+                if (!settings.agentApiUrl) return;
+                const toastId = toast.loading('正在创建脚本...');
+                try {
+                    const url = createApiUrl(settings.agentApiUrl, '/api/scripts');
+                    const res = await apiFetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(script) });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.detail || '创建脚本失败。');
+                    toast.success('脚本已创建。', { id: toastId });
+                    await get().fetchData(true);
+                } catch (e) {
+                    toast.error(`创建失败: ${e instanceof Error ? e.message : '未知错误'}`, { id: toastId });
+                }
+            },
+            updateScript: async (scriptId, script) => {
+                const { settings } = get();
+                if (!settings.agentApiUrl) return;
+                const toastId = toast.loading('正在更新脚本...');
+                try {
+                    const url = createApiUrl(settings.agentApiUrl, `/api/scripts/${scriptId}`);
+                    const res = await apiFetch(url, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(script) });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.detail || '更新脚本失败。');
+                    toast.success('脚本已更新。', { id: toastId });
+                    await get().fetchData(true);
+                } catch (e) {
+                    toast.error(`更新失败: ${e instanceof Error ? e.message : '未知错误'}`, { id: toastId });
+                }
+            },
+            deleteScript: async (scriptId) => {
+                const { settings } = get();
+                if (!settings.agentApiUrl) return;
+                const toastId = toast.loading('正在删除脚本...');
+                try {
+                    const url = createApiUrl(settings.agentApiUrl, `/api/scripts/${scriptId}`);
+                    const res = await apiFetch(url, { method: 'DELETE' });
+                    if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.detail || '删除脚本失败。'); }
+                    toast.success('脚本已删除。', { id: toastId });
+                    await get().fetchData(true);
+                } catch (e) {
+                    toast.error(`删除失败: ${e instanceof Error ? e.message : '未知错误'}`, { id: toastId });
+                }
+            },
+
+            // --- ScheduledTask CRUD ---
+            createScheduledTask: async (task) => {
+                const { settings } = get();
+                if (!settings.agentApiUrl) return;
+                const toastId = toast.loading('正在创建定时任务...');
+                try {
+                    const url = createApiUrl(settings.agentApiUrl, '/api/scheduled-tasks');
+                    const res = await apiFetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(task) });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.detail || '创建定时任务失败。');
+                    toast.success('定时任务已创建。', { id: toastId });
+                    await get().fetchData(true);
+                } catch (e) {
+                    toast.error(`创建失败: ${e instanceof Error ? e.message : '未知错误'}`, { id: toastId });
+                }
+            },
+            updateScheduledTask: async (taskId, task) => {
+                const { settings } = get();
+                if (!settings.agentApiUrl) return;
+                const toastId = toast.loading('正在更新定时任务...');
+                try {
+                    const url = createApiUrl(settings.agentApiUrl, `/api/scheduled-tasks/${taskId}`);
+                    const res = await apiFetch(url, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(task) });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.detail || '更新定时任务失败。');
+                    toast.success('定时任务已更新。', { id: toastId });
+                    await get().fetchData(true);
+                } catch (e) {
+                    toast.error(`更新失败: ${e instanceof Error ? e.message : '未知错误'}`, { id: toastId });
+                }
+            },
+            deleteScheduledTask: async (taskId) => {
+                const { settings } = get();
+                if (!settings.agentApiUrl) return;
+                const toastId = toast.loading('正在删除定时任务...');
+                try {
+                    const url = createApiUrl(settings.agentApiUrl, `/api/scheduled-tasks/${taskId}`);
+                    const res = await apiFetch(url, { method: 'DELETE' });
+                    if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.detail || '删除定时任务失败。'); }
+                    toast.success('定时任务已删除。', { id: toastId });
+                    await get().fetchData(true);
+                } catch (e) {
+                    toast.error(`删除失败: ${e instanceof Error ? e.message : '未知错误'}`, { id: toastId });
+                }
             },
         }),
         {

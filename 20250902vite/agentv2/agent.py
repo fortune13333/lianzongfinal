@@ -69,6 +69,9 @@ if __name__ == "__main__":
         with SessionLocal() as db:
             crud.seed_initial_data(db)
             crud.migrate_plaintext_passwords(db)
+            # Start APScheduler and load saved tasks from DB
+            from scheduler import init_scheduler
+            init_scheduler(db)
     except OperationalError as e:
         if "no such column" in str(e):
             logging.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")

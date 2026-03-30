@@ -26,3 +26,9 @@ python-jose[cryptography]
 
 # alembic - 数据库迁移管理工具（替代手动 ALTER TABLE）
 alembic
+
+# jinja2 - 用于配置模板变量渲染（支持条件/循环等完整语法）
+jinja2
+
+# apscheduler - 用于定时任务（自动备份、定期配置拉取）
+apscheduler

@@ -102,12 +102,20 @@ const TemplateEditModal: React.FC<TemplateEditModalProps> = ({ templateToEdit, c
                 placeholder="在此处输入模板配置..."
                 required
               />
-              <p className="text-xs text-text-400 mt-2">
-                您可以在模板中使用动态变量，部署时会自动替换: 
-                <code className="bg-bg-800 px-1 rounded ml-1">{`{{ device.name }}`}</code>, 
-                <code className="bg-bg-800 px-1 rounded ml-1">{`{{ device.id }}`}</code>, 
-                <code className="bg-bg-800 px-1 rounded ml-1">{`{{ device.ipAddress }}`}</code>.
-              </p>
+              <div className="mt-2 p-3 bg-bg-800 rounded-md border border-bg-700">
+                <p className="text-xs font-semibold text-text-300 mb-2">Jinja2 模板语法支持：</p>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-text-400">
+                  <div><code className="text-primary-400">{`{{ device.name }}`}</code> — 设备名称</div>
+                  <div><code className="text-primary-400">{`{{ device.id }}`}</code> — 设备 ID</div>
+                  <div><code className="text-primary-400">{`{{ device.ipAddress }}`}</code> — 设备 IP</div>
+                  <div><code className="text-primary-400">{`{{ device.type }}`}</code> — 设备类型</div>
+                </div>
+                <div className="mt-2 space-y-1 text-xs text-text-500">
+                  <div>条件：<code className="text-yellow-400">{`{% if device.type == 'Router' %}...{% endif %}`}</code></div>
+                  <div>循环：<code className="text-yellow-400">{`{% for item in list %}...{% endfor %}`}</code></div>
+                  <div>注释：<code className="text-yellow-400">{`{# 这是注释 #}`}</code></div>
+                </div>
+              </div>
             </div>
           </div>
 
