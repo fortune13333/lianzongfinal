@@ -113,9 +113,21 @@ class ScheduledTask(Base):
     description = Column(String, nullable=True)
     cron_expr = Column(String, nullable=False)   # cron syntax e.g. "0 2 * * *"
     task_type = Column(String, nullable=False)   # "backup" or "config_pull"
-    device_ids = Column(Text, nullable=False)    # JSON list of device IDs, or '["all"]'
+    # NOTE: device_ids is stored as a JSON-encoded string (e.g. '["RTR01", "all"]').
+    # This avoids a separate association table for a simple list of string IDs.
+    # Always use the device_ids_list property to access the parsed list.
+    device_ids = Column(Text, nullable=False)
     is_enabled = Column(Boolean, default=True, nullable=False)
     created_by = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     last_run = Column(DateTime(timezone=True), nullable=True)
     last_status = Column(String, nullable=True)  # "success" | "error" | null
+
+    @property
+    def device_ids_list(self) -> list:
+        """Returns device_ids as a parsed Python list. Safe to call at any time."""
+        import json as _json
+        try:
+            return _json.loads(str(self.device_ids))
+        except (ValueError, TypeError):
+            return []

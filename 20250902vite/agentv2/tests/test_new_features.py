@@ -10,7 +10,19 @@ import uuid
 # ─────────────────────────────────────────────────────────
 
 class TestScriptCRUD:
-    """T10-A - 验证 /api/scripts 的完整 CRUD 操作"""
+    """T10-A - 验证 /api/scripts 的完整 CRUD 操作。
+
+    IMPORTANT — these tests are intentionally sequential and share state via
+    class-level SCRIPT_ID.  pytest runs methods in definition order within a
+    class, which is the only correct execution order here:
+      1. list (empty)  2. create  3. duplicate → 409  4. list (populated)
+      5. update        6. update nonexistent → 404   7. operator → 403
+      8. delete        9. list (empty again)
+
+    Each test inherits the DB state left by the previous one.  Re-ordering or
+    running individual tests in isolation will produce unexpected failures.
+    This is intentional: the test suite exercises a full CRUD lifecycle.
+    """
 
     SCRIPT_ID = str(uuid.uuid4())
     SCRIPT = {
@@ -85,7 +97,14 @@ class TestScriptCRUD:
 # ─────────────────────────────────────────────────────────
 
 class TestScheduledTaskCRUD:
-    """T10-B - 验证 /api/scheduled-tasks 的完整 CRUD 操作"""
+    """T10-B - 验证 /api/scheduled-tasks 的完整 CRUD 操作。
+
+    IMPORTANT — same sequential lifecycle design as TestScriptCRUD.
+    Tests share state via class-level TASK_ID and must run in definition order:
+      1. list (empty)  2. create  3. list (populated)  4. update
+      5. update nonexistent → 404   6. operator → 403
+      7. delete         8. list (empty again)
+    """
 
     TASK_ID = str(uuid.uuid4())
     TASK = {

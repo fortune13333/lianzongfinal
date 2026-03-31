@@ -387,6 +387,48 @@ def perform_ai_config_check(payload: AIConfigCheckRequest) -> str:
         device=payload.device
     )
 
+def perform_push_config(device_id: str, config_commands: List[str]) -> str:
+    """
+    Pushes a list of config commands to a device via SSH.
+    Returns the command output string on success.
+    Raises HTTPException on SSH failure or device not found.
+    """
+    device_info = get_device_info(device_id)
+    if not device_info:
+        raise HTTPException(status_code=404, detail=f"在配置文件中未找到设备 ID '{device_id}'。")
+    try:
+        with ConnectHandler(**device_info) as net_connect:
+            net_connect.enable()
+            output: str = net_connect.send_config_set(config_commands)
+        return output
+    except NetmikoAuthenticationException as e:
+        logging.error(f"Authentication failed pushing config to {device_id}: {e}")
+        raise HTTPException(status_code=401, detail=f"设备 '{device_id}' 认证失败，请检查 config.ini 凭据。")
+    except NetmikoBaseException as e:
+        logging.error(f"Netmiko error pushing config to {device_id}: {e}")
+        raise HTTPException(status_code=504, detail=f"推送配置失败：连接设备时出错: {e}")
+    except Exception as e:
+        logging.error(f"Unexpected error pushing config to {device_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"推送配置时发生意外错误: {e}")
+
+
+def perform_execute_ssh_config(device_info: Dict[str, Any], commands: List[str]) -> str:
+    """
+    Executes config commands on a device using an already-resolved device_info dict.
+    Used by script execution where device_info is looked up before calling this.
+    Returns the command output string. Raises HTTPException on failure.
+    """
+    try:
+        with ConnectHandler(**device_info) as net_connect:
+            net_connect.enable()
+            output: str = net_connect.send_config_set(commands)
+        return output
+    except NetmikoBaseException as e:
+        raise HTTPException(status_code=504, detail=f"SSH 连接失败: {e}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 def perform_write_startup(db: Session, device_id: str, token_value: str, actor: str) -> Dict[str, Any]:
     """
     Validates token and writes the running configuration to startup configuration.
