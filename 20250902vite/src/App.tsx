@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
+import TopologyView from './components/TopologyView';
 import SettingsModal from './components/SettingsModal';
 import DeviceEditModal from './components/DeviceEditModal';
 import Login from './components/Login';
@@ -13,7 +14,11 @@ import { useStore } from './store/useStore';
 import TerminalContainer from './components/TerminalContainer';
 
 
+type MainView = 'dashboard' | 'topology';
+
 const App: React.FC = () => {
+  const [mainView, setMainView] = useState<MainView>('dashboard');
+
   const {
     currentUser,
     isLoading,
@@ -115,9 +120,32 @@ const App: React.FC = () => {
       
       <Header />
       
-      <main className={`container mx-auto p-4 md:p-8 flex-grow flex flex-col min-h-0 ${openDeviceIds.length > 0 ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+      {/* View tab bar — hidden when a device terminal is open */}
+      {openDeviceIds.length === 0 && (
+        <div className="container mx-auto px-4 md:px-8 pt-2 flex-shrink-0">
+          <div className="flex gap-1 border-b border-bg-800 pb-0">
+            {(['dashboard', 'topology'] as MainView[]).map(v => (
+              <button
+                key={v}
+                onClick={() => setMainView(v)}
+                className={`px-4 py-2 text-sm font-medium rounded-t-md border-b-2 transition-colors
+                  ${mainView === v
+                    ? 'border-primary-500 text-primary-300 bg-bg-900/50'
+                    : 'border-transparent text-text-400 hover:text-text-200 hover:bg-bg-900/30'
+                  }`}
+              >
+                {v === 'dashboard' ? '受管设备' : '网络拓扑'}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <main className={`container mx-auto p-4 md:p-8 flex-grow flex flex-col min-h-0 ${openDeviceIds.length > 0 ? 'overflow-hidden' : mainView === 'topology' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
         {openDeviceIds.length > 0 ? (
           <TerminalContainer />
+        ) : mainView === 'topology' ? (
+          <TopologyView />
         ) : (
           <Dashboard />
         )}

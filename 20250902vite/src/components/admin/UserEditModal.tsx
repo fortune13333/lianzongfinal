@@ -13,18 +13,26 @@ interface UserEditModalProps {
   onSave: () => void;
 }
 
-const ATOMIC_PERMISSIONS = [
-    { id: 'device:create', label: '创建设备' },
-    { id: 'device:update', label: '更新设备' },
-    { id: 'device:delete', label: '删除设备' },
-    { id: 'rollback:execute', label: '执行回滚' },
-    { id: 'startup:write', label: '写入启动配置' },
-    { id: 'user:manage', label: '管理用户' },
-    { id: 'template:manage', label: '管理模板' },
-    { id: 'policy:manage', label: '管理策略' },
-    { id: 'system:reset', label: '重置数据' },
-    { id: 'system:settings', label: '系统设置' },
+// 与 src/utils/permissions.ts 中的 ATOMIC_PERMISSIONS 保持一致
+// 分组展示，便于管理员理解每项权限的作用
+const PERMISSION_LIST: { id: string; label: string; group: string }[] = [
+  { id: 'device:view',      label: '查看设备 / 发现拓扑', group: '设备' },
+  { id: 'device:create',    label: '创建设备',             group: '设备' },
+  { id: 'device:update',    label: '更新设备',             group: '设备' },
+  { id: 'device:delete',    label: '删除设备',             group: '设备' },
+  { id: 'rollback:execute', label: '执行配置回滚',         group: '配置' },
+  { id: 'startup:write',    label: '写入启动配置',         group: '配置' },
+  { id: 'template:manage',  label: '管理配置模板',         group: '配置' },
+  { id: 'script:manage',    label: '管理脚本库',           group: '脚本' },
+  { id: 'script:execute',   label: '执行脚本',             group: '脚本' },
+  { id: 'task:manage',      label: '管理定时任务',         group: '脚本' },
+  { id: 'policy:manage',    label: '管理合规策略',         group: '管理' },
+  { id: 'user:manage',      label: '管理用户',             group: '管理' },
+  { id: 'system:settings',  label: '修改系统设置',         group: '管理' },
+  { id: 'system:reset',     label: '重置 / 清除数据',      group: '管理' },
 ];
+
+const PERMISSION_GROUPS = ['设备', '配置', '脚本', '管理'] as const;
 
 
 const UserEditModal: React.FC<UserEditModalProps> = ({ userToEdit, allUsers, currentUser, agentApiUrl, onClose, onSave }) => {
@@ -167,17 +175,24 @@ const UserEditModal: React.FC<UserEditModalProps> = ({ userToEdit, allUsers, cur
              {role === 'operator' && (
                 <div>
                     <label className="block text-sm font-medium text-text-300 mb-2">额外权限</label>
-                    <div className="max-h-36 overflow-y-auto bg-bg-950 border border-bg-700 rounded-md p-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {ATOMIC_PERMISSIONS.map(p => (
-                            <div key={p.id} className="flex items-center">
-                                <input
-                                    type="checkbox"
-                                    id={`perm-${p.id}`}
-                                    checked={permissions.has(p.id)}
-                                    onChange={() => handlePermissionToggle(p.id)}
-                                    className="h-4 w-4 rounded bg-bg-800 border-bg-600 text-primary-600 focus:ring-primary-500"
-                                />
-                                <label htmlFor={`perm-${p.id}`} className="ml-2 block text-sm text-text-200">{p.label}</label>
+                    <div className="max-h-64 overflow-y-auto bg-bg-950 border border-bg-700 rounded-md p-3 space-y-3">
+                        {PERMISSION_GROUPS.map(group => (
+                            <div key={group}>
+                                <div className="text-xs font-semibold text-text-500 uppercase tracking-wider mb-1.5 pb-1 border-b border-bg-800">{group}</div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                                    {PERMISSION_LIST.filter(p => p.group === group).map(p => (
+                                        <div key={p.id} className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                id={`perm-${p.id}`}
+                                                checked={permissions.has(p.id)}
+                                                onChange={() => handlePermissionToggle(p.id)}
+                                                className="h-4 w-4 rounded bg-bg-800 border-bg-600 text-primary-600 focus:ring-primary-500"
+                                            />
+                                            <label htmlFor={`perm-${p.id}`} className="ml-2 text-sm text-text-200 cursor-pointer select-none">{p.label}</label>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         ))}
                     </div>

@@ -2,19 +2,20 @@ import { User } from '../types';
 
 // The list of all possible atomic permissions
 export const ATOMIC_PERMISSIONS = {
+    DEVICE_VIEW: 'device:view',
     DEVICE_CREATE: 'device:create',
     DEVICE_UPDATE: 'device:update',
     DEVICE_DELETE: 'device:delete',
     ROLLBACK_EXECUTE: 'rollback:execute',
+    STARTUP_WRITE: 'startup:write',
     USER_MANAGE: 'user:manage',
     TEMPLATE_MANAGE: 'template:manage',
     POLICY_MANAGE: 'policy:manage',
-    SYSTEM_RESET: 'system:reset',
-    SYSTEM_SETTINGS: 'system:settings',
-    STARTUP_WRITE: 'startup:write',
     SCRIPT_MANAGE: 'script:manage',
     SCRIPT_EXECUTE: 'script:execute',
     TASK_MANAGE: 'task:manage',
+    SYSTEM_RESET: 'system:reset',
+    SYSTEM_SETTINGS: 'system:settings',
 } as const;
 
 // A type for the permission strings

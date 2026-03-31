@@ -93,5 +93,37 @@ export interface TaskSlice {
   deleteScheduledTask: (taskId: string) => Promise<void>;
 }
 
+// ── Topology ──────────────────────────────────────────────
+
+export interface TopologyNode {
+  id: string;
+  type: string;
+  data: { label: string; managed: boolean };
+  position: { x: number; y: number };
+}
+
+export interface TopologyEdge {
+  id: string;
+  source: string;
+  target: string;
+  data: {
+    sourcePort: string | null;
+    targetPort: string | null;
+    targetIp: string | null;
+    targetPlatform: string | null;
+    protocol: string;
+  };
+}
+
+export interface TopologySlice {
+  topologyNodes: TopologyNode[];
+  topologyEdges: TopologyEdge[];
+  topologyLastDiscoveredAt: string | null;
+  isTopologyLoading: boolean;
+  fetchTopology: () => Promise<void>;
+  discoverTopology: (deviceIds?: string[], simulation?: boolean) => Promise<void>;
+  clearTopology: () => Promise<void>;
+}
+
 // FullStore is the union of all slices — used as the generic for StateCreator in slice files.
-export type FullStore = AuthSlice & DataSlice & DeviceSlice & UiSlice & SessionSlice & ScriptSlice & TaskSlice;
+export type FullStore = AuthSlice & DataSlice & DeviceSlice & UiSlice & SessionSlice & ScriptSlice & TaskSlice & TopologySlice;

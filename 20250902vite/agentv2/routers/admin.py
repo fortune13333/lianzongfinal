@@ -164,10 +164,10 @@ def update_ai_settings(
     if payload.auto_audit_ai_analysis_mode:
         crud.update_setting(db, "auto_audit_ai_analysis_mode", payload.auto_audit_ai_analysis_mode)
         mode_text = (
-            ""尽力而为"" if payload.auto_audit_ai_analysis_mode == 'best_effort'
-            else ""完全禁用""
+            '"尽力而为"' if payload.auto_audit_ai_analysis_mode == 'best_effort'
+            else '"完全禁用"'
         )
-        crud.log_action(db, actor, f"将"断连自动审计"的AI分析模式设置为 {mode_text}。")
+        crud.log_action(db, actor, f'将"断连自动审计"的AI分析模式设置为 {mode_text}。')
 
     return crud.get_settings_as_dict(db)
 

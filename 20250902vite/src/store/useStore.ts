@@ -11,6 +11,7 @@ import { createUiSlice, DEFAULT_SETTINGS } from './slices/uiSlice';
 import { createSessionSlice } from './slices/sessionSlice';
 import { createScriptSlice } from './slices/scriptSlice';
 import { createTaskSlice } from './slices/taskSlice';
+import { createTopologySlice } from './slices/topologySlice';
 
 export const useStore = create<FullStore>()(
   persist(
@@ -22,6 +23,7 @@ export const useStore = create<FullStore>()(
       ...createSessionSlice(set, get, api),
       ...createScriptSlice(set, get, api),
       ...createTaskSlice(set, get, api),
+      ...createTopologySlice(set, get, api),
     }),
     {
       name: 'chaintrace-settings-storage',

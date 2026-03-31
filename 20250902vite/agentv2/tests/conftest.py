@@ -73,7 +73,7 @@ def admin_token(client, init_test_db):
 def operator_token(client, init_test_db):
     """用 operator1/password 登录，返回 JWT token 字符串。"""
     # 清空登录速率限制记录，防止前面的登录测试耗尽配额导致 429
-    from api_routes import _login_attempts
+    from auth_deps import _login_attempts
     _login_attempts.clear()
     r = client.post("/api/login", json={"username": "operator1", "password": "password"})
     assert r.status_code == 200, f"operator1 登录失败: {r.text}"

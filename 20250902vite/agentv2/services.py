@@ -484,3 +484,103 @@ def perform_write_startup(db: Session, device_id: str, token_value: str, actor: 
     except Exception as e:
         logging.error(f"Unexpected error during write startup for {device_id}: {e}")
         raise HTTPException(status_code=500, detail=f"写入启动配置时发生意外错误: {e}")
+
+
+# ─────────────────────────────────────────────────────────
+# Topology Discovery
+# ─────────────────────────────────────────────────────────
+
+def _parse_cdp_neighbors(raw: str, source_device_id: str) -> List[Dict[str, Any]]:
+    """Parse `show cdp neighbors detail` output into a list of link dicts."""
+    links: List[Dict[str, Any]] = []
+    current: Dict[str, Any] = {}
+    for line in raw.splitlines():
+        line = line.strip()
+        if line.startswith("Device ID:"):
+            if current.get("target_device_id"):
+                links.append(current)
+            device_id = line.split(":", 1)[1].strip()
+            # Strip domain suffix if present (e.g. "SW1.corp.local" → "SW1")
+            if "." in device_id and not device_id.replace(".", "").isdigit():
+                device_id = device_id.split(".")[0]
+            current = {
+                "source_device_id": source_device_id,
+                "source_port": None,
+                "target_device_id": device_id.upper(),
+                "target_port": None,
+                "target_ip": None,
+                "target_platform": None,
+                "protocol": "cdp",
+            }
+        elif "IP address:" in line and current:
+            m = re.search(r"IP address:\s*([\d.]+)", line)
+            if m:
+                current["target_ip"] = m.group(1)
+        elif line.startswith("Platform:") and current:
+            current["target_platform"] = line.split(":", 1)[1].split(",")[0].strip()
+        elif line.startswith("Interface:") and current:
+            m = re.search(r"Interface:\s*(\S+),\s*Port ID[^:]*:\s*(\S+)", line)
+            if m:
+                current["source_port"] = m.group(1).rstrip(",")
+                current["target_port"] = m.group(2)
+    if current.get("target_device_id"):
+        links.append(current)
+    return links
+
+
+def _parse_lldp_neighbors(raw: str, source_device_id: str) -> List[Dict[str, Any]]:
+    """Parse `show lldp neighbors detail` output into a list of link dicts."""
+    links: List[Dict[str, Any]] = []
+    current: Dict[str, Any] = {}
+    for line in raw.splitlines():
+        line = line.strip()
+        if line.startswith("System Name:"):
+            if current.get("target_device_id"):
+                links.append(current)
+            device_id = line.split(":", 1)[1].strip()
+            if "." in device_id and not device_id.replace(".", "").isdigit():
+                device_id = device_id.split(".")[0]
+            current = {
+                "source_device_id": source_device_id,
+                "source_port": None,
+                "target_device_id": device_id.upper(),
+                "target_port": None,
+                "target_ip": None,
+                "target_platform": None,
+                "protocol": "lldp",
+            }
+        elif "Management Addresses" in line:
+            pass  # next IP address line is mgmt IP
+        elif re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", line) and current and not current.get("target_ip"):
+            current["target_ip"] = line
+        elif line.startswith("System Description:") and current:
+            current["target_platform"] = line.split(":", 1)[1].strip()[:64]
+        elif line.startswith("Local Intf:") and current:
+            current["source_port"] = line.split(":", 1)[1].strip()
+        elif line.startswith("Port ID:") and current:
+            current["target_port"] = line.split(":", 1)[1].strip()
+    if current.get("target_device_id"):
+        links.append(current)
+    return links
+
+
+def perform_discover_topology(device_id: str) -> List[Dict[str, Any]]:
+    """SSH into device_id, run CDP/LLDP neighbor discovery, return parsed link list."""
+    device_info = get_device_info(device_id)
+    if not device_info:
+        raise HTTPException(status_code=404, detail=f"设备 '{device_id}' 不存在")
+    try:
+        with ConnectHandler(**device_info) as conn:
+            cdp_raw = conn.send_command("show cdp neighbors detail", read_timeout=15)
+            links = _parse_cdp_neighbors(cdp_raw, device_id)
+            if not links:
+                lldp_raw = conn.send_command("show lldp neighbors detail", read_timeout=15)
+                links = _parse_lldp_neighbors(lldp_raw, device_id)
+            logging.info(f"Topology discovery for '{device_id}': found {len(links)} neighbors")
+            return links
+    except NetmikoAuthenticationException as e:
+        logging.error(f"Topology auth failed for {device_id}: {e}")
+        raise HTTPException(status_code=401, detail=f"设备 '{device_id}' 认证失败")
+    except NetmikoBaseException as e:
+        logging.error(f"Topology SSH failed for {device_id}: {e}")
+        raise HTTPException(status_code=504, detail=f"设备 '{device_id}' 连接失败: {e}")

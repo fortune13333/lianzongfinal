@@ -131,3 +131,19 @@ class ScheduledTask(Base):
             return _json.loads(str(self.device_ids))
         except (ValueError, TypeError):
             return []
+
+
+class TopologyLink(Base):
+    """One directed CDP/LLDP neighbor relationship discovered from a managed device."""
+    __tablename__ = "topology_links"
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    # The managed device that reported this neighbor
+    source_device_id = Column(String, nullable=False, index=True)
+    source_port = Column(String, nullable=True)   # e.g. "GigabitEthernet0/0"
+    # The discovered neighbor (may or may not be a managed device)
+    target_device_id = Column(String, nullable=False)  # hostname as reported by CDP/LLDP
+    target_port = Column(String, nullable=True)   # e.g. "GigabitEthernet1/0/1"
+    target_ip = Column(String, nullable=True)
+    target_platform = Column(String, nullable=True)
+    protocol = Column(String, nullable=False, default='cdp')  # 'cdp' | 'lldp'
+    discovered_at = Column(DateTime(timezone=True), server_default=func.now())

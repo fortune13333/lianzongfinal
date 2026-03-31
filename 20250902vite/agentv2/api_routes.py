@@ -3,7 +3,7 @@
 
 from fastapi import APIRouter
 
-from routers import auth, devices, blockchain, templates, scripts, tasks, admin
+from routers import auth, devices, blockchain, templates, scripts, tasks, admin, topology
 
 router = APIRouter()
 
@@ -14,3 +14,4 @@ router.include_router(templates.router)
 router.include_router(scripts.router)
 router.include_router(tasks.router)
 router.include_router(admin.router)
+router.include_router(topology.router)

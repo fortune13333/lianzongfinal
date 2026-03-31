@@ -459,3 +459,26 @@ def update_task_run_status(db: Session, task_id: str, status: str):
         db_task.last_run = datetime.datetime.now(datetime.timezone.utc)  # type: ignore
         db_task.last_status = status  # type: ignore
         db.commit()
+
+
+# ─────────────────────────────────────────────────────────
+# Topology
+# ─────────────────────────────────────────────────────────
+
+def get_topology_links(db: Session) -> list:
+    return db.query(models.TopologyLink).order_by(models.TopologyLink.discovered_at.desc()).all()
+
+def upsert_topology_links(db: Session, new_links: list, source_device_ids: list) -> list:
+    """Replace all existing links for the given source devices, then insert the new ones."""
+    if source_device_ids:
+        db.query(models.TopologyLink).filter(
+            models.TopologyLink.source_device_id.in_(source_device_ids)
+        ).delete(synchronize_session=False)
+    for link_data in new_links:
+        db.add(models.TopologyLink(**link_data))
+    db.commit()
+    return get_topology_links(db)
+
+def clear_topology(db: Session) -> None:
+    db.query(models.TopologyLink).delete(synchronize_session=False)
+    db.commit()
