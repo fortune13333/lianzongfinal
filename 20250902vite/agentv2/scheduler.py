@@ -15,9 +15,9 @@ def get_scheduler() -> BackgroundScheduler:
     return _scheduler
 
 
-def _run_backup_job(task_id: str, device_ids_json: str, task_name: str) -> None:
-    """Execute a scheduled backup: pull running config from each device and add a block."""
-    logging.info(f"[Scheduler] Starting backup job '{task_name}' (ID: {task_id})")
+def _run_scheduled_job(task_id: str, device_ids_json: str, task_name: str, task_type: str) -> None:
+    """Execute a scheduled job (backup or config_pull) for each target device."""
+    logging.info(f"[Scheduler] Starting '{task_type}' job '{task_name}' (ID: {task_id})")
     try:
         device_ids = json.loads(device_ids_json)
         # Import here to avoid circular imports at module load time
@@ -26,6 +26,9 @@ def _run_backup_job(task_id: str, device_ids_json: str, task_name: str) -> None:
         import models
         from services import get_running_config, perform_add_block, is_simulation_mode
         from core import SubmissionPayload
+
+        # config_pull uses changeType='config_pull' to distinguish from manual backups
+        change_type = "config_pull" if task_type == "config_pull" else "update"
 
         success = 0
         errors = 0
@@ -45,19 +48,20 @@ def _run_backup_job(task_id: str, device_ids_json: str, task_name: str) -> None:
                     audit_payload = SubmissionPayload(
                         operator=f"scheduler:{task_name}",
                         config=config_dict["config"],
+                        changeType=change_type,
                     )
                     perform_add_block(db, device_id, audit_payload)
                     success += 1
-                    logging.info(f"[Scheduler] Backup OK for device {device_id}")
+                    logging.info(f"[Scheduler] {task_type} OK for device {device_id}")
                 except Exception as e:
-                    logging.error(f"[Scheduler] Backup FAILED for device {device_id}: {e}")
+                    logging.error(f"[Scheduler] {task_type} FAILED for device {device_id}: {e}")
                     errors += 1
 
             status = "success" if errors == 0 else "error"
             crud.update_task_run_status(db, task_id, status)
             crud.log_action(
                 db, "system:scheduler",
-                f"定时任务 '{task_name}' 执行完成: {success} 成功, {errors} 失败。"
+                f"定时任务 '{task_name}'({task_type}) 执行完成: {success} 成功, {errors} 失败。"
             )
     except Exception as e:
         logging.error(f"[Scheduler] Job '{task_name}' (ID: {task_id}) crashed: {e}")
@@ -81,17 +85,22 @@ def add_task_job(task) -> None:
     if not task.is_enabled:
         return
 
+    task_type = str(task.task_type)
+    if task_type not in ("backup", "config_pull"):
+        logging.warning(f"[Scheduler] Unknown task_type '{task_type}' for task '{task.id}'. Skipping.")
+        return
+
     try:
         trigger = CronTrigger.from_crontab(str(task.cron_expr), timezone="UTC")
         _scheduler.add_job(
-            _run_backup_job,
+            _run_scheduled_job,
             trigger=trigger,
             id=job_id,
-            args=[str(task.id), str(task.device_ids), str(task.name)],
+            args=[str(task.id), str(task.device_ids), str(task.name), task_type],
             replace_existing=True,
             misfire_grace_time=300,  # allow 5 min grace window
         )
-        logging.info(f"[Scheduler] Registered job '{task.name}' cron='{task.cron_expr}'")
+        logging.info(f"[Scheduler] Registered '{task_type}' job '{task.name}' cron='{task.cron_expr}'")
     except Exception as e:
         logging.error(f"[Scheduler] Failed to register job for task '{task.id}': {e}")
 

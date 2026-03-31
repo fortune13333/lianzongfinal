@@ -248,9 +248,13 @@ def perform_auto_audit(device_id: str, operator: str):
     Synchronous service to perform an auto-audit. Manages its own DB session.
     This function is designed to be run in a separate thread (e.g., via run_in_executor).
     """
+    if is_simulation_mode():
+        logging.info(f"[AutoAudit] Simulation mode active — skipping SSH auto-audit for device {device_id}.")
+        return
+
     db = SessionLocal()
     try:
-        crud.log_action(db, operator, f"用户 '{operator}' 在设备 '{device_id}' 上的一个已修改会话，在未点击‘保存并审计’的情况下断开连接。系统已触发自动快照。")
+        crud.log_action(db, operator, f"用户 ‘{operator}’ 在设备 ‘{device_id}’ 上的一个已修改会话，在未点击’保存并审计’的情况下断开连接。系统已触发自动快照。")
 
         latest_config_dict = get_running_config(device_id)
         latest_config = latest_config_dict["config"]

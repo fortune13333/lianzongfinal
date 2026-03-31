@@ -48,7 +48,10 @@ _RATE_LIMIT_WINDOW: int = 60  # seconds
 def _check_login_rate_limit(ip: str) -> bool:
     now = time.time()
     attempts = [t for t in _login_attempts[ip] if now - t < _RATE_LIMIT_WINDOW]
-    _login_attempts[ip] = attempts
+    if attempts:
+        _login_attempts[ip] = attempts
+    elif ip in _login_attempts:
+        del _login_attempts[ip]
     if len(attempts) >= _RATE_LIMIT_MAX:
         return False
     _login_attempts[ip].append(now)
@@ -671,12 +674,14 @@ def export_device_history(device_id: str, actor: str = Depends(get_current_actor
 def search_configs(
     q: str,
     device_id: Optional[str] = None,
+    limit: int = 100,
     actor: str = Depends(get_current_actor),
     db: Session = Depends(get_db),
 ) -> List[Dict[str, Any]]:
-    """在所有（或指定设备的）历史配置区块中全文搜索关键词。"""
+    """在所有（或指定设备的）历史配置区块中全文搜索关键词。limit 最大 500。"""
     if not q.strip():
         return []
+    limit = min(limit, 500)
     query = db.query(models.Block)
     if device_id:
         query = query.filter(models.Block.device_id == device_id)
@@ -684,6 +689,8 @@ def search_configs(
     results: List[Dict[str, Any]] = []
     q_lower = q.lower()
     for block in blocks:
+        if len(results) >= limit:
+            break
         try:
             data = json.loads(str(block.data))
             config_text: str = data.get("config", "")
@@ -762,7 +769,7 @@ def execute_script(script_id: str, payload: ScriptExecutePayload, actor: str = r
             results.append({"device_id": device_id, "device_name": device.name, "status": "error", "output": f"Jinja2 渲染失败: {e}"})
             continue
 
-        # Command interception check
+        # Command interception check (hard rules from config.ini)
         intercept_error: Optional[str] = None
         for line in rendered.splitlines():
             violated = check_command_against_rules(line)
@@ -771,6 +778,15 @@ def execute_script(script_id: str, payload: ScriptExecutePayload, actor: str = r
                 break
         if intercept_error:
             results.append({"device_id": device_id, "device_name": device.name, "status": "error", "output": intercept_error})
+            continue
+
+        # AI policy compliance check — same gate as bulk_deploy, prevents scripts
+        # from being used to bypass policy enforcement.
+        try:
+            from services import perform_pre_deployment_check
+            perform_pre_deployment_check(db, device_id, rendered)
+        except HTTPException as e:
+            results.append({"device_id": device_id, "device_name": device.name, "status": "error", "output": f"合规检查未通过: {e.detail}"})
             continue
 
         if is_simulation_mode():
@@ -847,13 +863,15 @@ def full_system_backup(actor: str = Depends(get_current_actor), db: Session = De
             for b in sorted(device.blocks, key=lambda b: b.index)
         ]
     backup: Dict[str, Any] = {
-        "backup_version": "1.0",
+        "backup_version": "2.0",
         "created_at": _dtcls.now(_tz.utc).isoformat().replace('+00:00', 'Z'),
         "created_by": actor,
         "devices": data.get("devices", []),
         "blockchains": all_blockchains,
         "templates": data.get("templates", []),
         "policies": data.get("policies", []),
+        "scripts": data.get("scripts", []),
+        "scheduled_tasks": data.get("scheduled_tasks", []),
         "audit_log": data.get("audit_log", []),
     }
     crud.log_action(db, actor, "导出了系统全量备份。")
