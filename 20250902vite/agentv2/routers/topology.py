@@ -61,9 +61,12 @@ def _link_to_edge(link) -> dict:
     }
 
 
-def _build_response(links: list, all_managed_ids: set) -> TopologyResponse:
-    """Convert DB links to React Flow nodes + edges."""
-    node_ids: set = set()
+def _build_response(links: list, all_managed_ids: set, extra_node_ids: set = set()) -> TopologyResponse:
+    """Convert DB links to React Flow nodes + edges.
+    extra_node_ids: device IDs that were successfully reached but had no neighbors,
+    so they appear as isolated nodes even without any links.
+    """
+    node_ids: set = set(extra_node_ids)
     edges = []
     last_dt = None
 
@@ -141,20 +144,22 @@ def discover_topology(
 
     all_new_links: list = []
     errors: list = []
+    reached_ids: set = set()   # devices that responded, even if 0 neighbors
 
     for device_id in target_ids:
         try:
             links = services.perform_discover_topology(device_id)
             all_new_links.extend(links)
+            reached_ids.add(device_id)
         except HTTPException as exc:
             errors.append({"device_id": device_id, "error": exc.detail})
             logging.warning(f"Topology discovery skipped for '{device_id}': {exc.detail}")
 
     crud.upsert_topology_links(db, all_new_links, target_ids)
     links = crud.get_topology_links(db)
-    response = _build_response(links, managed_ids)
+    response = _build_response(links, managed_ids, extra_node_ids=reached_ids)
 
-    if errors and not all_new_links:
+    if len(errors) == len(target_ids):
         raise HTTPException(
             status_code=504,
             detail={"message": "所有设备拓扑发现均失败", "errors": errors},

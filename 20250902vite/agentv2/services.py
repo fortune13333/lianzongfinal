@@ -11,7 +11,7 @@ from typing import Dict, Any, Optional, cast, List, Tuple
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from netmiko import ConnectHandler, NetmikoBaseException # type: ignore
-from netmiko.exceptions import NetmikoAuthenticationException # type: ignore
+from netmiko.exceptions import NetmikoAuthenticationException, NetmikoTimeoutException # type: ignore
 from fastapi import HTTPException
 
 import crud
@@ -136,7 +136,7 @@ def get_running_config(device_id: str) -> Dict[str, str]:
     except NetmikoAuthenticationException as e:
         logging.error(f"Authentication failed for {device_id}: {e}")
         raise HTTPException(status_code=401, detail=f"设备 '{device_id}' 认证失败。请检查 config.ini 中的凭据。")
-    except NetmikoBaseException as e:
+    except (NetmikoBaseException, NetmikoTimeoutException) as e:
         logging.error(f"Netmiko connection error for {device_id}: {e}")
         raise HTTPException(status_code=504, detail=f"连接设备 '{device_id}' 失败: {e}")
     except Exception as e:
@@ -298,7 +298,7 @@ def perform_rollback(db: Session, device_id: str, payload: RollbackPayload) -> B
                 net_connect.enable()
                 output = net_connect.send_config_set(config_commands)
                 logging.info(f"Rollback: Config push output for {device_id}: {output}")
-        except NetmikoBaseException as e:
+        except (NetmikoBaseException, NetmikoTimeoutException) as e:
             logging.error(f"Rollback failed during config push for {device_id}: {e}")
             raise HTTPException(status_code=504, detail=f"回滚失败：推送到设备时出错: {e}")
 
@@ -404,7 +404,7 @@ def perform_push_config(device_id: str, config_commands: List[str]) -> str:
     except NetmikoAuthenticationException as e:
         logging.error(f"Authentication failed pushing config to {device_id}: {e}")
         raise HTTPException(status_code=401, detail=f"设备 '{device_id}' 认证失败，请检查 config.ini 凭据。")
-    except NetmikoBaseException as e:
+    except (NetmikoBaseException, NetmikoTimeoutException) as e:
         logging.error(f"Netmiko error pushing config to {device_id}: {e}")
         raise HTTPException(status_code=504, detail=f"推送配置失败：连接设备时出错: {e}")
     except Exception as e:
@@ -423,7 +423,7 @@ def perform_execute_ssh_config(device_info: Dict[str, Any], commands: List[str])
             net_connect.enable()
             output: str = net_connect.send_config_set(commands)
         return output
-    except NetmikoBaseException as e:
+    except (NetmikoBaseException, NetmikoTimeoutException) as e:
         raise HTTPException(status_code=504, detail=f"SSH 连接失败: {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -478,7 +478,7 @@ def perform_write_startup(db: Session, device_id: str, token_value: str, actor: 
 
         return {"status": "success", "message": f"配置已成功保存到设备 '{device_id}' 的启动配置中。", "output": output}
 
-    except NetmikoBaseException as e:
+    except (NetmikoBaseException, NetmikoTimeoutException) as e:
         logging.error(f"Write startup failed for {device_id}: {e}")
         raise HTTPException(status_code=504, detail=f"写入启动配置失败：连接或执行命令时出错: {e}")
     except Exception as e:
@@ -581,6 +581,9 @@ def perform_discover_topology(device_id: str) -> List[Dict[str, Any]]:
     except NetmikoAuthenticationException as e:
         logging.error(f"Topology auth failed for {device_id}: {e}")
         raise HTTPException(status_code=401, detail=f"设备 '{device_id}' 认证失败")
-    except NetmikoBaseException as e:
+    except NetmikoTimeoutException as e:
+        logging.warning(f"Topology timeout for {device_id}: {e}")
+        raise HTTPException(status_code=504, detail=f"设备 '{device_id}' 连接超时（不在线或不可达）")
+    except (NetmikoBaseException, NetmikoTimeoutException) as e:
         logging.error(f"Topology SSH failed for {device_id}: {e}")
         raise HTTPException(status_code=504, detail=f"设备 '{device_id}' 连接失败: {e}")
