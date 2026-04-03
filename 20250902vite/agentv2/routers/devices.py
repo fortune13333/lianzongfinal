@@ -15,7 +15,7 @@ from database import get_db
 from core import (
     config as app_config,
     ACTIVE_WEB_SESSIONS, sessions_lock,
-    DevicePayload, ConfigPayload, SessionPayload,
+    DevicePayload, ConfigPayload, SessionPayload, WriteStartupPayload,
 )
 from auth_deps import get_current_actor, require_permission
 from services import (
@@ -285,11 +285,10 @@ def leave_device_session(
 @router.post("/api/devices/{device_id}/write-startup", status_code=200)
 def write_startup(
     device_id: str,
-    payload,
+    payload: WriteStartupPayload,
     actor: str = require_permission("startup:write"),
     db: Session = Depends(get_db)
 ) -> Dict[str, Any]:
-    from core import WriteStartupPayload
     from services import perform_write_startup
     if is_simulation_mode():
         return {"status": "success", "message": "写入启动配置模拟成功。"}

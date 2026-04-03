@@ -47,17 +47,17 @@ except (ValueError, Exception) as e:
     logging.error(f"FATAL: 讯飞星火驱动初始化失败: {e}")
 
 
-def _call_spark_api(model_name: str, payload: Dict[str, Any], expect_json: bool = True) -> Any:
+def _call_spark_api(model_name: str, payload: Dict[str, Any], expect_json: bool = True, timeout: float = 120.0) -> Any:
     if not spark_configured:
         raise HTTPException(status_code=503, detail="讯飞星火AI服务未正确配置，请检查后端日志。")
-    
+
     response_text = ""
     try:
         # Per documentation, the `user` field is used for end-user identification
         # and abuse monitoring. Sending the APP_ID here is the correct approach.
         payload['user'] = APP_ID
 
-        with httpx.Client(headers=HEADERS, timeout=120.0) as client:
+        with httpx.Client(headers=HEADERS, timeout=timeout) as client:
             logging.info(f"HTTP Request: POST {SPARK_API_URL}")
             response = client.post(SPARK_API_URL, json=payload)
             response_text = response.text
@@ -268,11 +268,11 @@ Device Information (for context):
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ],
-        "max_tokens": 8192,
+        "max_tokens": 4096,
     }
-    
-    result = _call_spark_api(MODEL, payload)
-    
+
+    result = _call_spark_api(MODEL, payload, timeout=180.0)
+
     report_list = []
     if isinstance(result, dict) and "report" in result:
         report_list = result.get("report", [])
