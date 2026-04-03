@@ -7,7 +7,7 @@ import re
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 from fastapi.websockets import WebSocketState
 from netmiko import ConnectHandler # type: ignore
-from netmiko.exceptions import NetmikoAuthenticationException, NetmikoBaseException # type: ignore
+from netmiko.exceptions import NetmikoAuthenticationException, NetmikoBaseException, NetmikoTimeoutException # type: ignore
 from netmiko.cisco_base_connection import CiscoBaseConnection # type: ignore
 from typing import Optional, TypedDict, List
 
@@ -180,17 +180,20 @@ async def websocket_endpoint(websocket: WebSocket, device_id: str, session_id: s
         if net_connect:
             await unified_io_handler(websocket, net_connect, actor_username, session_id, db)
 
-    except NetmikoBaseException as e:
-        error_type = "认证失败" if isinstance(e, NetmikoAuthenticationException) else "连接超时或错误"
+    except WebSocketDisconnect:
+        logging.info(f"WebSocket disconnected for device {device_id} during SSH connection setup.")
+    except (NetmikoBaseException, NetmikoTimeoutException) as e:
+        error_type = "认证失败" if isinstance(e, NetmikoAuthenticationException) else "连接超时或不可达"
         logging.error(f"WS connection failed for {device_id}: {error_type}: {e}")
         try:
             await websocket.send_text(f"\r\n--- 连接失败 ---\r\n原因: {error_type}: {e}\r\n")
         except Exception:
             pass
     except Exception as e:
-        logging.error(f"An unexpected WebSocket error occurred for device {device_id}: {e}")
+        err_msg = str(e) or type(e).__name__
+        logging.error(f"An unexpected WebSocket error occurred for device {device_id}: {err_msg}")
         try:
-            await websocket.send_text(f"\r\n--- 连接失败 ---\r\n原因: 未知连接错误: {e}\r\n")
+            await websocket.send_text(f"\r\n--- 连接失败 ---\r\n原因: 未知连接错误: {err_msg}\r\n")
         except Exception:
             pass
     finally:

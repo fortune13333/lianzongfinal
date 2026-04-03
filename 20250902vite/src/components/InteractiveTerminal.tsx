@@ -112,8 +112,6 @@ interface InteractiveTerminalProps {
   sessionId: string;
 }
 
-const READ_ONLY_COMMANDS = ['show', 'display', 'dir', 'ping', 'traceroute'];
-
 const InteractiveTerminal: React.FC<InteractiveTerminalProps> = ({ device, sessionId }) => {
     const { currentUser, settings, saveSessionAndAudit } = useStore(state => ({
         currentUser: state.currentUser!,
@@ -376,8 +374,8 @@ const InteractiveTerminal: React.FC<InteractiveTerminalProps> = ({ device, sessi
                     </button>
                 </div>
             </div>
-            <div className="flex-grow p-2 overflow-hidden">
-                <div ref={terminalRef} className="h-full w-full" />
+            <div className="flex-grow relative overflow-hidden min-h-0">
+                <div ref={terminalRef} className="absolute inset-0" />
             </div>
             {showAiAssistant && (
                 <div className="flex-shrink-0">

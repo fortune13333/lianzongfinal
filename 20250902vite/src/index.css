@@ -248,6 +248,391 @@
   @apply bg-bg-600 border-bg-700 text-text-100 placeholder-text-400 focus:border-primary-500 focus:ring-primary-500/30;
 }
 
+/* ============================================================
+   PRESET COMBINED THEMES
+   Each rule sets BOTH background palette AND primary accent.
+   Applied via data-bg-theme; these rules appear last so they
+   always win over standalone accent overrides.
+   ============================================================ */
+
+/* --- DARK PRESETS --- */
+
+[data-bg-theme="proton-purple"] {
+  --color-bg-950: 13 11 26;
+  --color-bg-900: 19 15 36;
+  --color-bg-800: 30 23 53;
+  --color-bg-700: 45 36 82;
+  --color-bg-600: 61 49 101;
+  --color-bg-500: 107 95 160;
+  --color-text-100: 240 235 255;
+  --color-text-200: 216 206 254;
+  --color-text-300: 180 168 240;
+  --color-text-400: 130 118 200;
+  --color-text-500: 107 95 160;
+  --color-primary-200: 196 181 253;
+  --color-primary-300: 167 139 250;
+  --color-primary-400: 139 92 246;
+  --color-primary-500: 124 58 237;
+  --color-primary-600: 109 40 217;
+  --color-primary-700: 91 33 182;
+}
+
+[data-bg-theme="ocean-deep"] {
+  --color-bg-950: 6 13 26;
+  --color-bg-900: 10 20 40;
+  --color-bg-800: 15 30 58;
+  --color-bg-700: 21 42 82;
+  --color-bg-600: 30 58 110;
+  --color-bg-500: 61 106 158;
+  --color-text-100: 232 244 252;
+  --color-text-200: 196 223 240;
+  --color-text-300: 144 190 221;
+  --color-text-400: 90 148 188;
+  --color-text-500: 61 106 158;
+  --color-primary-200: 165 243 252;
+  --color-primary-300: 103 232 249;
+  --color-primary-400: 34 211 238;
+  --color-primary-500: 6 182 212;
+  --color-primary-600: 8 145 178;
+  --color-primary-700: 14 116 144;
+}
+
+[data-bg-theme="volcanic"] {
+  --color-bg-950: 15 9 2;
+  --color-bg-900: 26 16 5;
+  --color-bg-800: 42 28 8;
+  --color-bg-700: 61 40 16;
+  --color-bg-600: 82 53 24;
+  --color-bg-500: 140 96 48;
+  --color-text-100: 255 248 235;
+  --color-text-200: 254 230 190;
+  --color-text-300: 245 200 120;
+  --color-text-400: 200 155 75;
+  --color-text-500: 140 96 48;
+  --color-primary-200: 254 215 170;
+  --color-primary-300: 253 186 116;
+  --color-primary-400: 251 146 60;
+  --color-primary-500: 249 115 22;
+  --color-primary-600: 234 88 12;
+  --color-primary-700: 194 65 12;
+}
+
+[data-bg-theme="starry-indigo"] {
+  --color-bg-950: 8 12 34;
+  --color-bg-900: 13 20 53;
+  --color-bg-800: 20 29 78;
+  --color-bg-700: 30 42 106;
+  --color-bg-600: 40 56 130;
+  --color-bg-500: 80 96 176;
+  --color-text-100: 235 240 255;
+  --color-text-200: 210 218 254;
+  --color-text-300: 165 180 252;
+  --color-text-400: 110 125 220;
+  --color-text-500: 80 96 176;
+  --color-primary-200: 199 210 254;
+  --color-primary-300: 165 180 252;
+  --color-primary-400: 129 140 248;
+  --color-primary-500: 99 102 241;
+  --color-primary-600: 79 70 229;
+  --color-primary-700: 67 56 202;
+}
+
+[data-bg-theme="aurora-green"] {
+  --color-bg-950: 5 20 16;
+  --color-bg-900: 9 30 24;
+  --color-bg-800: 14 44 36;
+  --color-bg-700: 21 62 52;
+  --color-bg-600: 29 82 68;
+  --color-bg-500: 58 138 116;
+  --color-text-100: 236 255 250;
+  --color-text-200: 204 251 241;
+  --color-text-300: 153 246 228;
+  --color-text-400: 94 234 212;
+  --color-text-500: 58 138 116;
+  --color-primary-200: 153 246 228;
+  --color-primary-300: 94 234 212;
+  --color-primary-400: 45 212 191;
+  --color-primary-500: 20 184 166;
+  --color-primary-600: 13 148 136;
+  --color-primary-700: 15 118 110;
+}
+
+[data-bg-theme="oled-black"] {
+  --color-bg-950: 0 0 0;
+  --color-bg-900: 10 10 10;
+  --color-bg-800: 20 20 20;
+  --color-bg-700: 30 30 30;
+  --color-bg-600: 42 42 42;
+  --color-bg-500: 102 102 102;
+  --color-text-100: 255 255 255;
+  --color-text-200: 230 230 230;
+  --color-text-300: 180 180 180;
+  --color-text-400: 120 120 120;
+  --color-text-500: 80 80 80;
+  --color-primary-200: 165 243 252;
+  --color-primary-300: 103 232 249;
+  --color-primary-400: 34 211 238;
+  --color-primary-500: 6 182 212;
+  --color-primary-600: 8 145 178;
+  --color-primary-700: 14 116 144;
+}
+
+[data-bg-theme="cyberpunk"] {
+  --color-bg-950: 15 5 32;
+  --color-bg-900: 22 10 48;
+  --color-bg-800: 32 15 70;
+  --color-bg-700: 45 24 96;
+  --color-bg-600: 61 34 120;
+  --color-bg-500: 112 64 176;
+  --color-text-100: 252 232 248;
+  --color-text-200: 240 200 232;
+  --color-text-300: 216 144 200;
+  --color-text-400: 176 96 160;
+  --color-text-500: 112 64 176;
+  --color-primary-200: 245 167 208;
+  --color-primary-300: 244 114 182;
+  --color-primary-400: 236 72 153;
+  --color-primary-500: 219 39 119;
+  --color-primary-600: 190 24 93;
+  --color-primary-700: 157 23 77;
+}
+
+[data-bg-theme="forest-night"] {
+  --color-bg-950: 10 18 9;
+  --color-bg-900: 15 28 14;
+  --color-bg-800: 21 41 21;
+  --color-bg-700: 30 58 30;
+  --color-bg-600: 40 78 40;
+  --color-bg-500: 74 122 74;
+  --color-text-100: 240 252 240;
+  --color-text-200: 212 240 212;
+  --color-text-300: 168 212 168;
+  --color-text-400: 114 168 114;
+  --color-text-500: 74 122 74;
+  --color-primary-200: 134 239 172;
+  --color-primary-300: 74 222 128;
+  --color-primary-400: 34 197 94;
+  --color-primary-500: 22 163 74;
+  --color-primary-600: 21 128 61;
+  --color-primary-700: 22 101 52;
+}
+
+[data-bg-theme="midnight-gold"] {
+  --color-bg-950: 15 13 8;
+  --color-bg-900: 26 23 15;
+  --color-bg-800: 39 34 26;
+  --color-bg-700: 56 47 34;
+  --color-bg-600: 74 61 46;
+  --color-bg-500: 138 112 80;
+  --color-text-100: 255 248 230;
+  --color-text-200: 245 228 184;
+  --color-text-300: 224 200 122;
+  --color-text-400: 192 160 80;
+  --color-text-500: 138 112 80;
+  --color-primary-200: 252 211 77;
+  --color-primary-300: 251 191 36;
+  --color-primary-400: 245 158 11;
+  --color-primary-500: 217 119 6;
+  --color-primary-600: 180 83 9;
+  --color-primary-700: 146 64 14;
+}
+
+[data-bg-theme="rose-gold"] {
+  --color-bg-950: 26 8 16;
+  --color-bg-900: 38 13 26;
+  --color-bg-800: 54 21 37;
+  --color-bg-700: 78 31 53;
+  --color-bg-600: 102 42 69;
+  --color-bg-500: 160 90 120;
+  --color-text-100: 255 240 248;
+  --color-text-200: 254 218 235;
+  --color-text-300: 248 180 210;
+  --color-text-400: 220 130 170;
+  --color-text-500: 160 90 120;
+  --color-primary-200: 254 205 211;
+  --color-primary-300: 253 164 175;
+  --color-primary-400: 251 113 133;
+  --color-primary-500: 244 63 94;
+  --color-primary-600: 225 29 72;
+  --color-primary-700: 190 18 60;
+}
+
+[data-bg-theme="night-violet"] {
+  --color-bg-950: 8 9 30;
+  --color-bg-900: 13 14 46;
+  --color-bg-800: 20 21 69;
+  --color-bg-700: 30 32 96;
+  --color-bg-600: 40 44 120;
+  --color-bg-500: 80 85 168;
+  --color-text-100: 238 238 255;
+  --color-text-200: 214 214 254;
+  --color-text-300: 180 180 252;
+  --color-text-400: 130 132 210;
+  --color-text-500: 80 85 168;
+  --color-primary-200: 221 214 254;
+  --color-primary-300: 196 181 253;
+  --color-primary-400: 167 139 250;
+  --color-primary-500: 139 92 246;
+  --color-primary-600: 124 58 237;
+  --color-primary-700: 109 40 217;
+}
+
+/* --- LIGHT PRESETS --- */
+
+[data-bg-theme="pure-white"] {
+  --color-bg-950: 245 245 245;
+  --color-bg-900: 255 255 255;
+  --color-bg-800: 232 232 232;
+  --color-bg-700: 208 208 208;
+  --color-bg-600: 245 245 245;
+  --color-bg-500: 156 163 175;
+  --color-text-100: 17 24 39;
+  --color-text-200: 31 41 55;
+  --color-text-300: 75 85 99;
+  --color-text-400: 107 114 128;
+  --color-text-500: 156 163 175;
+  --color-primary-200: 196 181 253;
+  --color-primary-300: 167 139 250;
+  --color-primary-400: 139 92 246;
+  --color-primary-500: 124 58 237;
+  --color-primary-600: 109 40 217;
+  --color-primary-700: 91 33 182;
+}
+
+[data-bg-theme="warm-orange"] {
+  --color-bg-950: 255 251 245;
+  --color-bg-900: 255 255 255;
+  --color-bg-800: 254 243 226;
+  --color-bg-700: 253 229 192;
+  --color-bg-600: 255 251 245;
+  --color-bg-500: 192 160 128;
+  --color-text-100: 45 26 0;
+  --color-text-200: 77 50 10;
+  --color-text-300: 120 80 30;
+  --color-text-400: 155 106 48;
+  --color-text-500: 192 160 128;
+  --color-primary-200: 254 215 170;
+  --color-primary-300: 253 186 116;
+  --color-primary-400: 251 146 60;
+  --color-primary-500: 249 115 22;
+  --color-primary-600: 234 88 12;
+  --color-primary-700: 194 65 12;
+}
+
+[data-bg-theme="sakura-pink"] {
+  --color-bg-950: 255 240 248;
+  --color-bg-900: 255 255 255;
+  --color-bg-800: 252 228 242;
+  --color-bg-700: 248 204 228;
+  --color-bg-600: 255 240 248;
+  --color-bg-500: 232 154 196;
+  --color-text-100: 45 10 28;
+  --color-text-200: 80 20 50;
+  --color-text-300: 120 45 80;
+  --color-text-400: 165 80 115;
+  --color-text-500: 232 154 196;
+  --color-primary-200: 251 207 232;
+  --color-primary-300: 244 114 182;
+  --color-primary-400: 236 72 153;
+  --color-primary-500: 219 39 119;
+  --color-primary-600: 190 24 93;
+  --color-primary-700: 157 23 77;
+}
+
+[data-bg-theme="mint-fresh"] {
+  --color-bg-950: 240 253 245;
+  --color-bg-900: 255 255 255;
+  --color-bg-800: 220 252 231;
+  --color-bg-700: 187 247 208;
+  --color-bg-600: 240 253 245;
+  --color-bg-500: 134 239 172;
+  --color-text-100: 5 46 22;
+  --color-text-200: 20 83 45;
+  --color-text-300: 55 120 80;
+  --color-text-400: 90 155 115;
+  --color-text-500: 134 172 148;
+  --color-primary-200: 110 231 183;
+  --color-primary-300: 52 211 153;
+  --color-primary-400: 16 185 129;
+  --color-primary-500: 5 150 105;
+  --color-primary-600: 4 120 87;
+  --color-primary-700: 6 95 70;
+}
+
+[data-bg-theme="sky-blue"] {
+  --color-bg-950: 240 249 255;
+  --color-bg-900: 255 255 255;
+  --color-bg-800: 224 242 254;
+  --color-bg-700: 186 230 253;
+  --color-bg-600: 240 249 255;
+  --color-bg-500: 125 211 252;
+  --color-text-100: 8 47 73;
+  --color-text-200: 12 74 110;
+  --color-text-300: 30 104 148;
+  --color-text-400: 56 149 200;
+  --color-text-500: 125 211 252;
+  --color-primary-200: 186 230 253;
+  --color-primary-300: 125 211 252;
+  --color-primary-400: 56 189 248;
+  --color-primary-500: 14 165 233;
+  --color-primary-600: 2 132 199;
+  --color-primary-700: 3 105 161;
+}
+
+[data-bg-theme="lavender-mist"] {
+  --color-bg-950: 245 243 255;
+  --color-bg-900: 255 255 255;
+  --color-bg-800: 237 233 254;
+  --color-bg-700: 221 214 254;
+  --color-bg-600: 245 243 255;
+  --color-bg-500: 196 181 253;
+  --color-text-100: 30 27 75;
+  --color-text-200: 46 42 100;
+  --color-text-300: 76 70 140;
+  --color-text-400: 107 102 175;
+  --color-text-500: 196 181 253;
+  --color-primary-200: 221 214 254;
+  --color-primary-300: 196 181 253;
+  --color-primary-400: 167 139 250;
+  --color-primary-500: 139 92 246;
+  --color-primary-600: 124 58 237;
+  --color-primary-700: 109 40 217;
+}
+
+/* Fix borders/glass for new light presets */
+[data-bg-theme="pure-white"] .border-white\/10,
+[data-bg-theme="warm-orange"] .border-white\/10,
+[data-bg-theme="sakura-pink"] .border-white\/10,
+[data-bg-theme="mint-fresh"] .border-white\/10,
+[data-bg-theme="sky-blue"] .border-white\/10,
+[data-bg-theme="lavender-mist"] .border-white\/10,
+[data-bg-theme="pure-white"] .border-white\/20,
+[data-bg-theme="warm-orange"] .border-white\/20,
+[data-bg-theme="sakura-pink"] .border-white\/20,
+[data-bg-theme="mint-fresh"] .border-white\/20,
+[data-bg-theme="sky-blue"] .border-white\/20,
+[data-bg-theme="lavender-mist"] .border-white\/20 {
+  border-color: rgb(var(--color-bg-700) / 0.5);
+}
+
+[data-bg-theme="pure-white"] .bg-grid-pattern,
+[data-bg-theme="warm-orange"] .bg-grid-pattern,
+[data-bg-theme="sakura-pink"] .bg-grid-pattern,
+[data-bg-theme="mint-fresh"] .bg-grid-pattern,
+[data-bg-theme="sky-blue"] .bg-grid-pattern,
+[data-bg-theme="lavender-mist"] .bg-grid-pattern {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+}
+
+[data-bg-theme="pure-white"] .glass-panel,
+[data-bg-theme="warm-orange"] .glass-panel,
+[data-bg-theme="sakura-pink"] .glass-panel,
+[data-bg-theme="mint-fresh"] .glass-panel,
+[data-bg-theme="sky-blue"] .glass-panel,
+[data-bg-theme="lavender-mist"] .glass-panel {
+  @apply bg-bg-900/100 border-bg-700 shadow-sm;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

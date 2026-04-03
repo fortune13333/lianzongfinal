@@ -14,115 +14,157 @@ interface SettingsModalProps {
 
 type ActiveTab = 'agent' | 'appearance' | 'ai';
 
+// ── Preset themes (combined bg + accent) ──────────────────────────────────
+type PresetTheme = { name: string; label: string; swatches: [string, string, string] };
+
+const DARK_PRESETS: PresetTheme[] = [
+    { name: 'proton-purple', label: 'Proton Purple',  swatches: ['#0d0b1a', '#8b5cf6', '#2dd4bf'] },
+    { name: 'ocean-deep',    label: 'Ocean Deep',     swatches: ['#060d1a', '#22d3ee', '#06b6d4'] },
+    { name: 'volcanic',      label: 'Volcanic',       swatches: ['#0f0902', '#fb923c', '#f59e0b'] },
+    { name: 'starry-indigo', label: 'Starry Indigo',  swatches: ['#080c22', '#818cf8', '#6366f1'] },
+    { name: 'aurora-green',  label: 'Aurora Green',   swatches: ['#051410', '#2dd4bf', '#22c55e'] },
+    { name: 'oled-black',    label: 'OLED Black',     swatches: ['#000000', '#22d3ee', '#22c55e'] },
+    { name: 'cyberpunk',     label: 'Cyberpunk',      swatches: ['#0f0520', '#ec4899', '#22d3ee'] },
+    { name: 'forest-night',  label: 'Forest Night',   swatches: ['#0a1209', '#22c55e', '#4ade80'] },
+    { name: 'midnight-gold', label: 'Midnight Gold',  swatches: ['#0f0d08', '#f59e0b', '#fbbf24'] },
+    { name: 'rose-gold',     label: 'Rose Gold',      swatches: ['#1a0810', '#fb7185', '#fbbf24'] },
+    { name: 'night-violet',  label: 'Night Violet',   swatches: ['#08091e', '#a78bfa', '#818cf8'] },
+];
+
+const LIGHT_PRESETS: PresetTheme[] = [
+    { name: 'pure-white',    label: 'Pure White',     swatches: ['#f5f5f5', '#8b5cf6', '#22c55e'] },
+    { name: 'warm-orange',   label: 'Warm Orange',    swatches: ['#fffbf5', '#fb923c', '#f59e0b'] },
+    { name: 'sakura-pink',   label: 'Sakura Pink',    swatches: ['#fff0f5', '#ec4899', '#f472b6'] },
+    { name: 'mint-fresh',    label: 'Mint Fresh',     swatches: ['#f0fdf5', '#10b981', '#06b6d4'] },
+    { name: 'sky-blue',      label: 'Sky Blue',       swatches: ['#f0f9ff', '#38bdf8', '#0ea5e9'] },
+    { name: 'lavender-mist', label: 'Lavender',       swatches: ['#f5f3ff', '#a78bfa', '#818cf8'] },
+];
+
+// Classic manual themes (bg + accent chosen independently)
 const ACCENT_THEMES = [
-    { name: 'cyan', color: '#06b6d4', label: '默认青色' },
+    { name: 'cyan',    color: '#06b6d4', label: '默认青色' },
     { name: 'emerald', color: '#059669', label: '翡翠绿' },
-    { name: 'amber', color: '#d97706', label: '琥珀黄' },
-    { name: 'violet', color: '#7c3aed', label: '紫罗兰' },
-    { name: 'rose', color: '#f43f5e', label: '玫瑰红' },
+    { name: 'amber',   color: '#d97706', label: '琥珀黄' },
+    { name: 'violet',  color: '#7c3aed', label: '紫罗兰' },
+    { name: 'rose',    color: '#f43f5e', label: '玫瑰红' },
+];
+const CLASSIC_BG_THEMES = [
+    { name: 'zinc',       label: '深空锌',       dark: true },
+    { name: 'slate',      label: '午夜石板',     dark: true },
+    { name: 'stone',      label: '暖调岩石',     dark: true },
+    { name: 'deep-space', label: '🌌 深空/星云', dark: true },
+    { name: 'polaris',    label: 'GitHub Light', dark: false },
+    { name: 'sky',        label: 'Catppuccin',   dark: false },
+    { name: 'mint',       label: 'One Light',    dark: false },
+    { name: 'lavender',   label: 'Solarized',    dark: false },
 ];
 
-const DARK_BG_THEMES = [
-    { name: 'zinc', label: '深空锌' },
-    { name: 'slate', label: '午夜石板' },
-    { name: 'stone', label: '暖调岩石' },
-];
+const ALL_PRESET_NAMES = new Set([...DARK_PRESETS, ...LIGHT_PRESETS].map(t => t.name));
 
-const LIGHT_BG_THEMES = [
-    { name: 'polaris', label: 'GitHub Light' },
-    { name: 'sky', label: 'Catppuccin Latte' },
-    { name: 'mint', label: 'One Light' },
-    { name: 'lavender', label: 'Solarized Light' },
-];
-
-// New Special Theme
-const SPECIAL_BG_THEMES = [
-    { name: 'deep-space', label: '🌌 深空/星云' },
-];
-
+// ── Swatch dot component ───────────────────────────────────────────────────
+const Swatch: React.FC<{ color: string }> = ({ color }) => (
+    <span className="w-4 h-4 rounded-sm flex-shrink-0 border border-black/10" style={{ backgroundColor: color }} />
+);
 
 const AppearanceSettings: React.FC<{
     settings: AppSettings;
     onUpdateSettings: (newSettings: Partial<AppSettings>) => void;
 }> = ({ settings, onUpdateSettings }) => {
+    const isPreset = ALL_PRESET_NAMES.has(settings.bgTheme);
+    const [showClassic, setShowClassic] = React.useState(!isPreset);
+
+    const selectPreset = (name: string) => {
+        onUpdateSettings({ bgTheme: name, theme: '' });
+        setShowClassic(false);
+    };
+
+    const PresetCard: React.FC<{ theme: PresetTheme }> = ({ theme }) => {
+        const active = settings.bgTheme === theme.name;
+        return (
+            <button
+                onClick={() => selectPreset(theme.name)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-all text-left
+                    ${active
+                        ? 'border-primary-500 bg-primary-500/10 ring-1 ring-primary-500'
+                        : 'border-bg-700 bg-bg-800 hover:bg-bg-700 hover:border-bg-600'
+                    }`}
+            >
+                <div className="flex gap-1 flex-shrink-0">
+                    {theme.swatches.map((c, i) => <Swatch key={i} color={c} />)}
+                </div>
+                <span className={`text-xs font-medium truncate ${active ? 'text-primary-300' : 'text-text-300'}`}>
+                    {theme.label}
+                </span>
+                {active && <span className="ml-auto text-primary-400 text-xs flex-shrink-0">✓</span>}
+            </button>
+        );
+    };
+
     return (
-        <div className="space-y-6">
+        <div className="space-y-5">
+            {/* Dark presets */}
             <div className="bg-bg-950/50 p-4 rounded-md">
-                <h4 className="font-semibold text-text-200 mb-2">强调色</h4>
-                <p className="text-sm text-text-400 mb-4">
-                    选择一个您喜欢的主题色，它将应用于应用内的按钮、高亮和重点元素。
-                </p>
-                <div className="flex flex-wrap gap-4">
-                    {ACCENT_THEMES.map(theme => (
-                        <div key={theme.name} className="flex flex-col items-center gap-2">
-                            <button
-                                onClick={() => onUpdateSettings({ theme: theme.name })}
-                                className={`w-12 h-12 rounded-full transition-all duration-200 ${settings.theme === theme.name ? 'ring-2 ring-offset-2 ring-offset-bg-900 ring-text-100' : ''}`}
-                                style={{ backgroundColor: theme.color }}
-                                aria-label={`选择 ${theme.label} 主题`}
-                            />
-                            <span className={`text-xs ${settings.theme === theme.name ? 'text-text-100 font-semibold' : 'text-text-400'}`}>
-                                {theme.label}
-                            </span>
-                        </div>
-                    ))}
+                <h4 className="text-xs font-bold text-text-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    🌙 暗色主题
+                </h4>
+                <div className="grid grid-cols-2 gap-2">
+                    {DARK_PRESETS.map(t => <PresetCard key={t.name} theme={t} />)}
                 </div>
             </div>
-             <div className="bg-bg-950/50 p-4 rounded-md">
-                <h4 className="font-semibold text-text-200 mb-2">背景主题</h4>
-                <p className="text-sm text-text-400 mb-4">
-                    选择一个基础背景色调，以适应您的视觉偏好。
-                </p>
-                 <div className="space-y-6">
-                    <div>
-                        <h5 className="text-xs font-bold text-text-400 uppercase tracking-wider mb-2">深色主题</h5>
-                        <div className="flex flex-wrap gap-3">
-                            {DARK_BG_THEMES.map(theme => (
-                                <button
-                                    key={theme.name}
-                                    onClick={() => onUpdateSettings({ bgTheme: theme.name })}
-                                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors border ${settings.bgTheme === theme.name ? 'bg-primary-600 text-white border-transparent' : 'bg-bg-800 border-bg-700 text-text-300 hover:bg-bg-700'}`}
-                                    aria-label={`选择 ${theme.label} 背景`}
-                                >
-                                    {theme.label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                    <div>
-                        <h5 className="text-xs font-bold text-text-400 uppercase tracking-wider mb-2">浅色主题</h5>
-                        <div className="flex flex-wrap gap-3">
-                            {LIGHT_BG_THEMES.map(theme => (
-                                <button
-                                    key={theme.name}
-                                    onClick={() => onUpdateSettings({ bgTheme: theme.name })}
-                                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors border ${settings.bgTheme === theme.name ? 'bg-primary-600 text-white border-transparent' : 'bg-bg-800 border-bg-700 text-text-300 hover:bg-bg-700'}`}
-                                    aria-label={`选择 ${theme.label} 背景`}
-                                >
-                                    {theme.label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                    <div>
-                        <h5 className="text-xs font-bold text-primary-400 uppercase tracking-wider mb-2">限定主题 (Beta)</h5>
-                        <div className="flex flex-wrap gap-3">
-                            {SPECIAL_BG_THEMES.map(theme => (
-                                <button
-                                    key={theme.name}
-                                    onClick={() => onUpdateSettings({ bgTheme: theme.name })}
-                                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all border relative overflow-hidden ${settings.bgTheme === theme.name ? 'bg-indigo-900 text-white border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]' : 'bg-bg-800 border-bg-700 text-text-300 hover:bg-bg-700'}`}
-                                    aria-label={`选择 ${theme.label} 背景`}
-                                >
-                                    <span className="relative z-10">{theme.label}</span>
-                                    {settings.bgTheme === theme.name && (
-                                        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 animate-pulse"></div>
-                                    )}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+
+            {/* Light presets */}
+            <div className="bg-bg-950/50 p-4 rounded-md">
+                <h4 className="text-xs font-bold text-text-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    ☀️ 亮色主题
+                </h4>
+                <div className="grid grid-cols-2 gap-2">
+                    {LIGHT_PRESETS.map(t => <PresetCard key={t.name} theme={t} />)}
                 </div>
+            </div>
+
+            {/* Classic custom section */}
+            <div className="bg-bg-950/50 rounded-md overflow-hidden">
+                <button
+                    onClick={() => setShowClassic(v => !v)}
+                    className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-bg-800/50 transition-colors"
+                >
+                    <span className="text-xs font-bold text-text-400 uppercase tracking-wider">🎨 自定义配色</span>
+                    <span className="text-text-500 text-sm">{showClassic ? '▲' : '▼'}</span>
+                </button>
+                {showClassic && (
+                    <div className="px-4 pb-4 space-y-4 border-t border-bg-800">
+                        <div className="pt-3">
+                            <p className="text-xs text-text-500 mb-3">自由组合强调色与背景，不受预设限制。</p>
+                            <div className="flex flex-wrap gap-3 mb-4">
+                                {ACCENT_THEMES.map(t => (
+                                    <div key={t.name} className="flex flex-col items-center gap-1">
+                                        <button
+                                            onClick={() => onUpdateSettings({ theme: t.name, bgTheme: ALL_PRESET_NAMES.has(settings.bgTheme) ? 'zinc' : settings.bgTheme })}
+                                            className={`w-10 h-10 rounded-full transition-all ${!isPreset && settings.theme === t.name ? 'ring-2 ring-offset-2 ring-offset-bg-900 ring-text-100' : ''}`}
+                                            style={{ backgroundColor: t.color }}
+                                            aria-label={t.label}
+                                        />
+                                        <span className="text-xs text-text-500">{t.label}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {CLASSIC_BG_THEMES.map(t => (
+                                    <button
+                                        key={t.name}
+                                        onClick={() => onUpdateSettings({ bgTheme: t.name })}
+                                        className={`px-3 py-1.5 text-xs font-medium rounded-md border transition-colors
+                                            ${!isPreset && settings.bgTheme === t.name
+                                                ? 'bg-primary-600 text-white border-transparent'
+                                                : 'bg-bg-800 border-bg-700 text-text-300 hover:bg-bg-700'}`}
+                                    >
+                                        {t.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

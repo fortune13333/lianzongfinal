@@ -14,7 +14,7 @@ import { useStore } from './store/useStore';
 import TerminalContainer from './components/TerminalContainer';
 
 
-type MainView = 'dashboard' | 'topology';
+type MainView = 'dashboard' | 'topology' | 'terminal';
 
 const App: React.FC = () => {
   const [mainView, setMainView] = useState<MainView>('dashboard');
@@ -31,6 +31,10 @@ const App: React.FC = () => {
     init,
     fetchData,
     openDeviceIds,
+    activeDeviceId,
+    setActiveDeviceTab,
+    closeDeviceTab,
+    devices,
     isWriteStartupModalOpen,
   } = useStore(state => ({
     currentUser: state.currentUser,
@@ -44,16 +48,36 @@ const App: React.FC = () => {
     init: state.init,
     fetchData: state.fetchData,
     openDeviceIds: state.openDeviceIds,
+    activeDeviceId: state.activeDeviceId,
+    setActiveDeviceTab: state.setActiveDeviceTab,
+    closeDeviceTab: state.closeDeviceTab,
+    devices: state.devices,
     isWriteStartupModalOpen: state.isWriteStartupModalOpen,
   }));
   
   const agentApiUrl = settings.agentApiUrl;
   const isLoadingRef = React.useRef(isLoading);
   isLoadingRef.current = isLoading;
-  
+
   React.useEffect(() => {
     init();
   }, [init]);
+
+  // When all terminal tabs are closed, return to dashboard view.
+  React.useEffect(() => {
+    if (openDeviceIds.length === 0 && mainView === 'terminal') {
+      setMainView('dashboard');
+    }
+  }, [openDeviceIds.length, mainView]);
+
+  // When a new device tab is opened, switch to terminal view automatically.
+  const prevOpenCountRef = React.useRef(openDeviceIds.length);
+  React.useEffect(() => {
+    if (openDeviceIds.length > prevOpenCountRef.current) {
+      setMainView('terminal');
+    }
+    prevOpenCountRef.current = openDeviceIds.length;
+  }, [openDeviceIds.length]);
 
   React.useEffect(() => {
     document.documentElement.setAttribute('data-theme', settings.theme);
@@ -120,35 +144,68 @@ const App: React.FC = () => {
       
       <Header />
       
-      {/* View tab bar — hidden when a device terminal is open */}
-      {openDeviceIds.length === 0 && (
-        <div className="container mx-auto px-4 md:px-8 pt-2 flex-shrink-0">
-          <div className="flex gap-1 border-b border-bg-800 pb-0">
-            {(['dashboard', 'topology'] as MainView[]).map(v => (
+      {/* Always-visible tab bar: left fixed tabs | right device terminal tabs */}
+      <div className="container mx-auto px-4 md:px-8 pt-2 flex-shrink-0">
+        <div className="flex items-end gap-1 border-b border-bg-800">
+          {/* Left: fixed view tabs */}
+          {(['dashboard', 'topology'] as const).map(v => (
+            <button
+              key={v}
+              onClick={() => setMainView(v)}
+              className={`px-4 py-2 text-sm font-medium rounded-t-md border-b-2 transition-colors whitespace-nowrap
+                ${mainView === v
+                  ? 'border-primary-500 text-primary-300 bg-bg-900/50'
+                  : 'border-transparent text-text-400 hover:text-text-200 hover:bg-bg-900/30'
+                }`}
+            >
+              {v === 'dashboard' ? '受管设备' : '网络拓扑'}
+            </button>
+          ))}
+
+          {/* Divider — only when there are open terminal tabs */}
+          {openDeviceIds.length > 0 && (
+            <div className="w-px h-5 bg-bg-700 mx-1 self-center flex-shrink-0" />
+          )}
+
+          {/* Right: device terminal tabs */}
+          {openDeviceIds.map(id => {
+            const deviceName = devices.find(d => d.id === id)?.name ?? id;
+            const isActive = mainView === 'terminal' && activeDeviceId === id;
+            return (
               <button
-                key={v}
-                onClick={() => setMainView(v)}
-                className={`px-4 py-2 text-sm font-medium rounded-t-md border-b-2 transition-colors
-                  ${mainView === v
-                    ? 'border-primary-500 text-primary-300 bg-bg-900/50'
+                key={id}
+                onClick={() => { setActiveDeviceTab(id); setMainView('terminal'); }}
+                className={`group flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-t-md border-b-2 transition-colors whitespace-nowrap max-w-[160px]
+                  ${isActive
+                    ? 'border-green-500 text-green-300 bg-bg-900/50'
                     : 'border-transparent text-text-400 hover:text-text-200 hover:bg-bg-900/30'
                   }`}
               >
-                {v === 'dashboard' ? '受管设备' : '网络拓扑'}
+                {isActive && <span className="text-green-400 text-xs">●</span>}
+                <span className="truncate">{deviceName}</span>
+                <span
+                  role="button"
+                  aria-label="关闭终端"
+                  onClick={e => { e.stopPropagation(); closeDeviceTab(id); }}
+                  className="ml-0.5 text-text-500 hover:text-red-400 leading-none flex-shrink-0"
+                >
+                  ×
+                </span>
               </button>
-            ))}
-          </div>
+            );
+          })}
         </div>
-      )}
+      </div>
 
-      <main className={`container mx-auto p-4 md:p-8 flex-grow flex flex-col min-h-0 ${openDeviceIds.length > 0 ? 'overflow-hidden' : mainView === 'topology' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
-        {openDeviceIds.length > 0 ? (
-          <TerminalContainer />
-        ) : mainView === 'topology' ? (
-          <TopologyView />
-        ) : (
-          <Dashboard />
+      <main className={`container mx-auto p-4 md:p-8 flex-grow flex flex-col min-h-0 ${mainView === 'terminal' || mainView === 'topology' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+        {/* TerminalContainer stays mounted (CSS hidden) to preserve WebSocket/SSH */}
+        {openDeviceIds.length > 0 && (
+          <div className={`flex-grow flex flex-col min-h-0 ${mainView === 'terminal' ? '' : 'hidden'}`}>
+            <TerminalContainer />
+          </div>
         )}
+        {mainView === 'topology' && <TopologyView />}
+        {mainView === 'dashboard' && <Dashboard />}
       </main>
       
       <SettingsModal />
