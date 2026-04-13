@@ -45,20 +45,20 @@ const BackgroundLayers: React.FC<{ bgTheme: string }> = React.memo(({ bgTheme })
           {/* 零尺寸 wrapper 锚定屏幕中心，动画驱动 wrapper 旋转 → blob 绕屏幕中心公转 */}
           <div className="aurora-orbit-1" style={{ position: 'absolute', left: '50%', top: '50%' }}>
             <div className="aurora-blob rounded-full mix-blend-screen" style={{
-              position: 'absolute', width: '55vw', height: '55vw',
-              left: '-27.5vw', top: '-27.5vw', backgroundColor: blobs[0],
+              position: 'absolute', width: '60vw', height: '60vw',
+              left: '-25vw', top: '-25vw', backgroundColor: blobs[0],
             }} />
           </div>
           <div className="aurora-orbit-2" style={{ position: 'absolute', left: '50%', top: '50%' }}>
             <div className="aurora-blob rounded-full mix-blend-screen" style={{
-              position: 'absolute', width: '50vw', height: '50vw',
+              position: 'absolute', width: '60vw', height: '60vw',
               left: '-25vw', top: '-25vw', backgroundColor: blobs[1],
             }} />
           </div>
           <div className="aurora-orbit-3" style={{ position: 'absolute', left: '50%', top: '50%' }}>
             <div className="aurora-blob rounded-full mix-blend-screen" style={{
-              position: 'absolute', width: '52vw', height: '52vw',
-              left: '-26vw', top: '-26vw', backgroundColor: blobs[2],
+              position: 'absolute', width: '60vw', height: '60vw',
+              left: '-25vw', top: '-25vw', backgroundColor: blobs[2],
             }} />
           </div>
         </>
