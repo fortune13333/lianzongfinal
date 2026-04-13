@@ -207,6 +207,44 @@
   border-color: rgb(var(--color-bg-700) / 0.5);
 }
 
+/* Aurora blob — the actual glowing circle */
+.aurora-blob {
+  filter: blur(90px);
+}
+
+/*
+  公转原理：
+  每个 blob 使用一个零尺寸 wrapper（.aurora-orbit-*）锚定在屏幕中心（left:50% top:50%）。
+  wrapper 的 transform-origin 默认 50% 50%，对零尺寸元素即屏幕中心点。
+  对 wrapper 施加 rotate(θ) translateX(R)：
+    1. translateX(R) 先将锚点沿局部 X 轴移动 R
+    2. rotate(θ) 再绕屏幕中心旋转
+  → blob 的视觉中心以屏幕中心为圆心、R 为半径做圆周运动。
+  linear + 0°→360° 数学上完全闭合，不存在复位跳变。
+*/
+/*
+  相同周期 + 初始角均匀错开 120°：
+  三球始终保持 120° 间隔同步旋转，背景亮度永远均匀分布。
+  不同轨道半径（16/22/28vw）让视觉层次更丰富。
+*/
+@keyframes aurora-screen-orbit-1 {
+  from { transform: rotate(0deg)   translateX(22vw); }
+  to   { transform: rotate(360deg) translateX(22vw); }
+}
+@keyframes aurora-screen-orbit-2 {
+  from { transform: rotate(120deg)  translateX(28vw); }
+  to   { transform: rotate(480deg)  translateX(28vw); }
+}
+@keyframes aurora-screen-orbit-3 {
+  from { transform: rotate(240deg)  translateX(16vw); }
+  to   { transform: rotate(600deg)  translateX(16vw); }
+}
+
+/* 相同周期保证三球始终 120° 均布 */
+.aurora-orbit-1 { will-change: transform; animation: aurora-screen-orbit-1 35s linear infinite; }
+.aurora-orbit-2 { will-change: transform; animation: aurora-screen-orbit-2 35s linear infinite; }
+.aurora-orbit-3 { will-change: transform; animation: aurora-screen-orbit-3 35s linear infinite; }
+
 /* Dot Matrix Background Pattern */
 .bg-grid-pattern {
   background-size: 40px 40px;
@@ -251,9 +289,28 @@
 /* ============================================================
    PRESET COMBINED THEMES
    Each rule sets BOTH background palette AND primary accent.
+   Text colors stay near-neutral so no "color filter" effect.
    Applied via data-bg-theme; these rules appear last so they
    always win over standalone accent overrides.
    ============================================================ */
+
+/* Shared neutral text for all dark presets */
+.dark-preset-text {
+  --color-text-100: 244 244 245;
+  --color-text-200: 228 228 231;
+  --color-text-300: 212 212 216;
+  --color-text-400: 161 161 170;
+  --color-text-500: 113 113 122;
+}
+
+/* Shared neutral text for all light presets */
+.light-preset-text {
+  --color-text-100: 17 24 39;
+  --color-text-200: 55 65 81;
+  --color-text-300: 107 114 128;
+  --color-text-400: 156 163 175;
+  --color-text-500: 203 213 225;
+}
 
 /* --- DARK PRESETS --- */
 
@@ -264,11 +321,11 @@
   --color-bg-700: 45 36 82;
   --color-bg-600: 61 49 101;
   --color-bg-500: 107 95 160;
-  --color-text-100: 240 235 255;
-  --color-text-200: 216 206 254;
-  --color-text-300: 180 168 240;
-  --color-text-400: 130 118 200;
-  --color-text-500: 107 95 160;
+  --color-text-100: 244 244 245;
+  --color-text-200: 228 228 231;
+  --color-text-300: 212 212 216;
+  --color-text-400: 161 161 170;
+  --color-text-500: 113 113 122;
   --color-primary-200: 196 181 253;
   --color-primary-300: 167 139 250;
   --color-primary-400: 139 92 246;
@@ -284,11 +341,11 @@
   --color-bg-700: 21 42 82;
   --color-bg-600: 30 58 110;
   --color-bg-500: 61 106 158;
-  --color-text-100: 232 244 252;
-  --color-text-200: 196 223 240;
-  --color-text-300: 144 190 221;
-  --color-text-400: 90 148 188;
-  --color-text-500: 61 106 158;
+  --color-text-100: 244 244 245;
+  --color-text-200: 228 228 231;
+  --color-text-300: 212 212 216;
+  --color-text-400: 161 161 170;
+  --color-text-500: 113 113 122;
   --color-primary-200: 165 243 252;
   --color-primary-300: 103 232 249;
   --color-primary-400: 34 211 238;
@@ -304,11 +361,11 @@
   --color-bg-700: 61 40 16;
   --color-bg-600: 82 53 24;
   --color-bg-500: 140 96 48;
-  --color-text-100: 255 248 235;
-  --color-text-200: 254 230 190;
-  --color-text-300: 245 200 120;
-  --color-text-400: 200 155 75;
-  --color-text-500: 140 96 48;
+  --color-text-100: 244 244 245;
+  --color-text-200: 228 228 231;
+  --color-text-300: 212 212 216;
+  --color-text-400: 161 161 170;
+  --color-text-500: 113 113 122;
   --color-primary-200: 254 215 170;
   --color-primary-300: 253 186 116;
   --color-primary-400: 251 146 60;
@@ -324,11 +381,11 @@
   --color-bg-700: 30 42 106;
   --color-bg-600: 40 56 130;
   --color-bg-500: 80 96 176;
-  --color-text-100: 235 240 255;
-  --color-text-200: 210 218 254;
-  --color-text-300: 165 180 252;
-  --color-text-400: 110 125 220;
-  --color-text-500: 80 96 176;
+  --color-text-100: 244 244 245;
+  --color-text-200: 228 228 231;
+  --color-text-300: 212 212 216;
+  --color-text-400: 161 161 170;
+  --color-text-500: 113 113 122;
   --color-primary-200: 199 210 254;
   --color-primary-300: 165 180 252;
   --color-primary-400: 129 140 248;
@@ -344,11 +401,11 @@
   --color-bg-700: 21 62 52;
   --color-bg-600: 29 82 68;
   --color-bg-500: 58 138 116;
-  --color-text-100: 236 255 250;
-  --color-text-200: 204 251 241;
-  --color-text-300: 153 246 228;
-  --color-text-400: 94 234 212;
-  --color-text-500: 58 138 116;
+  --color-text-100: 244 244 245;
+  --color-text-200: 228 228 231;
+  --color-text-300: 212 212 216;
+  --color-text-400: 161 161 170;
+  --color-text-500: 113 113 122;
   --color-primary-200: 153 246 228;
   --color-primary-300: 94 234 212;
   --color-primary-400: 45 212 191;
@@ -364,11 +421,11 @@
   --color-bg-700: 30 30 30;
   --color-bg-600: 42 42 42;
   --color-bg-500: 102 102 102;
-  --color-text-100: 255 255 255;
-  --color-text-200: 230 230 230;
-  --color-text-300: 180 180 180;
-  --color-text-400: 120 120 120;
-  --color-text-500: 80 80 80;
+  --color-text-100: 244 244 245;
+  --color-text-200: 228 228 231;
+  --color-text-300: 212 212 216;
+  --color-text-400: 161 161 170;
+  --color-text-500: 113 113 122;
   --color-primary-200: 165 243 252;
   --color-primary-300: 103 232 249;
   --color-primary-400: 34 211 238;
@@ -384,11 +441,11 @@
   --color-bg-700: 45 24 96;
   --color-bg-600: 61 34 120;
   --color-bg-500: 112 64 176;
-  --color-text-100: 252 232 248;
-  --color-text-200: 240 200 232;
-  --color-text-300: 216 144 200;
-  --color-text-400: 176 96 160;
-  --color-text-500: 112 64 176;
+  --color-text-100: 244 244 245;
+  --color-text-200: 228 228 231;
+  --color-text-300: 212 212 216;
+  --color-text-400: 161 161 170;
+  --color-text-500: 113 113 122;
   --color-primary-200: 245 167 208;
   --color-primary-300: 244 114 182;
   --color-primary-400: 236 72 153;
@@ -404,11 +461,11 @@
   --color-bg-700: 30 58 30;
   --color-bg-600: 40 78 40;
   --color-bg-500: 74 122 74;
-  --color-text-100: 240 252 240;
-  --color-text-200: 212 240 212;
-  --color-text-300: 168 212 168;
-  --color-text-400: 114 168 114;
-  --color-text-500: 74 122 74;
+  --color-text-100: 244 244 245;
+  --color-text-200: 228 228 231;
+  --color-text-300: 212 212 216;
+  --color-text-400: 161 161 170;
+  --color-text-500: 113 113 122;
   --color-primary-200: 134 239 172;
   --color-primary-300: 74 222 128;
   --color-primary-400: 34 197 94;
@@ -424,11 +481,11 @@
   --color-bg-700: 56 47 34;
   --color-bg-600: 74 61 46;
   --color-bg-500: 138 112 80;
-  --color-text-100: 255 248 230;
-  --color-text-200: 245 228 184;
-  --color-text-300: 224 200 122;
-  --color-text-400: 192 160 80;
-  --color-text-500: 138 112 80;
+  --color-text-100: 244 244 245;
+  --color-text-200: 228 228 231;
+  --color-text-300: 212 212 216;
+  --color-text-400: 161 161 170;
+  --color-text-500: 113 113 122;
   --color-primary-200: 252 211 77;
   --color-primary-300: 251 191 36;
   --color-primary-400: 245 158 11;
@@ -444,11 +501,11 @@
   --color-bg-700: 78 31 53;
   --color-bg-600: 102 42 69;
   --color-bg-500: 160 90 120;
-  --color-text-100: 255 240 248;
-  --color-text-200: 254 218 235;
-  --color-text-300: 248 180 210;
-  --color-text-400: 220 130 170;
-  --color-text-500: 160 90 120;
+  --color-text-100: 244 244 245;
+  --color-text-200: 228 228 231;
+  --color-text-300: 212 212 216;
+  --color-text-400: 161 161 170;
+  --color-text-500: 113 113 122;
   --color-primary-200: 254 205 211;
   --color-primary-300: 253 164 175;
   --color-primary-400: 251 113 133;
@@ -464,11 +521,11 @@
   --color-bg-700: 30 32 96;
   --color-bg-600: 40 44 120;
   --color-bg-500: 80 85 168;
-  --color-text-100: 238 238 255;
-  --color-text-200: 214 214 254;
-  --color-text-300: 180 180 252;
-  --color-text-400: 130 132 210;
-  --color-text-500: 80 85 168;
+  --color-text-100: 244 244 245;
+  --color-text-200: 228 228 231;
+  --color-text-300: 212 212 216;
+  --color-text-400: 161 161 170;
+  --color-text-500: 113 113 122;
   --color-primary-200: 221 214 254;
   --color-primary-300: 196 181 253;
   --color-primary-400: 167 139 250;
@@ -487,10 +544,10 @@
   --color-bg-600: 245 245 245;
   --color-bg-500: 156 163 175;
   --color-text-100: 17 24 39;
-  --color-text-200: 31 41 55;
-  --color-text-300: 75 85 99;
-  --color-text-400: 107 114 128;
-  --color-text-500: 156 163 175;
+  --color-text-200: 55 65 81;
+  --color-text-300: 107 114 128;
+  --color-text-400: 156 163 175;
+  --color-text-500: 203 213 225;
   --color-primary-200: 196 181 253;
   --color-primary-300: 167 139 250;
   --color-primary-400: 139 92 246;
@@ -506,11 +563,11 @@
   --color-bg-700: 253 229 192;
   --color-bg-600: 255 251 245;
   --color-bg-500: 192 160 128;
-  --color-text-100: 45 26 0;
-  --color-text-200: 77 50 10;
-  --color-text-300: 120 80 30;
-  --color-text-400: 155 106 48;
-  --color-text-500: 192 160 128;
+  --color-text-100: 17 24 39;
+  --color-text-200: 55 65 81;
+  --color-text-300: 107 114 128;
+  --color-text-400: 156 163 175;
+  --color-text-500: 203 213 225;
   --color-primary-200: 254 215 170;
   --color-primary-300: 253 186 116;
   --color-primary-400: 251 146 60;
@@ -526,11 +583,11 @@
   --color-bg-700: 248 204 228;
   --color-bg-600: 255 240 248;
   --color-bg-500: 232 154 196;
-  --color-text-100: 45 10 28;
-  --color-text-200: 80 20 50;
-  --color-text-300: 120 45 80;
-  --color-text-400: 165 80 115;
-  --color-text-500: 232 154 196;
+  --color-text-100: 17 24 39;
+  --color-text-200: 55 65 81;
+  --color-text-300: 107 114 128;
+  --color-text-400: 156 163 175;
+  --color-text-500: 203 213 225;
   --color-primary-200: 251 207 232;
   --color-primary-300: 244 114 182;
   --color-primary-400: 236 72 153;
@@ -546,11 +603,11 @@
   --color-bg-700: 187 247 208;
   --color-bg-600: 240 253 245;
   --color-bg-500: 134 239 172;
-  --color-text-100: 5 46 22;
-  --color-text-200: 20 83 45;
-  --color-text-300: 55 120 80;
-  --color-text-400: 90 155 115;
-  --color-text-500: 134 172 148;
+  --color-text-100: 17 24 39;
+  --color-text-200: 55 65 81;
+  --color-text-300: 107 114 128;
+  --color-text-400: 156 163 175;
+  --color-text-500: 203 213 225;
   --color-primary-200: 110 231 183;
   --color-primary-300: 52 211 153;
   --color-primary-400: 16 185 129;
@@ -566,11 +623,11 @@
   --color-bg-700: 186 230 253;
   --color-bg-600: 240 249 255;
   --color-bg-500: 125 211 252;
-  --color-text-100: 8 47 73;
-  --color-text-200: 12 74 110;
-  --color-text-300: 30 104 148;
-  --color-text-400: 56 149 200;
-  --color-text-500: 125 211 252;
+  --color-text-100: 17 24 39;
+  --color-text-200: 55 65 81;
+  --color-text-300: 107 114 128;
+  --color-text-400: 156 163 175;
+  --color-text-500: 203 213 225;
   --color-primary-200: 186 230 253;
   --color-primary-300: 125 211 252;
   --color-primary-400: 56 189 248;
@@ -586,11 +643,11 @@
   --color-bg-700: 221 214 254;
   --color-bg-600: 245 243 255;
   --color-bg-500: 196 181 253;
-  --color-text-100: 30 27 75;
-  --color-text-200: 46 42 100;
-  --color-text-300: 76 70 140;
-  --color-text-400: 107 102 175;
-  --color-text-500: 196 181 253;
+  --color-text-100: 17 24 39;
+  --color-text-200: 55 65 81;
+  --color-text-300: 107 114 128;
+  --color-text-400: 156 163 175;
+  --color-text-500: 203 213 225;
   --color-primary-200: 221 214 254;
   --color-primary-300: 196 181 253;
   --color-primary-400: 167 139 250;

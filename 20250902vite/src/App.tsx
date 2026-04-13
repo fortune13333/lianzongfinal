@@ -16,6 +16,58 @@ import TerminalContainer from './components/TerminalContainer';
 
 type MainView = 'dashboard' | 'topology' | 'terminal';
 
+// --- Defined OUTSIDE App so the component identity is stable across re-renders.
+// --- If defined inside App, every App re-render creates a new function reference,
+// --- causing React to unmount+remount BackgroundLayers and reset CSS animations.
+const THEME_BLOBS: Record<string, [string, string, string]> = {
+  'deep-space':    ['rgba(147,51,234,0.40)',  'rgba(37,99,235,0.34)',  'rgba(6,182,212,0.30)'],
+  'proton-purple': ['rgba(139,92,246,0.48)',  'rgba(79,70,229,0.38)',  'rgba(45,212,191,0.28)'],
+  'ocean-deep':    ['rgba(6,182,212,0.44)',   'rgba(14,64,138,0.50)',  'rgba(20,184,166,0.32)'],
+  'volcanic':      ['rgba(249,115,22,0.50)',  'rgba(220,38,38,0.38)',  'rgba(245,158,11,0.42)'],
+  'starry-indigo': ['rgba(99,102,241,0.50)',  'rgba(79,70,229,0.42)',  'rgba(139,92,246,0.36)'],
+  'aurora-green':  ['rgba(20,184,166,0.48)',  'rgba(34,197,94,0.38)',  'rgba(6,182,212,0.28)'],
+  'oled-black':    ['rgba(34,211,238,0.28)',  'rgba(22,163,74,0.22)',  'rgba(99,102,241,0.22)'],
+  'cyberpunk':     ['rgba(236,72,153,0.50)',  'rgba(34,211,238,0.42)', 'rgba(139,92,246,0.38)'],
+  'forest-night':  ['rgba(34,197,94,0.48)',   'rgba(20,184,166,0.36)', 'rgba(74,222,128,0.30)'],
+  'midnight-gold': ['rgba(245,158,11,0.50)',  'rgba(249,115,22,0.38)', 'rgba(251,191,36,0.36)'],
+  'rose-gold':     ['rgba(251,113,133,0.50)', 'rgba(244,63,94,0.38)',  'rgba(245,158,11,0.30)'],
+  'night-violet':  ['rgba(167,139,250,0.48)', 'rgba(99,102,241,0.38)', 'rgba(34,211,238,0.26)'],
+};
+
+const BackgroundLayers: React.FC<{ bgTheme: string }> = React.memo(({ bgTheme }) => {
+  const blobs = THEME_BLOBS[bgTheme];
+  const hasBlobs = Boolean(blobs);
+  return (
+    <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none select-none">
+      <div className="absolute inset-0 bg-bg-950 transition-colors duration-500"></div>
+      {hasBlobs && blobs && (
+        <>
+          {/* 零尺寸 wrapper 锚定屏幕中心，动画驱动 wrapper 旋转 → blob 绕屏幕中心公转 */}
+          <div className="aurora-orbit-1" style={{ position: 'absolute', left: '50%', top: '50%' }}>
+            <div className="aurora-blob rounded-full mix-blend-screen" style={{
+              position: 'absolute', width: '55vw', height: '55vw',
+              left: '-27.5vw', top: '-27.5vw', backgroundColor: blobs[0],
+            }} />
+          </div>
+          <div className="aurora-orbit-2" style={{ position: 'absolute', left: '50%', top: '50%' }}>
+            <div className="aurora-blob rounded-full mix-blend-screen" style={{
+              position: 'absolute', width: '50vw', height: '50vw',
+              left: '-25vw', top: '-25vw', backgroundColor: blobs[1],
+            }} />
+          </div>
+          <div className="aurora-orbit-3" style={{ position: 'absolute', left: '50%', top: '50%' }}>
+            <div className="aurora-blob rounded-full mix-blend-screen" style={{
+              position: 'absolute', width: '52vw', height: '52vw',
+              left: '-26vw', top: '-26vw', backgroundColor: blobs[2],
+            }} />
+          </div>
+        </>
+      )}
+      <div className={`absolute inset-0 bg-grid-pattern ${hasBlobs ? 'opacity-40' : 'opacity-20'}`}></div>
+    </div>
+  );
+});
+
 const App: React.FC = () => {
   const [mainView, setMainView] = useState<MainView>('dashboard');
 
@@ -98,30 +150,11 @@ const App: React.FC = () => {
     }
   }, [agentApiUrl, currentUser, fetchData]);
   
-  // --- Background Component ---
-  const BackgroundLayers = () => (
-    <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none select-none">
-      {/* 1. Base Background Color (Driven by CSS variable --color-bg-950) */}
-      <div className="absolute inset-0 bg-bg-950 transition-colors duration-500"></div>
-      
-      {/* 2. Aurora / Nebula Gradients (Only visible in Deep Space theme) */}
-      {settings.bgTheme === 'deep-space' && (
-        <>
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full mix-blend-screen filter blur-[100px] animate-blob"></div>
-            <div className="absolute top-[10%] right-[-10%] w-[35%] h-[35%] bg-blue-600/20 rounded-full mix-blend-screen filter blur-[100px] animate-blob animation-delay-2000"></div>
-            <div className="absolute bottom-[-10%] left-[20%] w-[40%] h-[40%] bg-cyan-600/20 rounded-full mix-blend-screen filter blur-[100px] animate-blob animation-delay-4000"></div>
-        </>
-      )}
-      
-      {/* 3. Dot Matrix Pattern Overlay (Visible in all themes, opacity adjusted by CSS usually, but here fixed) */}
-      <div className={`absolute inset-0 bg-grid-pattern ${settings.bgTheme === 'deep-space' ? 'opacity-40' : 'opacity-20'}`}></div>
-    </div>
-  );
 
   if (!currentUser) {
     return (
       <div className="h-screen w-screen flex items-center justify-center relative">
-        <BackgroundLayers />
+        <BackgroundLayers bgTheme={settings.bgTheme} />
         <Toaster position="top-center" toastOptions={{ className: '!bg-bg-900/90 !text-text-100 border border-white/10 backdrop-blur-md' }} />
         <Login />
       </div>
@@ -130,7 +163,7 @@ const App: React.FC = () => {
 
   return (
     <div className="h-screen flex flex-col relative">
-      <BackgroundLayers />
+      <BackgroundLayers bgTheme={settings.bgTheme} />
       
       <Toaster position="top-center" toastOptions={{ className: '!bg-bg-900/90 !text-text-100 border border-white/10 backdrop-blur-md' }} />
       
