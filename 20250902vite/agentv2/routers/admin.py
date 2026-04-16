@@ -222,10 +222,10 @@ def search_configs(
     if not q.strip():
         return []
     limit = min(limit, 500)
-    query = db.query(models.Block)
+    query = db.query(models.Block).filter(models.Block.data.ilike(f'%{q}%'))
     if device_id:
         query = query.filter(models.Block.device_id == device_id)
-    blocks = query.all()
+    blocks = query.limit(limit * 10).all()
     results: List[Dict[str, Any]] = []
     q_lower = q.lower()
     for block in blocks:

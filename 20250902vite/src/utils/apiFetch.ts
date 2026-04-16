@@ -15,7 +15,9 @@ export const apiFetch = async (url: string, options: RequestInit = {}): Promise<
     if (response.status === 401) {
         sessionStorage.removeItem('chaintrace_token');
         sessionStorage.removeItem('chaintrace_user');
-        window.location.href = '/';
+        // Dispatch event instead of hard-redirecting — lets Zustand logout() handle UI transition
+        // gracefully, and prevents background polling from force-navigating during active use.
+        window.dispatchEvent(new CustomEvent('chaintrace:unauthorized'));
     }
     return response;
 };

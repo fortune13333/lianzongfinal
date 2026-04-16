@@ -23,6 +23,10 @@ export const createDataSlice: StateCreator<FullStore, [], [], DataSlice> = (set,
   blockchains: {},
   isLoading: true,
   backendSettings: DEFAULT_BACKEND_SETTINGS,
+  isResetConfirmOpen: false,
+
+  promptResetData: () => set({ isResetConfirmOpen: true }),
+  cancelResetData: () => set({ isResetConfirmOpen: false }),
 
   fetchData: async (isSilent = false) => {
     const { agentApiUrl } = get().settings;
@@ -89,7 +93,7 @@ export const createDataSlice: StateCreator<FullStore, [], [], DataSlice> = (set,
       toast.error("无权操作或未配置代理。");
       return;
     }
-    if (!window.confirm("您确定要重置所有设备和区块链数据吗？")) return;
+    set({ isResetConfirmOpen: false });
     const toastId = toast.loading('正在重置数据...');
     try {
       const url = createApiUrl(settings.agentApiUrl, '/api/reset');

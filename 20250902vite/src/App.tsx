@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
-import TopologyView from './components/TopologyView';
 import SettingsModal from './components/SettingsModal';
 import DeviceEditModal from './components/DeviceEditModal';
 import Login from './components/Login';
@@ -11,7 +10,11 @@ import { Toaster } from 'react-hot-toast';
 import AIStatusBanner from './components/AIStatusBanner';
 import ApiKeyInstructionsModal from './components/ApiKeyInstructionsModal';
 import { useStore } from './store/useStore';
-import TerminalContainer from './components/TerminalContainer';
+import Loader from './components/Loader';
+
+// Heavy components lazy-loaded to reduce initial bundle size
+const TopologyView = React.lazy(() => import('./components/TopologyView'));
+const TerminalContainer = React.lazy(() => import('./components/TerminalContainer'));
 
 
 type MainView = 'dashboard' | 'topology' | 'terminal';
@@ -82,6 +85,13 @@ const App: React.FC = () => {
     executeRollback,
     init,
     fetchData,
+    logout,
+    deleteConfirmDeviceId,
+    cancelDeleteDevice,
+    deleteDevice,
+    isResetConfirmOpen,
+    cancelResetData,
+    resetData,
     openDeviceIds,
     activeDeviceId,
     setActiveDeviceTab,
@@ -99,14 +109,21 @@ const App: React.FC = () => {
     executeRollback: state.executeRollback,
     init: state.init,
     fetchData: state.fetchData,
+    logout: state.logout,
     openDeviceIds: state.openDeviceIds,
     activeDeviceId: state.activeDeviceId,
     setActiveDeviceTab: state.setActiveDeviceTab,
     closeDeviceTab: state.closeDeviceTab,
     devices: state.devices,
     isWriteStartupModalOpen: state.isWriteStartupModalOpen,
+    deleteConfirmDeviceId: state.deleteConfirmDeviceId,
+    cancelDeleteDevice: state.cancelDeleteDevice,
+    deleteDevice: state.deleteDevice,
+    isResetConfirmOpen: state.isResetConfirmOpen,
+    cancelResetData: state.cancelResetData,
+    resetData: state.resetData,
   }));
-  
+
   const agentApiUrl = settings.agentApiUrl;
   const isLoadingRef = React.useRef(isLoading);
   isLoadingRef.current = isLoading;
@@ -114,6 +131,13 @@ const App: React.FC = () => {
   React.useEffect(() => {
     init();
   }, [init]);
+
+  // Listen for 401 events from apiFetch — avoids hard redirect that disrupts active use
+  React.useEffect(() => {
+    const handler = () => logout();
+    window.addEventListener('chaintrace:unauthorized', handler);
+    return () => window.removeEventListener('chaintrace:unauthorized', handler);
+  }, [logout]);
 
   // When all terminal tabs are closed, return to dashboard view.
   React.useEffect(() => {
@@ -234,10 +258,16 @@ const App: React.FC = () => {
         {/* TerminalContainer stays mounted (CSS hidden) to preserve WebSocket/SSH */}
         {openDeviceIds.length > 0 && (
           <div className={`flex-grow flex flex-col min-h-0 ${mainView === 'terminal' ? '' : 'hidden'}`}>
-            <TerminalContainer />
+            <Suspense fallback={<div className="flex-grow flex items-center justify-center"><Loader /></div>}>
+              <TerminalContainer />
+            </Suspense>
           </div>
         )}
-        {mainView === 'topology' && <TopologyView />}
+        {mainView === 'topology' && (
+          <Suspense fallback={<div className="flex-grow flex items-center justify-center"><Loader /></div>}>
+            <TopologyView />
+          </Suspense>
+        )}
         {mainView === 'dashboard' && <Dashboard />}
       </main>
       
@@ -262,6 +292,36 @@ const App: React.FC = () => {
         </ConfirmationModal>
       )}
       
+      {deleteConfirmDeviceId && (
+        <ConfirmationModal
+          isOpen={!!deleteConfirmDeviceId}
+          onClose={cancelDeleteDevice}
+          onConfirm={() => deleteDevice(deleteConfirmDeviceId)}
+          title="确认删除设备"
+          confirmText="确认删除"
+          confirmButtonVariant="danger"
+        >
+          <p className="text-sm text-text-300">
+            您确定要删除此设备及其所有历史配置记录吗？此操作不可恢复。
+          </p>
+        </ConfirmationModal>
+      )}
+
+      {isResetConfirmOpen && (
+        <ConfirmationModal
+          isOpen={isResetConfirmOpen}
+          onClose={cancelResetData}
+          onConfirm={resetData}
+          title="确认重置数据"
+          confirmText="确认重置"
+          confirmButtonVariant="danger"
+        >
+          <p className="text-sm text-text-300">
+            您确定要重置所有设备和区块链数据吗？此操作不可恢复。
+          </p>
+        </ConfirmationModal>
+      )}
+
       {isWriteStartupModalOpen && <WriteStartupModal />}
       <ApiKeyInstructionsModal />
     </div>

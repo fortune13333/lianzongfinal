@@ -12,6 +12,10 @@ export const createDeviceSlice: StateCreator<FullStore, [], [], DeviceSlice> = (
   activeDeviceId: null,
   deviceStatuses: {},
   _pollingIntervalId: null,
+  deleteConfirmDeviceId: null,
+
+  promptDeleteDevice: (deviceId) => set({ deleteConfirmDeviceId: deviceId }),
+  cancelDeleteDevice: () => set({ deleteConfirmDeviceId: null }),
 
   openDeviceTab: (deviceId) => set(state => ({
     openDeviceIds: state.openDeviceIds.includes(deviceId)
@@ -80,7 +84,7 @@ export const createDeviceSlice: StateCreator<FullStore, [], [], DeviceSlice> = (
       toast.error("无权操作或未配置代理。");
       return;
     }
-    if (!window.confirm("您确定要删除此设备及其所有历史记录吗？")) return;
+    set({ deleteConfirmDeviceId: null });
     const toastId = toast.loading('正在删除设备...');
     try {
       const url = createApiUrl(settings.agentApiUrl, `/api/devices/${deviceId}`);

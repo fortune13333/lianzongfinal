@@ -34,6 +34,9 @@ router = APIRouter()
 
 READ_ONLY_COMMANDS = ['show', 'display', 'dir', 'ping', 'traceroute']
 
+# Regex for ANSI escape sequences (like arrow keys) — defined at module level, before use
+ANSI_ESCAPE_RE = re.compile(r'\x1b\[[0-9;]*[a-zA-Z]')
+
 
 async def unified_io_handler(
     websocket: WebSocket, 
@@ -125,15 +128,19 @@ async def unified_io_handler(
         if not ws_reader.done(): ws_reader.cancel()
         if not device_reader.done(): device_reader.cancel()
 
-# Regex for ANSI escape sequences (like arrow keys)
-ANSI_ESCAPE_RE = re.compile(r'\x1b\[[0-9;]*[a-zA-Z]')
-
 @router.websocket("/ws/{device_id}/{session_id}")
 async def websocket_endpoint(websocket: WebSocket, device_id: str, session_id: str, db: Session = Depends(get_db)) -> None:
-    # --- JWT Authentication for WebSocket ---
+    # --- JWT Authentication via first message (token not exposed in URL/logs) ---
     from jose import jwt as jose_jwt, JWTError
     from core import JWT_SECRET_KEY, JWT_ALGORITHM
-    ws_token = websocket.query_params.get("token", "")
+
+    await websocket.accept()
+    try:
+        ws_token = await asyncio.wait_for(websocket.receive_text(), timeout=5.0)
+    except asyncio.TimeoutError:
+        await websocket.close(code=1008, reason="认证超时：未在规定时间内收到令牌。")
+        return
+
     try:
         ws_payload = jose_jwt.decode(ws_token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
         actor_username = ws_payload.get("sub", "")
@@ -142,8 +149,6 @@ async def websocket_endpoint(websocket: WebSocket, device_id: str, session_id: s
     except JWTError:
         await websocket.close(code=1008, reason="认证失败：WebSocket 令牌无效或已过期。")
         return
-
-    await websocket.accept()
 
     # --- Register Session ---
     with sessions_lock:

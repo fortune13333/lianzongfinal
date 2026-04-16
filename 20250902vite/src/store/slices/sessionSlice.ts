@@ -118,11 +118,19 @@ export const createSessionSlice: StateCreator<FullStore, [], [], SessionSlice> =
     } catch (error) {
       const isAbort = error instanceof Error && error.name === 'AbortError';
       const msg = isAbort ? '操作已取消或超时 (超过 90 秒)。' : error instanceof Error ? error.message : '未知错误。';
-      const errorSteps: ProgressStep[] = [
-        { text: '从设备获取最新配置', status: 'done' },
-        { text: 'AI 智能审计分析', status: 'error' },
-        { text: '写入区块链', status: 'pending' },
-      ];
+      // AbortError: operation was cancelled before any step ran → all pending
+      // Other errors: single HTTP request failed, mark first step as error
+      const errorSteps: ProgressStep[] = isAbort
+        ? [
+            { text: '从设备获取最新配置', status: 'pending' },
+            { text: 'AI 智能审计分析', status: 'pending' },
+            { text: '写入区块链', status: 'pending' },
+          ]
+        : [
+            { text: '从设备获取最新配置', status: 'error' },
+            { text: 'AI 智能审计分析', status: 'pending' },
+            { text: '写入区块链', status: 'pending' },
+          ];
       toast.custom(
         (t) => React.createElement(ProgressToast, { t, title: `保存失败: ${msg}`, steps: errorSteps }),
         { id: toastId, duration: 8000 },

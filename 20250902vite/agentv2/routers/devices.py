@@ -234,7 +234,7 @@ def export_device_history(
 # --- Session Collaboration (Who is viewing) ---
 
 @router.get("/api/sessions/{device_id}")
-def get_device_sessions(device_id: str) -> List[Dict[str, str]]:
+def get_device_sessions(device_id: str, actor: str = Depends(get_current_actor)) -> List[Dict[str, str]]:
     """Returns the list of active users currently viewing a device."""
     active_users: List[Dict[str, str]] = []
     now = time.time()

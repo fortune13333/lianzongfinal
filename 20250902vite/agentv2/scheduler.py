@@ -32,6 +32,7 @@ def _run_scheduled_job(task_id: str, device_ids_json: str, task_name: str, task_
 
         success = 0
         errors = 0
+        simulated = 0
         with SessionLocal() as db:
             if device_ids == ["all"]:
                 all_devices = db.query(models.Device).all()
@@ -40,9 +41,9 @@ def _run_scheduled_job(task_id: str, device_ids_json: str, task_name: str, task_
             for device_id in device_ids:
                 try:
                     if is_simulation_mode():
-                        # In simulation mode just log — no real SSH
+                        # In simulation mode just log — no real SSH, don't count as success
                         logging.info(f"[Scheduler] SIMULATION: Skipping SSH for device {device_id}")
-                        success += 1
+                        simulated += 1
                         continue
                     config_dict = get_running_config(device_id)
                     audit_payload = SubmissionPayload(
@@ -57,7 +58,12 @@ def _run_scheduled_job(task_id: str, device_ids_json: str, task_name: str, task_
                     logging.error(f"[Scheduler] {task_type} FAILED for device {device_id}: {e}")
                     errors += 1
 
-            status = "success" if errors == 0 else "error"
+            if errors > 0:
+                status = "error"
+            elif simulated > 0 and success == 0:
+                status = "simulated"
+            else:
+                status = "success"
             crud.update_task_run_status(db, task_id, status)
             crud.log_action(
                 db, "system:scheduler",

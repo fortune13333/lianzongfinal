@@ -61,11 +61,13 @@ def _link_to_edge(link) -> dict:
     }
 
 
-def _build_response(links: list, all_managed_ids: set, extra_node_ids: set = set()) -> TopologyResponse:
+def _build_response(links: list, all_managed_ids: set, extra_node_ids: Optional[set] = None) -> TopologyResponse:
     """Convert DB links to React Flow nodes + edges.
     extra_node_ids: device IDs that were successfully reached but had no neighbors,
     so they appear as isolated nodes even without any links.
     """
+    if extra_node_ids is None:
+        extra_node_ids = set()
     node_ids: set = set(extra_node_ids)
     edges = []
     last_dt = None

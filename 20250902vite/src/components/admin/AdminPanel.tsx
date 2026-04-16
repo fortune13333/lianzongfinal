@@ -18,10 +18,12 @@ import { useStore } from '../../store/useStore';
 import { hasPermission, ATOMIC_PERMISSIONS } from '../../utils/permissions';
 
 
-type DeletionTarget = 
+type DeletionTarget =
     | { type: 'user'; item: User }
     | { type: 'template'; item: ConfigTemplate }
-    | { type: 'policy'; item: Policy };
+    | { type: 'policy'; item: Policy }
+    | { type: 'script'; item: Script }
+    | { type: 'scheduledTask'; item: ScheduledTask };
 
 type AdminTab = 'audit' | 'users' | 'templates' | 'policies' | 'deployments' | 'tokens' | 'scripts' | 'scheduledTasks';
 
@@ -143,6 +145,12 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
             case 'policy':
                 handleDelete(`/api/policies/${item.id}`, '策略已删除。', '删除策略失败');
                 break;
+            case 'script':
+                deleteScript(item.id);
+                break;
+            case 'scheduledTask':
+                deleteScheduledTask(item.id);
+                break;
         }
         setDeletionTarget(null);
     };
@@ -172,8 +180,8 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
         if (!deletionTarget) return { title: '', content: <></> };
         const { type, item } = deletionTarget;
         const name = 'username' in item ? item.username : item.name;
-        const typeName = { user: '用户', template: '模板', policy: '策略' }[type];
-        
+        const typeName: Record<typeof type, string> = { user: '用户', template: '模板', policy: '策略', script: '脚本', scheduledTask: '定时任务' }[type];
+
         return {
             title: `确认删除${typeName}`,
             content: <p>您确定要永久删除{typeName} <strong>"{name}"</strong> 吗？此操作不可撤销。</p>
@@ -331,7 +339,7 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
                                             <td className="px-6 py-4 text-right space-x-2">
                                                 <button onClick={() => setExecuteScript(script)} className="font-medium text-green-400 hover:underline">执行</button>
                                                 <button onClick={() => { setScriptToEdit(script); setIsScriptModalOpen(true); }} className="font-medium text-primary-400 hover:underline">编辑</button>
-                                                <button onClick={() => { if (window.confirm(`确认删除脚本 "${script.name}"？`)) deleteScript(script.id); }} className="font-medium text-red-500 hover:underline">删除</button>
+                                                <button onClick={() => setDeletionTarget({ type: 'script', item: script })} className="font-medium text-red-500 hover:underline">删除</button>
                                             </td>
                                         </tr>
                                     ))}
@@ -385,7 +393,7 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
                                             </td>
                                             <td className="px-6 py-4 text-right space-x-2">
                                                 <button onClick={() => { setTaskToEdit(task); setIsTaskModalOpen(true); }} className="font-medium text-primary-400 hover:underline">编辑</button>
-                                                <button onClick={() => { if (window.confirm(`确认删除定时任务 "${task.name}"？`)) deleteScheduledTask(task.id); }} className="font-medium text-red-500 hover:underline">删除</button>
+                                                <button onClick={() => setDeletionTarget({ type: 'scheduledTask', item: task })} className="font-medium text-red-500 hover:underline">删除</button>
                                             </td>
                                         </tr>
                                     ))}

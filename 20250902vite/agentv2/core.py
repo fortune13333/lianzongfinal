@@ -10,7 +10,7 @@ import hashlib
 import argparse
 import re
 from pathlib import Path
-from typing import Dict, List, Any, Optional, TypedDict, Tuple
+from typing import Dict, List, Any, Optional, TypedDict, Tuple, Literal
 
 from pydantic import BaseModel
 
@@ -169,7 +169,7 @@ class DevicePayload(BaseModel):
     id: str
     name: str
     ipAddress: str
-    type: str
+    type: Literal['Router', 'Switch', 'Firewall']
     policyIds: Optional[List[str]] = []
     tags: Optional[List[str]] = []  # 前端传来的标签数组
 

@@ -24,6 +24,7 @@ def _task_to_dict(task) -> Dict[str, Any]:
         "device_ids": json.loads(str(task.device_ids)),
         "is_enabled": task.is_enabled,
         "created_by": task.created_by,
+        "created_at": task.created_at.isoformat().replace('+00:00', 'Z') if task.created_at else None,
         "last_run": task.last_run.isoformat().replace('+00:00', 'Z') if task.last_run else None,
         "last_status": task.last_status,
     }

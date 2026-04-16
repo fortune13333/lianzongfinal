@@ -218,14 +218,15 @@ const InteractiveTerminal: React.FC<InteractiveTerminalProps> = ({ device, sessi
         termRef.current?.reset();
         termRef.current?.writeln('\x1b[1;33m正在连接到设备...\x1b[0m');
 
-        const wsToken = sessionStorage.getItem('chaintrace_token') || '';
-        const wsPathWithAuth = `/ws/${device.id}/${sessionId}?token=${encodeURIComponent(wsToken)}`;
-        const wsUrl = createApiUrl(settings.agentApiUrl, wsPathWithAuth).replace(/^http/, 'ws');
-        
+        const wsUrl = createApiUrl(settings.agentApiUrl, `/ws/${device.id}/${sessionId}`).replace(/^http/, 'ws');
+
         const ws = new WebSocket(wsUrl);
         wsRef.current = ws;
 
         ws.onopen = () => {
+            // Send token as first message — avoids token exposure in URL/server logs
+            const wsToken = sessionStorage.getItem('chaintrace_token') || '';
+            ws.send(wsToken);
             setStatus('connected');
             reconnectAttemptsRef.current = 0;
             intentionalDisconnectRef.current = false;

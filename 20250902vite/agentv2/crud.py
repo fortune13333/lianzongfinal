@@ -67,15 +67,16 @@ def _format_data_for_frontend(
     db_write_tokens: List[models.WriteToken],
     db_scripts: Optional[List[models.Script]] = None,
     db_scheduled_tasks: Optional[List[models.ScheduledTask]] = None,
+    blocks_by_device: Optional[Dict[str, List[Any]]] = None,
 ) -> Dict[str, Any]:
-    
+
     # --- ROBUSTNESS FIX START ---
     formatted_blocks: Dict[str, List[Dict[str, Any]]] = {}
     for device in db_devices:
         chain = []
-        # Sort blocks by index to ensure chronological order
-        sorted_blocks = sorted(device.blocks, key=lambda b: b.index)
-        for b in sorted_blocks:
+        # Use pre-loaded blocks_by_device if provided, else fall back to device.blocks
+        raw_blocks = blocks_by_device.get(device.id, []) if blocks_by_device is not None else sorted(device.blocks, key=lambda b: b.index)
+        for b in raw_blocks:
             block_data: Dict[str, Any]
             try:
                 # Attempt to parse the JSON data
@@ -138,7 +139,28 @@ def migrate_plaintext_passwords(db: Session):
         logging.warning(f"密码迁移: 已将 {migrated} 个明文密码自动转换为 bcrypt 哈希。")
 
 def get_all_data(db: Session) -> Dict[str, Any]:
-    devices = db.query(models.Device).options(joinedload(models.Device.blocks), joinedload(models.Device.policies)).all()
+    # Load devices without blocks (avoid loading potentially huge block history on every poll)
+    devices = db.query(models.Device).options(joinedload(models.Device.policies)).all()
+    device_ids = [d.id for d in devices]
+
+    # Load latest 50 blocks per device via a single query ordered by index descending
+    all_blocks = (
+        db.query(models.Block)
+        .filter(models.Block.device_id.in_(device_ids))
+        .order_by(models.Block.device_id, desc(models.Block.index))
+        .all()
+    ) if device_ids else []
+
+    # Group by device_id, keep latest 50, then re-sort ascending for frontend
+    blocks_by_device: Dict[str, List[Any]] = {}
+    for block in all_blocks:
+        dev_id = str(block.device_id)
+        bucket = blocks_by_device.setdefault(dev_id, [])
+        if len(bucket) < 50:
+            bucket.append(block)
+    for bucket in blocks_by_device.values():
+        bucket.sort(key=lambda b: b.index)
+
     users = db.query(models.User).all()
     logs = db.query(models.AuditLog).order_by(desc(models.AuditLog.timestamp)).limit(MAX_LOG_ENTRIES).all()
     templates = db.query(models.ConfigTemplate).all()
@@ -148,7 +170,11 @@ def get_all_data(db: Session) -> Dict[str, Any]:
     write_tokens = db.query(models.WriteToken).order_by(desc(models.WriteToken.created_at)).limit(100).all()
     scripts = db.query(models.Script).order_by(models.Script.name).all()
     scheduled_tasks = db.query(models.ScheduledTask).all()
-    return _format_data_for_frontend(devices, users, logs, templates, policies, settings, deploy_history, write_tokens, scripts, scheduled_tasks)
+    return _format_data_for_frontend(
+        devices, users, logs, templates, policies, settings,
+        deploy_history, write_tokens, scripts, scheduled_tasks,
+        blocks_by_device=blocks_by_device,
+    )
 
 def reset_all_data(db: Session):
     for table in reversed(models.Base.metadata.sorted_tables):

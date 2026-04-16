@@ -30,7 +30,10 @@ export interface DataSlice {
   blockchains: Record<string, Block[]>;
   isLoading: boolean;
   backendSettings: BackendSettings;
+  isResetConfirmOpen: boolean;
   fetchData: (isSilent?: boolean) => Promise<void>;
+  promptResetData: () => void;
+  cancelResetData: () => void;
   resetData: () => Promise<void>;
 }
 
@@ -39,11 +42,14 @@ export interface DeviceSlice {
   activeDeviceId: string | null;
   deviceStatuses: Record<string, DeviceStatus>;
   _pollingIntervalId: ReturnType<typeof setInterval> | null;
+  deleteConfirmDeviceId: string | null;
   openDeviceTab: (deviceId: string) => void;
   closeDeviceTab: (deviceId: string) => void;
   setActiveDeviceTab: (deviceId: string) => void;
   addNewDevice: (deviceData: Omit<Device, 'ipAddress'> & { ipAddress: string; policyIds?: string[] }) => Promise<void>;
   updateDevice: (deviceId: string, deviceData: Omit<Device, 'ipAddress'> & { ipAddress: string; policyIds?: string[] }) => Promise<void>;
+  promptDeleteDevice: (deviceId: string) => void;
+  cancelDeleteDevice: () => void;
   deleteDevice: (deviceId: string) => Promise<void>;
   pollDeviceStatuses: () => Promise<void>;
   startStatusPolling: () => void;
