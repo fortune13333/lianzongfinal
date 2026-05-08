@@ -28,3 +28,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# License files and RSA keys — never commit to repository
+*.lic
+private_key.pem
+agentv2/chaintrace.db

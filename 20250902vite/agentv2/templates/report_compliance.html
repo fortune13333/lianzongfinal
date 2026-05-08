@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { size: A4; margin: 20mm 15mm; }
+  * { box-sizing: border-box; }
+  body { font-family: "WenQuanYi Zen Hei", "Microsoft YaHei", "SimHei", sans-serif; font-size: 10pt; color: #1a1a1a; margin: 0; }
+  .cover { text-align: center; padding: 40mm 0 20mm; page-break-after: always; }
+  .cover .logo { font-size: 24pt; font-weight: bold; color: #1d4ed8; letter-spacing: 2px; }
+  .cover .report-type { font-size: 16pt; margin-top: 8mm; color: #374151; }
+  .cover .meta { margin-top: 16mm; font-size: 10pt; color: #6b7280; line-height: 2; }
+  .cover .meta strong { color: #111827; }
+  .section-title { font-size: 13pt; font-weight: bold; color: #1d4ed8; border-bottom: 2px solid #1d4ed8; padding-bottom: 2mm; margin: 8mm 0 4mm; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin-bottom: 6mm; }
+  .info-item { font-size: 9pt; }
+  .info-item .key { color: #6b7280; }
+  .info-item .val { font-weight: bold; color: #111827; }
+  .badge { display: inline-block; padding: 0.5mm 2mm; border-radius: 2mm; font-size: 8pt; font-weight: bold; }
+  .badge-pass { background: #dcfce7; color: #15803d; }
+  .badge-fail { background: #fee2e2; color: #dc2626; }
+  .badge-na { background: #f3f4f6; color: #6b7280; }
+  table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+  thead th { background: #1d4ed8; color: white; padding: 2mm 3mm; text-align: left; }
+  tbody tr:nth-child(even) { background: #f9fafb; }
+  tbody td { padding: 2mm 3mm; border-bottom: 1px solid #e5e7eb; vertical-align: top; word-break: break-all; }
+  .hash { font-family: monospace; font-size: 8pt; color: #4b5563; }
+  .chain-ok { color: #15803d; font-weight: bold; }
+  .chain-fail { color: #dc2626; font-weight: bold; }
+  .footer { position: fixed; bottom: 8mm; left: 0; right: 0; text-align: center; font-size: 8pt; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 2mm; }
+  .seal { display: inline-block; border: 3px solid #dc2626; border-radius: 50%; padding: 6mm 8mm; color: #dc2626; font-size: 11pt; font-weight: bold; margin-top: 20mm; letter-spacing: 2px; transform: rotate(-15deg); }
+</style>
+</head>
+<body>
+
+<div class="footer">链踪网络配置审计系统 · 区块链合规检查报告 · 第 <span class="page"></span> 页</div>
+
+<!-- Cover -->
+<div class="cover">
+  <div class="logo">链 踪</div>
+  <div style="font-size:11pt;color:#6b7280;margin-top:2mm;">ChainTrace 网络配置审计系统</div>
+  <div class="report-type">区块链合规检查报告</div>
+  <div class="meta">
+    <div>设备名称：<strong>{{ device.name }}</strong></div>
+    <div>设备 ID：<strong>{{ device.id }}</strong></div>
+    <div>设备类型：<strong>{{ device.type }}</strong></div>
+    <div>IP 地址：<strong>{{ device.ipAddress }}</strong></div>
+    <div>配置版本数：<strong>{{ blocks|length }}</strong></div>
+    <div>生成时间：<strong>{{ generated_at }}</strong></div>
+    <div>生成人员：<strong>{{ generated_by }}</strong></div>
+  </div>
+  <div class="seal">合规专用</div>
+</div>
+
+<!-- Chain Integrity -->
+{% set chain_ok = namespace(value=true) %}
+{% for i in range(1, blocks|length) %}
+  {% if blocks[i].prev_hash != blocks[i-1].hash %}
+    {% set chain_ok.value = false %}
+  {% endif %}
+{% endfor %}
+
+<div class="section-title">一、区块链完整性验证</div>
+<div style="padding:4mm;border:1px solid {% if chain_ok.value %}#bbf7d0{% else %}#fecaca{% endif %};border-radius:3mm;background:{% if chain_ok.value %}#f0fdf4{% else %}#fff1f2{% endif %};">
+  <span style="font-size:13pt;">{% if chain_ok.value %}✓{% else %}✗{% endif %}</span>
+  <strong style="color:{% if chain_ok.value %}#15803d{% else %}#dc2626{% endif %};">
+    {% if chain_ok.value %}哈希链验证通过：所有区块的 prev_hash 连续一致，配置历史未被篡改。{% else %}哈希链验证失败：检测到区块间哈希不连续，配置历史可能遭到篡改，请立即调查。{% endif %}
+  </strong>
+</div>
+
+<!-- Summary -->
+<div class="section-title">二、配置变更摘要</div>
+<div class="info-grid">
+  <div class="info-item"><span class="key">总版本数：</span><span class="val">{{ blocks|length }}</span></div>
+  <div class="info-item"><span class="key">合规状态：</span><span class="val">{% if chain_ok.value %}正常{% else %}异常{% endif %}</span></div>
+  <div class="info-item"><span class="key">设备 ID：</span><span class="val">{{ device.id }}</span></div>
+  <div class="info-item"><span class="key">IP 地址：</span><span class="val">{{ device.ipAddress }}</span></div>
+</div>
+
+<!-- Block Table -->
+<div class="section-title">三、配置区块明细</div>
+{% if blocks %}
+<table>
+  <thead>
+    <tr>
+      <th style="width:5%">版本</th>
+      <th style="width:18%">时间</th>
+      <th style="width:10%">操作人</th>
+      <th style="width:10%">变更类型</th>
+      <th style="width:22%">区块哈希（前16位）</th>
+      <th style="width:10%">合规状态</th>
+      <th>摘要</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for block in blocks %}
+    {% set bd = block.data|tojson|fromjson if block.data is string else block.data %}
+    <tr>
+      <td>{{ block.index + 1 }}</td>
+      <td>{{ block.timestamp[:19] if block.timestamp else '—' }}</td>
+      <td>{{ bd.operator if bd else '—' }}</td>
+      <td>{{ bd.changeType if bd else '—' }}</td>
+      <td class="hash">{{ block.hash[:16] if block.hash else '—' }}…</td>
+      <td>
+        {% if bd and bd.compliance_status == 'passed' %}
+          <span class="badge badge-pass">通过</span>
+        {% elif bd and bd.compliance_status == 'failed' %}
+          <span class="badge badge-fail">违规</span>
+        {% else %}
+          <span class="badge badge-na">未检查</span>
+        {% endif %}
+      </td>
+      <td>{{ bd.summary if bd else '—' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p style="color:#6b7280;text-align:center;padding:10mm;">该设备暂无配置历史记录。</p>
+{% endif %}
+
+</body>
+</html>

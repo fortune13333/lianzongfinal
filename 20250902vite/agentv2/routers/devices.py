@@ -21,6 +21,7 @@ from auth_deps import get_current_actor, require_permission
 from services import (
     is_simulation_mode, get_device_info, get_running_config, perform_push_config,
 )
+from license import get_device_limit
 
 router = APIRouter(tags=["devices"])
 
@@ -68,6 +69,13 @@ def add_device(
     actor: str = require_permission("device:create"),
     db: Session = Depends(get_db)
 ) -> DevicePayload:
+    limit = get_device_limit()
+    current_count = db.query(models.Device).count()
+    if current_count >= limit:
+        raise HTTPException(
+            status_code=403,
+            detail=f"已达到 License 设备上限（{limit} 台）。请升级 License 或联系销售。"
+        )
     if crud.get_device(db, device_id=device.id):
         raise HTTPException(status_code=409, detail=f"设备 ID '{device.id}' 已存在。")
     new_device_orm = crud.create_device_with_genesis_block(db=db, device_payload=device)

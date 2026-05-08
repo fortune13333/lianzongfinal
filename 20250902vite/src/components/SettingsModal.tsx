@@ -4,6 +4,7 @@ import Loader from './Loader';
 import { CheckCircleSolid, XCircleSolid } from './AIIcons';
 import { toast } from 'react-hot-toast';
 import { createApiUrl } from '../utils/apiUtils';
+import { apiFetch } from '../utils/apiFetch';
 import { useStore } from '../store/useStore';
 import { hasPermission, ATOMIC_PERMISSIONS } from '../utils/permissions';
 
@@ -12,7 +13,7 @@ interface SettingsModalProps {
   // All props removed and replaced by useStore hook
 }
 
-type ActiveTab = 'agent' | 'appearance' | 'ai';
+type ActiveTab = 'agent' | 'appearance' | 'ai' | 'ldap';
 
 // ── Preset themes (combined bg + accent) ──────────────────────────────────
 type PresetTheme = { name: string; label: string; swatches: [string, string, string] };
@@ -306,6 +307,163 @@ const AgentSettingsSection: React.FC<{
     );
 };
 
+interface LdapConfig {
+    enabled: boolean;
+    server: string;
+    port: number;
+    base_dn: string;
+    bind_dn: string;
+    bind_password: string;
+    user_search_filter: string;
+    use_ssl: boolean;
+}
+
+const DEFAULT_LDAP: LdapConfig = {
+    enabled: false,
+    server: '',
+    port: 389,
+    base_dn: '',
+    bind_dn: '',
+    bind_password: '',
+    user_search_filter: '(sAMAccountName={username})',
+    use_ssl: false,
+};
+
+const LdapSettings: React.FC = () => {
+    const agentApiUrl = useStore(state => state.settings.agentApiUrl);
+    const [config, setConfig] = useState<LdapConfig>(DEFAULT_LDAP);
+    const [loading, setLoading] = useState(true);
+    const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'failure'>('idle');
+    const [testMessage, setTestMessage] = useState('');
+
+    useEffect(() => {
+        if (!agentApiUrl) { setLoading(false); return; }
+        const fetchConfig = async () => {
+            try {
+                const res = await apiFetch(createApiUrl(agentApiUrl, '/api/settings/ldap'));
+                if (res.ok) setConfig({ ...DEFAULT_LDAP, ...(await res.json()) });
+            } catch { /* keep defaults */ } finally { setLoading(false); }
+        };
+        fetchConfig();
+    }, [agentApiUrl]);
+
+    const handleSave = async () => {
+        const toastId = toast.loading('正在保存 LDAP 配置...');
+        try {
+            const res = await apiFetch(createApiUrl(agentApiUrl!, '/api/settings/ldap'), {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(config),
+            });
+            if (!res.ok) throw new Error((await res.json()).detail || '保存失败');
+            toast.success('LDAP 配置已保存。', { id: toastId });
+        } catch (e) {
+            toast.error(`保存失败: ${e instanceof Error ? e.message : '未知错误'}`, { id: toastId });
+        }
+    };
+
+    const handleTest = async () => {
+        setTestStatus('testing');
+        setTestMessage('');
+        try {
+            const res = await apiFetch(createApiUrl(agentApiUrl!, '/api/settings/ldap/test'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(config),
+            });
+            const data = await res.json();
+            if (res.ok) { setTestStatus('success'); setTestMessage(data.message || '连接成功'); }
+            else { setTestStatus('failure'); setTestMessage(data.detail || '连接失败'); }
+        } catch (e) {
+            setTestStatus('failure');
+            setTestMessage(e instanceof Error ? e.message : '网络错误');
+        }
+    };
+
+    const inputCls = 'w-full bg-bg-950 border border-bg-700 rounded-md p-2 text-text-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm';
+
+    if (loading) return <div className="flex justify-center py-8"><Loader /></div>;
+
+    return (
+        <div className="space-y-4">
+            <div className="bg-bg-950/50 p-4 rounded-md">
+                <div className="flex items-center justify-between">
+                    <label htmlFor="ldap-enabled" className="flex flex-col cursor-pointer pr-4">
+                        <span className="font-semibold text-text-200">启用 LDAP/AD 认证</span>
+                        <span className="text-sm text-text-400">允许企业域账号通过 LDAP/Active Directory 登录系统。</span>
+                    </label>
+                    <div className="relative inline-flex items-center flex-shrink-0">
+                        <input type="checkbox" id="ldap-enabled" className="sr-only peer"
+                            checked={config.enabled}
+                            onChange={e => setConfig(c => ({ ...c, enabled: e.target.checked }))} />
+                        <div className="w-11 h-6 bg-bg-700 rounded-full peer peer-focus:ring-4 peer-focus:ring-primary-500/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="bg-bg-950/50 p-4 rounded-md space-y-3">
+                <h4 className="font-semibold text-text-200 text-sm">服务器配置</h4>
+                <div className="grid grid-cols-3 gap-3">
+                    <div className="col-span-2">
+                        <label className="text-xs text-text-400 mb-1 block">LDAP 服务器地址</label>
+                        <input type="text" placeholder="ldap://192.168.1.10" value={config.server}
+                            onChange={e => setConfig(c => ({ ...c, server: e.target.value }))} className={inputCls} />
+                    </div>
+                    <div>
+                        <label className="text-xs text-text-400 mb-1 block">端口</label>
+                        <input type="number" placeholder="389" value={config.port}
+                            onChange={e => setConfig(c => ({ ...c, port: parseInt(e.target.value) || 389 }))} className={inputCls} />
+                    </div>
+                </div>
+                <div className="flex items-center gap-2">
+                    <input type="checkbox" id="ldap-ssl" className="w-4 h-4 bg-bg-800 border-bg-600 text-primary-600 rounded"
+                        checked={config.use_ssl} onChange={e => setConfig(c => ({ ...c, use_ssl: e.target.checked }))} />
+                    <label htmlFor="ldap-ssl" className="text-sm text-text-300 cursor-pointer">使用 SSL/TLS（LDAPS）</label>
+                </div>
+            </div>
+
+            <div className="bg-bg-950/50 p-4 rounded-md space-y-3">
+                <h4 className="font-semibold text-text-200 text-sm">绑定配置</h4>
+                <div>
+                    <label className="text-xs text-text-400 mb-1 block">Base DN</label>
+                    <input type="text" placeholder="DC=company,DC=com" value={config.base_dn}
+                        onChange={e => setConfig(c => ({ ...c, base_dn: e.target.value }))} className={`${inputCls} font-mono`} />
+                </div>
+                <div>
+                    <label className="text-xs text-text-400 mb-1 block">Bind DN（查询账号）</label>
+                    <input type="text" placeholder="CN=svc,OU=ServiceAccounts,DC=company,DC=com" value={config.bind_dn}
+                        onChange={e => setConfig(c => ({ ...c, bind_dn: e.target.value }))} className={`${inputCls} font-mono`} />
+                </div>
+                <div>
+                    <label className="text-xs text-text-400 mb-1 block">Bind 密码</label>
+                    <input type="password" placeholder="••••••••" value={config.bind_password}
+                        onChange={e => setConfig(c => ({ ...c, bind_password: e.target.value }))} className={inputCls} />
+                </div>
+                <div>
+                    <label className="text-xs text-text-400 mb-1 block">用户搜索过滤器</label>
+                    <input type="text" placeholder="(sAMAccountName={username})" value={config.user_search_filter}
+                        onChange={e => setConfig(c => ({ ...c, user_search_filter: e.target.value }))} className={`${inputCls} font-mono`} />
+                    <p className="text-xs text-text-500 mt-1">{'{username}'} 将被替换为登录时输入的用户名。</p>
+                </div>
+            </div>
+
+            <div className="flex items-center gap-3 flex-wrap">
+                <button onClick={handleTest} disabled={testStatus === 'testing'}
+                    className="bg-bg-700 hover:bg-bg-600 text-text-100 font-bold py-2 px-4 rounded-md transition-colors text-sm disabled:opacity-50">
+                    {testStatus === 'testing' ? '测试中...' : '测试连接'}
+                </button>
+                <button onClick={handleSave}
+                    className="bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded-md transition-colors text-sm">
+                    保存配置
+                </button>
+                {testStatus === 'success' && <span className="flex items-center gap-1 text-xs text-emerald-400"><CheckCircleSolid className="h-4 w-4" />{testMessage}</span>}
+                {testStatus === 'failure' && <span className="flex items-center gap-1 text-xs text-red-400"><XCircleSolid className="h-4 w-4" />{testMessage}</span>}
+            </div>
+        </div>
+    );
+};
+
+
 const SettingsModal: React.FC<SettingsModalProps> = () => {
   const { 
     isOpen, close, settings, backendSettings, 
@@ -366,6 +524,7 @@ const SettingsModal: React.FC<SettingsModalProps> = () => {
             <TabButton tabId="appearance">外观</TabButton>
             <TabButton tabId="agent">本地代理</TabButton>
             <TabButton tabId="ai">AI 设置</TabButton>
+            {canChangeSystemSettings && <TabButton tabId="ldap">LDAP 认证</TabButton>}
         </div>
 
         <div className="p-6 max-h-[60vh] overflow-y-auto">
@@ -449,11 +608,18 @@ const SettingsModal: React.FC<SettingsModalProps> = () => {
                 </div>
             )}
             {activeTab === 'agent' && (
-                <AgentSettingsSection 
-                    settings={settings} 
+                <AgentSettingsSection
+                    settings={settings}
                     onUpdateSettings={updateSettings}
                     onAddAgentUrlToHistory={addAgentUrlToHistory}
                 />
+            )}
+            {activeTab === 'ldap' && canChangeSystemSettings && (
+                <div>
+                    <h3 className="text-lg font-bold text-text-100 mb-2">LDAP / Active Directory 认证</h3>
+                    <p className="text-sm text-text-400 mb-4">配置企业 LDAP 目录服务，允许域账号直接登录。首次 LDAP 登录将自动创建操作员账号，管理员可在"用户管理"中调整其权限。</p>
+                    <LdapSettings />
+                </div>
             )}
         </div>
 

@@ -2,6 +2,7 @@
 # Extracted from api_routes.py so all routers can import from one place.
 
 import logging
+import secrets
 import time
 from collections import defaultdict
 from typing import Dict
@@ -11,8 +12,9 @@ from sqlalchemy.orm import Session
 from jose import JWTError, jwt as jose_jwt
 
 import crud
+import models
 from database import get_db
-from core import JWT_SECRET_KEY, JWT_ALGORITHM
+from core import JWT_SECRET_KEY, JWT_ALGORITHM, get_password_hash
 
 # --- Login Rate Limiter ---
 # NOTE: This is an in-memory, process-local rate limiter.
@@ -63,6 +65,56 @@ def get_current_actor(
 ) -> str:
     """Generic JWT auth dependency — verifies identity only, no permission check."""
     return extract_actor_from_jwt(authorization, db)
+
+
+def verify_ldap_credentials(username: str, password: str, ldap_cfg: dict) -> bool:
+    """Verify username/password against an LDAP/AD server. Returns True on success."""
+    try:
+        from ldap3 import Server, Connection, ALL
+        server = Server(
+            ldap_cfg.get("server", ""),
+            port=int(ldap_cfg.get("port", 389)),
+            use_ssl=bool(ldap_cfg.get("use_ssl", False)),
+            get_info=ALL,
+        )
+        # Step 1: bind with service account to search for the user's DN
+        bind_conn = Connection(
+            server,
+            user=ldap_cfg.get("bind_dn", ""),
+            password=ldap_cfg.get("bind_password", ""),
+            auto_bind=True,
+        )
+        search_filter = ldap_cfg.get(
+            "user_search_filter", "(sAMAccountName={username})"
+        ).format(username=username)
+        bind_conn.search(ldap_cfg.get("base_dn", ""), search_filter, attributes=["distinguishedName"])
+        if not bind_conn.entries:
+            logging.warning(f"LDAP: 未找到用户 '{username}'")
+            return False
+        user_dn = bind_conn.entries[0].entry_dn
+        # Step 2: re-bind with the user's own credentials to verify password
+        user_conn = Connection(server, user=user_dn, password=password, auto_bind=True)
+        return user_conn.bound
+    except Exception as e:
+        logging.warning(f"LDAP 认证失败 for '{username}': {e}")
+        return False
+
+
+def get_or_create_ldap_user(db: Session, username: str) -> models.User:
+    """After successful LDAP auth, ensure a local user record exists (auto-created as operator)."""
+    user = crud.get_user_by_username(db, username)
+    if not user:
+        user = models.User(
+            username=username,
+            password=get_password_hash(secrets.token_hex(32)),  # unusable random password
+            role="operator",
+            extra_permissions="",
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        logging.info(f"自动创建 LDAP 用户本地记录: {username}")
+    return user
 
 
 def require_permission(required_permission: str):

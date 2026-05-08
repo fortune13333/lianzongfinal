@@ -1,4 +1,19 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: chaintrace
+      POSTGRES_USER: chaintrace
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-chaintrace_dev}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chaintrace"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
   chaintrace:
     build: .
     # Port 8001 is now internal-only; nginx handles external traffic.
@@ -8,19 +23,21 @@ services:
     volumes:
       # config.ini: edit on host, takes effect after restart
       - ./agentv2/config.ini:/app/agentv2/config.ini
-      # database: persists on host at agentv2/chaintrace.db
-      - ./agentv2/chaintrace.db:/app/agentv2/chaintrace.db
+      # license file: place chaintrace.lic in agentv2/ to activate Pro/Enterprise features
+      - ./agentv2/chaintrace.lic:/app/agentv2/chaintrace.lic:ro
     environment:
-      # Override JWT secret via environment variable (recommended for production).
-      # CT_JWT_SECRET_KEY: "your-strong-random-secret-here"
       - CT_JWT_SECRET_KEY=${CT_JWT_SECRET_KEY:-}
+      - DATABASE_URL=postgresql+psycopg2://chaintrace:${DB_PASSWORD:-chaintrace_dev}@postgres:5432/chaintrace
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/api/health')"]
       interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 10s
+      start_period: 15s
 
   nginx:
     image: nginx:alpine
@@ -36,3 +53,6 @@ services:
     restart: unless-stopped
     profiles:
       - https   # Only start nginx when: docker compose --profile https up
+
+volumes:
+  pgdata:

@@ -282,3 +282,14 @@ class ScheduledTaskPayload(BaseModel):
     task_type: str   # "backup" | "config_pull"
     device_ids: List[str]
     is_enabled: bool = True
+
+
+class LDAPSettingsPayload(BaseModel):
+    enabled: bool = False
+    server: str = ""
+    port: int = 389
+    base_dn: str = ""
+    bind_dn: str = ""
+    bind_password: str = ""
+    user_search_filter: str = "(sAMAccountName={username})"
+    use_ssl: bool = False

@@ -337,6 +337,26 @@ def update_setting(db: Session, key: str, value: str):
     else: db_setting = models.Setting(key=key, value=value); db.add(db_setting)
     db.commit()
 
+def get_setting(db: Session, key: str, default: str = "") -> str:
+    """Get a single setting value by key; returns default if not found."""
+    row = db.query(models.Setting).filter(models.Setting.key == key).first()
+    return str(row.value) if row else default
+
+def set_setting(db: Session, key: str, value: str) -> None:
+    """Upsert a single setting."""
+    update_setting(db, key, value)
+
+def get_audit_logs_in_range(db: Session, start: str, end: str) -> list:
+    """Return AuditLog entries whose timestamp falls within [start, end] (date strings)."""
+    from sqlalchemy import cast, Date
+    return (
+        db.query(models.AuditLog)
+        .filter(cast(models.AuditLog.timestamp, Date) >= start)
+        .filter(cast(models.AuditLog.timestamp, Date) <= end)
+        .order_by(models.AuditLog.timestamp)
+        .all()
+    )
+
 # --- Deployment History ---
 def create_deployment_record(db: Session, operator: str, template_name: str, target_devices: List[str], results: List[Dict[str, Any]]):
     success_count = sum(1 for r in results if r['status'] == 'success')

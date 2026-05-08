@@ -17,7 +17,7 @@ from api_routes import router as api_router
 from websocket_handler import router as websocket_router
 
 # New database imports
-from database import init_db, SessionLocal, SQLALCHEMY_DATABASE_URL
+from database import init_db, SessionLocal, DATABASE_URL, _is_sqlite
 import crud
 
 
@@ -65,6 +65,17 @@ if __name__ == "__main__":
         logging.warning(f"Alembic 迁移失败，回退到 SQLAlchemy create_all: {alembic_err}")
         init_db()  # fallback: create tables that don't exist
 
+    # --- Load and display License status ---
+    from license import load_license
+    lic = load_license()
+    if lic.is_valid:
+        logging.info(
+            f"License 版本: 专业版/企业版 | 客户: {lic.customer} | "
+            f"设备上限: {lic.max_devices} | 功能: {lic.features} | 到期: {lic.expires_at}"
+        )
+    else:
+        logging.warning(f"社区版模式（最多 5 台设备，无 LDAP/PDF 功能）: {lic.error}")
+
     try:
         with SessionLocal() as db:
             crud.seed_initial_data(db)
@@ -76,19 +87,19 @@ if __name__ == "__main__":
         if "no such column" in str(e):
             logging.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             logging.error("!! 数据库架构不匹配 !!")
-            logging.error("!! 您当前的 'chaintrace.db' 文件是旧版本的，与新代码不兼容。")
-            logging.error("!! 为解决此问题，请【删除 'chaintrace.db' 文件】，然后重新启动程序。")
-            logging.error("!! 系统将自动创建一个结构正确的新数据库文件。")
+            if _is_sqlite:
+                logging.error("!! 您当前的 'chaintrace.db' 文件是旧版本的，与新代码不兼容。")
+                logging.error("!! 为解决此问题，请【删除 'chaintrace.db' 文件】，然后重新启动程序。")
+                logging.error("!! 系统将自动创建一个结构正确的新数据库文件。")
+                try:
+                    db_path = Path(CONFIG_FILE.parent, "chaintrace.db")
+                    logging.error(f"!! 您需要删除的文件位于: {db_path.resolve()}")
+                except Exception:
+                    logging.error("!! 请在程序运行目录下查找并删除 'chaintrace.db' 文件。")
+            else:
+                logging.error("!! PostgreSQL 数据库架构与代码不匹配，请运行: cd agentv2 && alembic upgrade head")
             logging.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            
-            try:
-                # Attempt to find the database file's path relative to the config file
-                db_path = Path(CONFIG_FILE.parent, Path(SQLALCHEMY_DATABASE_URL.replace("sqlite:///./", "")))
-                logging.error(f"!! 您需要删除的文件位于: {db_path.resolve()}")
-            except Exception:
-                logging.error("!! 请在程序运行目录下查找并删除 'chaintrace.db' 文件。")
-
-            sys.exit(1) # Exit with an error code to prevent the server from starting.
+            sys.exit(1)
         else:
             # If it's a different operational error, re-raise it.
             logging.critical(f"启动时发生严重的数据库操作错误: {e}")

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { size: A4; margin: 20mm 15mm; }
+  * { box-sizing: border-box; }
+  body { font-family: "WenQuanYi Zen Hei", "Microsoft YaHei", "SimHei", sans-serif; font-size: 10pt; color: #1a1a1a; margin: 0; }
+  .cover { text-align: center; padding: 40mm 0 20mm; page-break-after: always; }
+  .cover .logo { font-size: 24pt; font-weight: bold; color: #1d4ed8; letter-spacing: 2px; }
+  .cover .report-type { font-size: 16pt; margin-top: 8mm; color: #374151; }
+  .cover .meta { margin-top: 16mm; font-size: 10pt; color: #6b7280; line-height: 2; }
+  .cover .meta strong { color: #111827; }
+  .section-title { font-size: 13pt; font-weight: bold; color: #1d4ed8; border-bottom: 2px solid #1d4ed8; padding-bottom: 2mm; margin: 8mm 0 4mm; }
+  .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; margin-bottom: 6mm; }
+  .summary-card { border: 1px solid #e5e7eb; border-radius: 3mm; padding: 4mm; text-align: center; }
+  .summary-card .num { font-size: 20pt; font-weight: bold; color: #1d4ed8; }
+  .summary-card .label { font-size: 8pt; color: #6b7280; margin-top: 1mm; }
+  table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+  thead th { background: #1d4ed8; color: white; padding: 2mm 3mm; text-align: left; }
+  tbody tr:nth-child(even) { background: #f9fafb; }
+  tbody td { padding: 2mm 3mm; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+  .footer { position: fixed; bottom: 8mm; left: 0; right: 0; text-align: center; font-size: 8pt; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 2mm; }
+  .seal { display: inline-block; border: 3px solid #dc2626; border-radius: 50%; padding: 6mm 8mm; color: #dc2626; font-size: 11pt; font-weight: bold; margin-top: 20mm; letter-spacing: 2px; transform: rotate(-15deg); }
+</style>
+</head>
+<body>
+
+<div class="footer">链踪网络配置审计系统 · 本报告由系统自动生成，具有法律效力 · 第 <span class="page"></span> 页</div>
+
+<!-- Cover -->
+<div class="cover">
+  <div class="logo">链 踪</div>
+  <div style="font-size:11pt;color:#6b7280;margin-top:2mm;">ChainTrace 网络配置审计系统</div>
+  <div class="report-type">审计日志报告</div>
+  <div class="meta">
+    <div>时间范围：<strong>{{ start }}</strong> 至 <strong>{{ end }}</strong></div>
+    <div>生成时间：<strong>{{ generated_at }}</strong></div>
+    <div>生成人员：<strong>{{ generated_by }}</strong></div>
+    <div>记录总数：<strong>{{ logs|length }}</strong> 条</div>
+  </div>
+  <div class="seal">审计专用</div>
+</div>
+
+<!-- Summary -->
+<div class="section-title">一、摘要统计</div>
+<div class="summary-grid">
+  <div class="summary-card">
+    <div class="num">{{ logs|length }}</div>
+    <div class="label">操作总记录数</div>
+  </div>
+  <div class="summary-card">
+    <div class="num">{{ logs|map(attribute='username')|unique|list|length }}</div>
+    <div class="label">涉及用户数</div>
+  </div>
+  <div class="summary-card">
+    <div class="num">{{ start }}</div>
+    <div class="label">报告起始日期</div>
+  </div>
+</div>
+
+<!-- Detail -->
+<div class="section-title">二、操作记录明细</div>
+{% if logs %}
+<table>
+  <thead>
+    <tr>
+      <th style="width:5%">序号</th>
+      <th style="width:20%">时间</th>
+      <th style="width:15%">操作人</th>
+      <th>操作内容</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for log in logs %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') if log.timestamp else '—' }}</td>
+      <td>{{ log.username }}</td>
+      <td>{{ log.action }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p style="color:#6b7280;text-align:center;padding:10mm;">该时间范围内无操作记录。</p>
+{% endif %}
+
+</body>
+</html>

@@ -14,6 +14,7 @@ import WriteTokenManagement from './WriteTokenManagement';
 import ScriptEditModal from '../ScriptEditModal';
 import ScriptExecuteModal from '../ScriptExecuteModal';
 import ScheduledTaskModal from './ScheduledTaskModal';
+import ReportsPanel from './ReportsPanel';
 import { useStore } from '../../store/useStore';
 import { hasPermission, ATOMIC_PERMISSIONS } from '../../utils/permissions';
 
@@ -25,7 +26,7 @@ type DeletionTarget =
     | { type: 'script'; item: Script }
     | { type: 'scheduledTask'; item: ScheduledTask };
 
-type AdminTab = 'audit' | 'users' | 'templates' | 'policies' | 'deployments' | 'tokens' | 'scripts' | 'scheduledTasks';
+type AdminTab = 'audit' | 'users' | 'templates' | 'policies' | 'deployments' | 'tokens' | 'scripts' | 'scheduledTasks' | 'reports';
 
 interface AdminPanelProps {
     // All props removed and replaced by useStore hook
@@ -39,6 +40,47 @@ const TabButton: React.FC<{ active: boolean; onClick: () => void; children: Reac
         {children}
     </button>
 );
+
+interface LicenseInfo {
+    is_valid: boolean;
+    customer: string;
+    max_devices: number;
+    features: string[];
+    expires_at: string | null;
+    error: string;
+}
+
+const LicenseCard: React.FC<{ agentApiUrl: string | undefined }> = ({ agentApiUrl }) => {
+    const [lic, setLic] = useState<LicenseInfo | null>(null);
+
+    useEffect(() => {
+        if (!agentApiUrl) return;
+        apiFetch(createApiUrl(agentApiUrl, '/api/license'))
+            .then(r => r.ok ? r.json() : null)
+            .then(data => data && setLic(data))
+            .catch(() => {});
+    }, [agentApiUrl]);
+
+    if (!lic) return null;
+
+    return (
+        <div className={`mb-4 flex items-center gap-3 px-4 py-3 rounded-md text-sm border ${lic.is_valid ? 'bg-emerald-900/20 border-emerald-700/40 text-emerald-300' : 'bg-bg-800 border-bg-700 text-text-400'}`}>
+            <span className="text-lg">{lic.is_valid ? '✓' : 'ℹ'}</span>
+            <div className="flex-1 min-w-0">
+                {lic.is_valid ? (
+                    <span>
+                        <strong>专业版 License</strong> · 客户：{lic.customer} · 设备上限：{lic.max_devices} ·
+                        功能：{lic.features.join('、') || '无'} ·
+                        {lic.expires_at ? ` 有效期至 ${lic.expires_at.slice(0, 10)}` : ' 永久有效'}
+                    </span>
+                ) : (
+                    <span><strong>社区版</strong>（最多 5 台设备，无 LDAP / PDF 功能）{lic.error ? ` — ${lic.error}` : ''}</span>
+                )}
+            </div>
+        </div>
+    );
+};
+
 
 const AdminPanel: React.FC<AdminPanelProps> = () => {
     const {
@@ -78,6 +120,7 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
         if (canManageUsers) tabs.push('tokens');
         if (canManageScripts) tabs.push('scripts');
         if (canManageTasks) tabs.push('scheduledTasks');
+        if (canManageUsers) tabs.push('reports');
         return tabs;
     }, [canManageUsers, canManageTemplates, canManagePolicies, canManageScripts, canManageTasks]);
 
@@ -180,7 +223,8 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
         if (!deletionTarget) return { title: '', content: <></> };
         const { type, item } = deletionTarget;
         const name = 'username' in item ? item.username : item.name;
-        const typeName: Record<typeof type, string> = { user: '用户', template: '模板', policy: '策略', script: '脚本', scheduledTask: '定时任务' }[type];
+        const typeNames: Record<DeletionTarget['type'], string> = { user: '用户', template: '模板', policy: '策略', script: '脚本', scheduledTask: '定时任务' };
+        const typeName = typeNames[type];
 
         return {
             title: `确认删除${typeName}`,
@@ -194,7 +238,8 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
                 <h2 className="text-3xl font-bold text-text-100">管理中心</h2>
             </div>
             <div className="bg-bg-900 p-6 rounded-lg shadow-xl">
-                <div className="flex border-b border-bg-700 mb-4 space-x-2">
+                {canManageUsers && <LicenseCard agentApiUrl={agentApiUrl} />}
+                <div className="flex border-b border-bg-700 mb-4 space-x-2 flex-wrap gap-y-1">
                     {availableTabs.includes('audit') && <TabButton active={activeTab === 'audit'} onClick={() => setActiveTab('audit')}>审计日志</TabButton>}
                     {availableTabs.includes('users') && <TabButton active={activeTab === 'users'} onClick={() => setActiveTab('users')}>用户管理</TabButton>}
                     {availableTabs.includes('templates') && <TabButton active={activeTab === 'templates'} onClick={() => setActiveTab('templates')}>配置模板</TabButton>}
@@ -203,6 +248,7 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
                     {availableTabs.includes('tokens') && <TabButton active={activeTab === 'tokens'} onClick={() => setActiveTab('tokens')}>写入令牌</TabButton>}
                     {availableTabs.includes('scripts') && <TabButton active={activeTab === 'scripts'} onClick={() => setActiveTab('scripts')}>脚本库</TabButton>}
                     {availableTabs.includes('scheduledTasks') && <TabButton active={activeTab === 'scheduledTasks'} onClick={() => setActiveTab('scheduledTasks')}>定时任务</TabButton>}
+                    {availableTabs.includes('reports') && <TabButton active={activeTab === 'reports'} onClick={() => setActiveTab('reports')}>报告导出</TabButton>}
                 </div>
 
                 {activeTab === 'policies' && canManagePolicies && (
@@ -347,6 +393,10 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
                             </table>
                         </div>
                     </div>
+                )}
+
+                {activeTab === 'reports' && canManageUsers && (
+                    <ReportsPanel />
                 )}
 
                 {activeTab === 'scheduledTasks' && canManageTasks && (

@@ -12,13 +12,14 @@ import models
 from database import get_db
 from core import (
     UserUpdatePayload, Policy as PolicyPayload, AISettingsPayload,
-    AICommandGenerationRequest, AIConfigCheckRequest,
+    AICommandGenerationRequest, AIConfigCheckRequest, LDAPSettingsPayload,
 )
 from auth_deps import get_current_actor, require_permission
 from services import (
     is_simulation_mode,
     perform_ai_command_generation, perform_ai_config_check,
 )
+from license import load_license
 
 router = APIRouter(tags=["admin"])
 
@@ -28,6 +29,62 @@ router = APIRouter(tags=["admin"])
 @router.get("/api/health")
 def health_check() -> Dict[str, str]:
     return {"status": "ok", "mode": "simulation" if is_simulation_mode() else "live"}
+
+
+# --- License ---
+
+@router.get("/api/license")
+def get_license_info(actor: str = Depends(get_current_actor)) -> Dict[str, Any]:
+    lic = load_license()
+    return {
+        "is_valid": lic.is_valid,
+        "customer": lic.customer,
+        "max_devices": lic.max_devices,
+        "features": lic.features,
+        "expires_at": lic.expires_at,
+        "error": lic.error,
+    }
+
+
+# --- LDAP Settings ---
+
+@router.get("/api/settings/ldap")
+def get_ldap_settings(
+    actor: str = require_permission("user:manage"),
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    raw = crud.get_setting(db, "ldap_config", "{}")
+    try:
+        cfg = json.loads(raw)
+    except Exception:
+        cfg = {}
+    cfg.pop("bind_password", None)  # never return password to frontend
+    return cfg
+
+
+@router.put("/api/settings/ldap")
+def update_ldap_settings(
+    payload: LDAPSettingsPayload,
+    actor: str = require_permission("user:manage"),
+    db: Session = Depends(get_db),
+) -> Dict[str, str]:
+    crud.set_setting(db, "ldap_config", payload.model_dump_json())
+    crud.log_action(db, actor, "更新了 LDAP 认证配置。")
+    return {"status": "ok"}
+
+
+@router.post("/api/settings/ldap/test")
+def test_ldap_connection(
+    payload: LDAPSettingsPayload,
+    actor: str = require_permission("user:manage"),
+) -> Dict[str, str]:
+    try:
+        from ldap3 import Server, Connection, ALL
+        server = Server(payload.server, port=payload.port, use_ssl=payload.use_ssl, get_info=ALL)
+        conn = Connection(server, user=payload.bind_dn, password=payload.bind_password, auto_bind=True)
+        return {"status": "ok", "message": f"成功连接到 {payload.server}"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"LDAP 连接失败: {e}")
 
 
 # --- Users ---

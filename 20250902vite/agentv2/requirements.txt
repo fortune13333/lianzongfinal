@@ -32,3 +32,13 @@ jinja2
 
 # apscheduler - 用于定时任务（自动备份、定期配置拉取）
 apscheduler
+
+# psycopg2-binary - PostgreSQL 驱动（生产部署用 PostgreSQL 时需要）
+psycopg2-binary>=2.9
+
+# ldap3 - LDAP/Active Directory 认证集成（企业 SSO 接入）
+ldap3>=2.9
+
+# weasyprint - HTML → PDF 转换（审计报告导出）
+# 注意：Docker 部署时需在 Dockerfile 中安装系统依赖（pango、cairo、fonts-wqy-zenhei）
+weasyprint>=62.0

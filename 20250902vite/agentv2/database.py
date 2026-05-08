@@ -1,33 +1,27 @@
-# database.txt - SQLAlchemy database setup and session management.
+# database.py - SQLAlchemy database setup and session management.
 
+import os
 import logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-# The database URL for SQLite. This will create a file named 'chaintrace.db'
-# in the same directory where the agent is run.
-SQLALCHEMY_DATABASE_URL = "sqlite:///./chaintrace.db"
+# Supports both SQLite (dev default) and PostgreSQL (production via DATABASE_URL env var).
+# To use PostgreSQL: export DATABASE_URL=postgresql+psycopg2://user:pass@host:5432/dbname
+DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./chaintrace.db")
 
-# Create the SQLAlchemy engine.
-# connect_args is needed only for SQLite to allow multi-threaded access.
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+_is_sqlite = DATABASE_URL.startswith("sqlite")
+_connect_args = {"check_same_thread": False} if _is_sqlite else {}
 
-# Each instance of the SessionLocal class will be a database session.
+engine = create_engine(DATABASE_URL, connect_args=_connect_args)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Base class for our ORM models.
 Base = declarative_base()
 
+
 def init_db():
-    """
-    Initializes the database by creating all tables defined in the models.
-    This function is called once on application startup.
-    """
+    """Fallback: create tables directly via SQLAlchemy if Alembic is unavailable."""
     try:
-        # Import all models here so that Base has them registered before creating tables.
-        # This prevents circular import issues.
         __import__('models')
         logging.info("Creating database tables if they don't exist...")
         Base.metadata.create_all(bind=engine)
@@ -36,13 +30,9 @@ def init_db():
         logging.critical(f"CRITICAL: Failed to initialize database tables. Error: {e}")
         raise
 
-# --- FastAPI Dependency ---
 
 def get_db():
-    """
-    A dependency for FastAPI routes to get a database session.
-    It ensures that the database session is always closed after the request.
-    """
+    """FastAPI dependency: yields a DB session and closes it after the request."""
     db = SessionLocal()
     try:
         yield db
