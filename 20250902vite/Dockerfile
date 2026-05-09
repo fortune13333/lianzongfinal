@@ -10,10 +10,10 @@ RUN npm run build
 FROM python:3.11-slim
 WORKDIR /app
 
-# System dependencies for WeasyPrint (PDF rendering) and Chinese fonts
+# System dependencies for pdfkit (PDF rendering via wkhtmltopdf) and Chinese fonts
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 \
-    libffi-dev shared-mime-info fonts-wqy-zenhei \
+    wkhtmltopdf \
+    fonts-wqy-zenhei \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies

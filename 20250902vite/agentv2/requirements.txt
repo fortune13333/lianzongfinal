@@ -39,6 +39,6 @@ psycopg2-binary>=2.9
 # ldap3 - LDAP/Active Directory 认证集成（企业 SSO 接入）
 ldap3>=2.9
 
-# weasyprint - HTML → PDF 转换（审计报告导出）
-# 注意：Docker 部署时需在 Dockerfile 中安装系统依赖（pango、cairo、fonts-wqy-zenhei）
-weasyprint>=62.0
+# pdfkit - HTML → PDF 转换（审计报告导出，基于 wkhtmltopdf）
+# Windows：从 wkhtmltopdf.org 下载安装包；Linux/Docker：apt-get install wkhtmltopdf
+pdfkit>=1.0

@@ -24,14 +24,47 @@ _jinja_env = Environment(loader=FileSystemLoader(str(_template_dir)))
 _jinja_env.filters["fromjson"] = json.loads
 
 
+_PDF_OPTIONS = {
+    "encoding": "UTF-8",
+    "page-size": "A4",
+    "margin-top": "15mm",
+    "margin-right": "15mm",
+    "margin-bottom": "15mm",
+    "margin-left": "15mm",
+    "quiet": "",
+}
+
+# Windows 默认安装路径；Linux/Docker 通过 PATH 找到即可
+_WKHTMLTOPDF_WINDOWS = Path(r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe")
+
+
+def _get_pdfkit_config():
+    import pdfkit
+    if _WKHTMLTOPDF_WINDOWS.exists():
+        return pdfkit.configuration(wkhtmltopdf=str(_WKHTMLTOPDF_WINDOWS))
+    return None  # 让 pdfkit 自行从 PATH 中查找
+
+
 def _render_pdf(html: str) -> bytes:
     try:
-        from weasyprint import HTML
-        return HTML(string=html).write_pdf()
+        import pdfkit
+        cfg = _get_pdfkit_config()
+        result = pdfkit.from_string(html, False, options=_PDF_OPTIONS, configuration=cfg)
+        return result if result else b""
     except ImportError:
         raise HTTPException(
             status_code=503,
-            detail="PDF 生成依赖（WeasyPrint）未安装。请在 Docker 环境中部署以使用此功能。"
+            detail="PDF 生成依赖（pdfkit）未安装，请运行 pip install pdfkit。",
+        )
+    except OSError as e:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "wkhtmltopdf 未找到。"
+                "Windows：请确认已安装 wkhtmltopdf，可执行文件应位于"
+                r" C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe；"
+                f"Linux：apt-get install wkhtmltopdf。详情：{e}"
+            ),
         )
 
 
