@@ -188,7 +188,7 @@ const AISettingSection: React.FC<{
             <span className="font-semibold text-text-200">{title}</span>
             <span className="text-sm text-text-400">{description}</span>
           </label>
-          <div className="relative inline-flex items-center flex-shrink-0">
+          <label htmlFor={`${title}-toggle`} className={`relative inline-flex items-center flex-shrink-0 ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
             <input
               type="checkbox"
               id={`${title}-toggle`}
@@ -198,7 +198,7 @@ const AISettingSection: React.FC<{
               disabled={isDisabled}
             />
             <div className="w-11 h-6 bg-bg-700 rounded-full peer peer-focus:ring-4 peer-focus:ring-primary-500/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-          </div>
+          </label>
         </div>
       </div>
       {(settings.enabled && !isDisabled) && (
@@ -392,12 +392,12 @@ const LdapSettings: React.FC = () => {
                         <span className="font-semibold text-text-200">启用 LDAP/AD 认证</span>
                         <span className="text-sm text-text-400">允许企业域账号通过 LDAP/Active Directory 登录系统。</span>
                     </label>
-                    <div className="relative inline-flex items-center flex-shrink-0">
+                    <label htmlFor="ldap-enabled" className="relative inline-flex items-center flex-shrink-0 cursor-pointer">
                         <input type="checkbox" id="ldap-enabled" className="sr-only peer"
                             checked={config.enabled}
                             onChange={e => setConfig(c => ({ ...c, enabled: e.target.checked }))} />
                         <div className="w-11 h-6 bg-bg-700 rounded-full peer peer-focus:ring-4 peer-focus:ring-primary-500/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                    </div>
+                    </label>
                 </div>
             </div>
 
@@ -546,7 +546,7 @@ const SettingsModal: React.FC<SettingsModalProps> = () => {
                                     <span className="font-semibold text-text-200">启用后端 AI 智能分析</span>
                                     <span className="text-sm text-text-400">在提交配置时，由后端AI进行合规审计与智能分析。</span>
                                 </label>
-                                <div className="relative inline-flex items-center flex-shrink-0">
+                                <label htmlFor="backend-ai-toggle" className="relative inline-flex items-center flex-shrink-0 cursor-pointer">
                                     <input
                                     type="checkbox"
                                     id="backend-ai-toggle"
@@ -555,7 +555,7 @@ const SettingsModal: React.FC<SettingsModalProps> = () => {
                                     onChange={(e) => updateBackendAISettings({ ...backendSettings, is_ai_analysis_enabled: e.target.checked })}
                                     />
                                     <div className="w-11 h-6 bg-bg-700 rounded-full peer peer-focus:ring-4 peer-focus:ring-primary-500/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                                </div>
+                                </label>
                                 </div>
 
                                 <div className="border-t border-bg-700 pt-4">
