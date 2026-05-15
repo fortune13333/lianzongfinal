@@ -14,6 +14,7 @@ export const ATOMIC_PERMISSIONS = {
     SCRIPT_MANAGE: 'script:manage',
     SCRIPT_EXECUTE: 'script:execute',
     TASK_MANAGE: 'task:manage',
+    ALERT_MANAGE: 'alert:manage',
     SYSTEM_RESET: 'system:reset',
     SYSTEM_SETTINGS: 'system:settings',
 } as const;
@@ -28,6 +29,7 @@ export const ADMIN_PANEL_PERMISSIONS: AtomicPermission[] = [
     ATOMIC_PERMISSIONS.POLICY_MANAGE,
     ATOMIC_PERMISSIONS.SCRIPT_MANAGE,
     ATOMIC_PERMISSIONS.TASK_MANAGE,
+    ATOMIC_PERMISSIONS.ALERT_MANAGE,
 ];
 
 /**

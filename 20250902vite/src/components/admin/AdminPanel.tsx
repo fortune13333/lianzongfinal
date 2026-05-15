@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { User, ConfigTemplate, Policy, Script, ScheduledTask } from '../../types';
+import { User, ConfigTemplate, Policy, Script, ScheduledTask, NotificationRule } from '../../types';
 import { createApiUrl } from '../../utils/apiUtils';
 import { apiFetch } from '../../utils/apiFetch';
 import { toast } from 'react-hot-toast';
@@ -14,6 +14,7 @@ import WriteTokenManagement from './WriteTokenManagement';
 import ScriptEditModal from '../ScriptEditModal';
 import ScriptExecuteModal from '../ScriptExecuteModal';
 import ScheduledTaskModal from './ScheduledTaskModal';
+import AlertRuleModal from './AlertRuleModal';
 import ReportsPanel from './ReportsPanel';
 import { useStore } from '../../store/useStore';
 import { hasPermission, ATOMIC_PERMISSIONS } from '../../utils/permissions';
@@ -24,9 +25,10 @@ type DeletionTarget =
     | { type: 'template'; item: ConfigTemplate }
     | { type: 'policy'; item: Policy }
     | { type: 'script'; item: Script }
-    | { type: 'scheduledTask'; item: ScheduledTask };
+    | { type: 'scheduledTask'; item: ScheduledTask }
+    | { type: 'notificationRule'; item: NotificationRule };
 
-type AdminTab = 'audit' | 'users' | 'templates' | 'policies' | 'deployments' | 'tokens' | 'scripts' | 'scheduledTasks' | 'reports';
+type AdminTab = 'audit' | 'users' | 'templates' | 'policies' | 'deployments' | 'tokens' | 'scripts' | 'scheduledTasks' | 'alerts' | 'reports';
 
 interface AdminPanelProps {
     // All props removed and replaced by useStore hook
@@ -86,7 +88,8 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
     const {
         currentUser, allUsers, auditLog, templates, policies,
         deploymentHistory, agentApiUrl, fetchData, writeTokens, scripts, scheduledTasks, devices,
-        deleteScript, deleteScheduledTask,
+        notificationRules,
+        deleteScript, deleteScheduledTask, deleteNotificationRule,
     } = useStore(state => ({
         currentUser: state.currentUser!,
         allUsers: state.allUsers,
@@ -100,8 +103,10 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
         scripts: state.scripts,
         scheduledTasks: state.scheduledTasks,
         devices: state.devices,
+        notificationRules: state.notificationRules,
         deleteScript: state.deleteScript,
         deleteScheduledTask: state.deleteScheduledTask,
+        deleteNotificationRule: state.deleteNotificationRule,
     }));
 
     const canManageUsers = hasPermission(currentUser, ATOMIC_PERMISSIONS.USER_MANAGE);
@@ -109,6 +114,7 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
     const canManagePolicies = hasPermission(currentUser, ATOMIC_PERMISSIONS.POLICY_MANAGE);
     const canManageScripts = hasPermission(currentUser, ATOMIC_PERMISSIONS.SCRIPT_MANAGE);
     const canManageTasks = hasPermission(currentUser, ATOMIC_PERMISSIONS.TASK_MANAGE);
+    const canManageAlerts = hasPermission(currentUser, ATOMIC_PERMISSIONS.ALERT_MANAGE);
 
     const availableTabs = useMemo(() => {
         const tabs: AdminTab[] = [];
@@ -120,9 +126,10 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
         if (canManageUsers) tabs.push('tokens');
         if (canManageScripts) tabs.push('scripts');
         if (canManageTasks) tabs.push('scheduledTasks');
+        if (canManageAlerts) tabs.push('alerts');
         if (canManageUsers) tabs.push('reports');
         return tabs;
-    }, [canManageUsers, canManageTemplates, canManagePolicies, canManageScripts, canManageTasks]);
+    }, [canManageUsers, canManageTemplates, canManagePolicies, canManageScripts, canManageTasks, canManageAlerts]);
 
     const [activeTab, setActiveTab] = useState<AdminTab>(availableTabs[0]);
     const [isUserModalOpen, setIsUserModalOpen] = useState(false);
@@ -140,6 +147,9 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
     // Scheduled task state
     const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
     const [taskToEdit, setTaskToEdit] = useState<ScheduledTask | null>(null);
+    // Alert rule state
+    const [isAlertRuleModalOpen, setIsAlertRuleModalOpen] = useState(false);
+    const [alertRuleToEdit, setAlertRuleToEdit] = useState<NotificationRule | null>(null);
     
     useEffect(() => {
         if (!availableTabs.includes(activeTab)) {
@@ -194,6 +204,9 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
             case 'scheduledTask':
                 deleteScheduledTask(item.id);
                 break;
+            case 'notificationRule':
+                deleteNotificationRule(item.id);
+                break;
         }
         setDeletionTarget(null);
     };
@@ -223,7 +236,7 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
         if (!deletionTarget) return { title: '', content: <></> };
         const { type, item } = deletionTarget;
         const name = 'username' in item ? item.username : item.name;
-        const typeNames: Record<DeletionTarget['type'], string> = { user: '用户', template: '模板', policy: '策略', script: '脚本', scheduledTask: '定时任务' };
+        const typeNames: Record<DeletionTarget['type'], string> = { user: '用户', template: '模板', policy: '策略', script: '脚本', scheduledTask: '定时任务', notificationRule: '告警规则' };
         const typeName = typeNames[type];
 
         return {
@@ -248,6 +261,7 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
                     {availableTabs.includes('tokens') && <TabButton active={activeTab === 'tokens'} onClick={() => setActiveTab('tokens')}>写入令牌</TabButton>}
                     {availableTabs.includes('scripts') && <TabButton active={activeTab === 'scripts'} onClick={() => setActiveTab('scripts')}>脚本库</TabButton>}
                     {availableTabs.includes('scheduledTasks') && <TabButton active={activeTab === 'scheduledTasks'} onClick={() => setActiveTab('scheduledTasks')}>定时任务</TabButton>}
+                    {availableTabs.includes('alerts') && <TabButton active={activeTab === 'alerts'} onClick={() => setActiveTab('alerts')}>告警通知</TabButton>}
                     {availableTabs.includes('reports') && <TabButton active={activeTab === 'reports'} onClick={() => setActiveTab('reports')}>报告导出</TabButton>}
                 </div>
 
@@ -452,6 +466,58 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
                         </div>
                     </div>
                 )}
+
+                {activeTab === 'alerts' && canManageAlerts && (
+                    <div className="bg-bg-950/50 rounded-md">
+                        <div className="p-4 flex justify-end">
+                            <button onClick={() => { setAlertRuleToEdit(null); setIsAlertRuleModalOpen(true); }} className="flex items-center gap-2 text-sm bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-3 rounded-md">
+                                <PlusIcon /> 创建告警规则
+                            </button>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm text-left text-text-300">
+                                <thead className="text-xs text-text-400 uppercase bg-bg-800/50">
+                                    <tr>
+                                        <th className="px-6 py-3">状态</th>
+                                        <th className="px-6 py-3">规则名称</th>
+                                        <th className="px-6 py-3">事件类型</th>
+                                        <th className="px-6 py-3">通知通道</th>
+                                        <th className="px-6 py-3">创建者</th>
+                                        <th className="px-6 py-3 text-right">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {notificationRules.length === 0 ? (
+                                        <tr><td colSpan={6} className="text-center py-8 text-text-500">暂无告警规则，点击右上角创建。</td></tr>
+                                    ) : notificationRules.map(rule => (
+                                        <tr key={rule.id} className="border-b border-bg-800 hover:bg-bg-800/50">
+                                            <td className="px-6 py-4">
+                                                <span className={`text-xs font-bold px-2 py-1 rounded-full ${rule.is_enabled ? 'bg-green-900 text-green-300' : 'bg-bg-700 text-text-500'}`}>
+                                                    {rule.is_enabled ? '启用' : '停用'}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 font-medium text-text-100">{rule.name}</td>
+                                            <td className="px-6 py-4 text-text-400 text-xs">
+                                                {rule.event_type === 'device_offline' ? '设备离线' :
+                                                 rule.event_type === 'brute_force' ? '暴力破解' :
+                                                 rule.event_type === 'compliance_fail' ? '合规失败' : '系统错误'}
+                                            </td>
+                                            <td className="px-6 py-4 text-text-400 text-xs">
+                                                {rule.channel === 'email' ? '邮件' :
+                                                 rule.channel === 'wechat_work' ? '企业微信' : '钉钉'}
+                                            </td>
+                                            <td className="px-6 py-4 text-text-400">{rule.created_by || '—'}</td>
+                                            <td className="px-6 py-4 text-right space-x-2">
+                                                <button onClick={() => { setAlertRuleToEdit(rule); setIsAlertRuleModalOpen(true); }} className="font-medium text-primary-400 hover:underline">编辑</button>
+                                                <button onClick={() => setDeletionTarget({ type: 'notificationRule', item: rule })} className="font-medium text-red-500 hover:underline">删除</button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {isUserModalOpen && <UserEditModal userToEdit={userToEdit} allUsers={allUsers} currentUser={currentUser} agentApiUrl={agentApiUrl} onClose={() => setIsUserModalOpen(false)} onSave={() => { setIsUserModalOpen(false); fetchData(true); }} />}
@@ -460,6 +526,7 @@ const AdminPanel: React.FC<AdminPanelProps> = () => {
             {isScriptModalOpen && <ScriptEditModal scriptToEdit={scriptToEdit} onClose={() => { setIsScriptModalOpen(false); setScriptToEdit(null); }} />}
             {executeScript && <ScriptExecuteModal script={executeScript} devices={devices} onClose={() => setExecuteScript(null)} />}
             {isTaskModalOpen && <ScheduledTaskModal taskToEdit={taskToEdit} devices={devices} onClose={() => { setIsTaskModalOpen(false); setTaskToEdit(null); }} />}
+            {isAlertRuleModalOpen && <AlertRuleModal ruleToEdit={alertRuleToEdit} onClose={() => { setIsAlertRuleModalOpen(false); setAlertRuleToEdit(null); }} />}
         
             {deletionTarget && (
                 <ConfirmationModal

@@ -12,7 +12,7 @@ const operatorFull: User = {
   id: 2,
   username: 'op_full',
   role: 'operator',
-  extra_permissions: 'device:create,device:update,device:delete,rollback:execute,user:manage,template:manage,policy:manage,system:reset,system:settings,startup:write,script:manage,script:execute,task:manage',
+  extra_permissions: 'device:create,device:update,device:delete,rollback:execute,user:manage,template:manage,policy:manage,system:reset,system:settings,startup:write,script:manage,script:execute,task:manage,device:view,alert:manage',
 };
 
 const operatorLimited: User = {

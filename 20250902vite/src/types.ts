@@ -173,3 +173,28 @@ export interface ConfigSearchResult {
   version?: number;
   matched_lines: string[];
 }
+
+export interface NotificationRule {
+  id: string;
+  name: string;
+  event_type: 'device_offline' | 'brute_force' | 'compliance_fail' | 'system_error';
+  channel: 'email' | 'wechat_work' | 'dingtalk';
+  channel_config: Record<string, string>;
+  is_enabled: boolean;
+  created_by?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface AlertEntry {
+  id: number;
+  rule_id: string | null;
+  event_type: string;
+  title: string;
+  message: string;
+  severity: 'critical' | 'warning' | 'info';
+  source: string | null;
+  is_sent: boolean;
+  sent_at: string | null;
+  created_at: string;
+}

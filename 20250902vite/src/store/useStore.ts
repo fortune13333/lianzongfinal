@@ -11,6 +11,7 @@ import { createUiSlice, DEFAULT_SETTINGS } from './slices/uiSlice';
 import { createSessionSlice } from './slices/sessionSlice';
 import { createScriptSlice } from './slices/scriptSlice';
 import { createTaskSlice } from './slices/taskSlice';
+import { createAlertSlice } from './slices/alertSlice';
 import { createTopologySlice } from './slices/topologySlice';
 
 export const useStore = create<FullStore>()(
@@ -23,6 +24,7 @@ export const useStore = create<FullStore>()(
       ...createSessionSlice(set, get, api),
       ...createScriptSlice(set, get, api),
       ...createTaskSlice(set, get, api),
+      ...createAlertSlice(set, get, api),
       ...createTopologySlice(set, get, api),
     }),
     {

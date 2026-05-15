@@ -67,6 +67,7 @@ def _format_data_for_frontend(
     db_write_tokens: List[models.WriteToken],
     db_scripts: Optional[List[models.Script]] = None,
     db_scheduled_tasks: Optional[List[models.ScheduledTask]] = None,
+    db_notification_rules: Optional[List[models.NotificationRule]] = None,
     blocks_by_device: Optional[Dict[str, List[Any]]] = None,
 ) -> Dict[str, Any]:
 
@@ -122,6 +123,7 @@ def _format_data_for_frontend(
         "write_tokens": [{"id": t.id, "token_value": t.token_value, "created_by_admin": t.created_by_admin, "created_at": t.created_at.isoformat().replace('+00:00', 'Z'), "expires_at": t.expires_at.isoformat().replace('+00:00', 'Z'), "is_used": t.is_used} for t in db_write_tokens],
         "scripts": [{"id": s.id, "name": s.name, "description": s.description, "content": s.content, "device_type": s.device_type, "created_by": s.created_by, "created_at": s.created_at.isoformat().replace('+00:00', 'Z') if s.created_at else None} for s in (db_scripts or [])],
         "scheduled_tasks": [{"id": t.id, "name": t.name, "description": t.description, "cron_expr": t.cron_expr, "task_type": t.task_type, "device_ids": json.loads(str(t.device_ids)), "is_enabled": t.is_enabled, "created_by": t.created_by, "created_at": t.created_at.isoformat().replace('+00:00', 'Z') if t.created_at else None, "last_run": t.last_run.isoformat().replace('+00:00', 'Z') if t.last_run else None, "last_status": t.last_status} for t in (db_scheduled_tasks or [])],
+        "notification_rules": [{"id": r.id, "name": r.name, "event_type": r.event_type, "channel": r.channel, "channel_config": json.loads(str(r.channel_config)), "is_enabled": r.is_enabled, "created_by": r.created_by, "created_at": r.created_at.isoformat().replace('+00:00', 'Z') if r.created_at else None, "updated_at": r.updated_at.isoformat().replace('+00:00', 'Z') if r.updated_at else None} for r in (db_notification_rules or [])],
     }
 
 # --- Generic CRUD ---
@@ -170,9 +172,11 @@ def get_all_data(db: Session) -> Dict[str, Any]:
     write_tokens = db.query(models.WriteToken).order_by(desc(models.WriteToken.created_at)).limit(100).all()
     scripts = db.query(models.Script).order_by(models.Script.name).all()
     scheduled_tasks = db.query(models.ScheduledTask).all()
+    notification_rules = db.query(models.NotificationRule).all()
     return _format_data_for_frontend(
         devices, users, logs, templates, policies, settings,
         deploy_history, write_tokens, scripts, scheduled_tasks,
+        notification_rules,
         blocks_by_device=blocks_by_device,
     )
 
@@ -528,3 +532,126 @@ def upsert_topology_links(db: Session, new_links: list, source_device_ids: list)
 def clear_topology(db: Session) -> None:
     db.query(models.TopologyLink).delete(synchronize_session=False)
     db.commit()
+
+
+# ─────────────────────────────────────────────────────────
+# Notification Rules
+# ─────────────────────────────────────────────────────────
+
+def get_notification_rules(db: Session) -> List[models.NotificationRule]:
+    return db.query(models.NotificationRule).order_by(models.NotificationRule.created_at.desc()).all()
+
+
+def get_notification_rule(db: Session, rule_id: str) -> Optional[models.NotificationRule]:
+    return db.query(models.NotificationRule).filter(models.NotificationRule.id == rule_id).first()
+
+
+def create_notification_rule(db: Session, rule_payload: Any, created_by: str) -> models.NotificationRule:
+    db_rule = models.NotificationRule(
+        id=rule_payload.id,
+        name=rule_payload.name,
+        event_type=rule_payload.event_type,
+        channel=rule_payload.channel,
+        channel_config=rule_payload.channel_config,
+        is_enabled=rule_payload.is_enabled,
+        created_by=created_by,
+    )
+    db.add(db_rule)
+    db.commit()
+    db.refresh(db_rule)
+    return db_rule
+
+
+def update_notification_rule(db: Session, rule_id: str, rule_payload: Any) -> Optional[models.NotificationRule]:
+    db_rule = get_notification_rule(db, rule_id)
+    if db_rule:
+        db_rule.name = rule_payload.name  # type: ignore
+        db_rule.event_type = rule_payload.event_type  # type: ignore
+        db_rule.channel = rule_payload.channel  # type: ignore
+        db_rule.channel_config = rule_payload.channel_config  # type: ignore
+        db_rule.is_enabled = rule_payload.is_enabled  # type: ignore
+        db.commit()
+        db.refresh(db_rule)
+    return db_rule
+
+
+def delete_notification_rule(db: Session, rule_id: str) -> bool:
+    db_rule = get_notification_rule(db, rule_id)
+    if db_rule:
+        db.delete(db_rule)
+        db.commit()
+        return True
+    return False
+
+
+# ─────────────────────────────────────────────────────────
+# Alerts
+# ─────────────────────────────────────────────────────────
+
+def get_alerts(db: Session, limit: int = 200, event_type: Optional[str] = None) -> List[models.Alert]:
+    q = db.query(models.Alert).order_by(desc(models.Alert.created_at))
+    if event_type:
+        q = q.filter(models.Alert.event_type == event_type)
+    return q.limit(limit).all()
+
+
+def create_alert(
+    db: Session,
+    rule_id: Optional[str],
+    event_type: str,
+    title: str,
+    message: str,
+    severity: str = "warning",
+    source: Optional[str] = None,
+    is_sent: bool = False,
+) -> models.Alert:
+    import datetime as _dt
+    alert = models.Alert(
+        rule_id=rule_id,
+        event_type=event_type,
+        title=title,
+        message=message,
+        severity=severity,
+        source=source,
+        is_sent=is_sent,
+        sent_at=_dt.datetime.now(_dt.timezone.utc) if is_sent else None,
+    )
+    db.add(alert)
+    db.commit()
+    db.refresh(alert)
+    return alert
+
+
+def get_alert_stats(db: Session) -> Dict[str, Any]:
+    """Return counts grouped by event_type and severity for the last 30 days."""
+    from sqlalchemy import func as sa_func
+    import datetime as _dt
+    cutoff = _dt.datetime.now(_dt.timezone.utc) - _dt.timedelta(days=30)
+
+    by_type = (
+        db.query(models.Alert.event_type, sa_func.count(models.Alert.id))
+        .filter(models.Alert.created_at >= cutoff)
+        .group_by(models.Alert.event_type)
+        .all()
+    )
+    by_severity = (
+        db.query(models.Alert.severity, sa_func.count(models.Alert.id))
+        .filter(models.Alert.created_at >= cutoff)
+        .group_by(models.Alert.severity)
+        .all()
+    )
+    total = db.query(models.Alert).filter(models.Alert.created_at >= cutoff).count()
+    return {
+        "total": total,
+        "by_type": {t: c for t, c in by_type},
+        "by_severity": {s: c for s, c in by_severity},
+    }
+
+
+def cleanup_old_alerts(db: Session, retention_days: int = 90) -> int:
+    """Delete alerts older than retention_days. Returns count deleted."""
+    import datetime as _dt
+    cutoff = _dt.datetime.now(_dt.timezone.utc) - _dt.timedelta(days=retention_days)
+    deleted = db.query(models.Alert).filter(models.Alert.created_at < cutoff).delete()
+    db.commit()
+    return deleted

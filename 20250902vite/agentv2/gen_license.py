@@ -64,8 +64,8 @@ def main():
     parser.add_argument("--generate-keypair", action="store_true", help="生成新的 RSA 密钥对")
     parser.add_argument("--customer", help="客户名称（中文可用）")
     parser.add_argument("--devices", type=int, default=50, help="最大设备数量（默认 50）")
-    parser.add_argument("--features", default="ldap,pdf_report",
-                        help="逗号分隔的功能列表，可选: ldap, pdf_report, notification（默认: ldap,pdf_report）")
+    parser.add_argument("--features", default="ldap,pdf_report,alerting",
+                        help="逗号分隔的功能列表，可选: ldap, pdf_report, alerting（默认: ldap,pdf_report,alerting）")
     parser.add_argument("--days", type=int, default=365, help="有效期（天数，默认 365）")
     parser.add_argument("--key", default="private_key.pem", help="RSA 私钥文件路径")
     parser.add_argument("--out", default="chaintrace.lic", help="输出 License 文件名")

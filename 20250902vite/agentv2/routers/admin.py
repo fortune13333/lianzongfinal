@@ -13,6 +13,7 @@ from database import get_db
 from core import (
     UserUpdatePayload, Policy as PolicyPayload, AISettingsPayload,
     AICommandGenerationRequest, AIConfigCheckRequest, LDAPSettingsPayload,
+    NotificationRulePayload,
 )
 from auth_deps import get_current_actor, require_permission
 from services import (
@@ -341,3 +342,138 @@ def proxy_ai_check_config(
     except Exception as e:
         logging.error(f"Error in AI config check proxy: {e}")
         raise HTTPException(status_code=500, detail=f"AI配置体检时发生意外错误: {e}")
+
+
+# ─────────────────────────────────────────────────────────
+# Notification Rules
+# ─────────────────────────────────────────────────────────
+
+
+def _require_alerting(actor: str = Depends(get_current_actor)) -> str:
+    """Gate all notification endpoints behind the alerting license feature."""
+    if not check_feature("alerting"):
+        raise HTTPException(status_code=403, detail="告警通知功能需要企业版 License，请联系销售升级。")
+    return actor
+
+
+@router.get("/api/notification-rules")
+def get_notification_rules(
+    actor: str = Depends(_require_alerting),
+    db: Session = Depends(get_db),
+) -> List[Dict[str, Any]]:
+    rules = crud.get_notification_rules(db)
+    return [
+        {
+            "id": r.id, "name": r.name, "event_type": r.event_type,
+            "channel": r.channel,
+            "channel_config": json.loads(str(r.channel_config)),
+            "is_enabled": r.is_enabled, "created_by": r.created_by,
+            "created_at": r.created_at.isoformat().replace('+00:00', 'Z') if r.created_at else None,
+            "updated_at": r.updated_at.isoformat().replace('+00:00', 'Z') if r.updated_at else None,
+        }
+        for r in rules
+    ]
+
+
+@router.post("/api/notification-rules", status_code=201)
+def create_notification_rule(
+    payload: NotificationRulePayload,
+    actor: str = Depends(_require_alerting),
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    new_rule = crud.create_notification_rule(db, payload, actor)
+    crud.log_action(db, actor, f"创建了告警通知规则 '{new_rule.name}'。")
+    return {
+        "id": new_rule.id, "name": new_rule.name, "event_type": new_rule.event_type,
+        "channel": new_rule.channel,
+        "channel_config": json.loads(str(new_rule.channel_config)),
+        "is_enabled": new_rule.is_enabled, "created_by": new_rule.created_by,
+    }
+
+
+@router.put("/api/notification-rules/{rule_id}")
+def update_notification_rule(
+    rule_id: str,
+    payload: NotificationRulePayload,
+    actor: str = Depends(_require_alerting),
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    db_rule = crud.get_notification_rule(db, rule_id)
+    if not db_rule:
+        raise HTTPException(status_code=404, detail="未找到告警通知规则。")
+    updated = crud.update_notification_rule(db, rule_id, payload)
+    if not updated:
+        raise HTTPException(status_code=500, detail="更新告警通知规则失败。")
+    crud.log_action(db, actor, f"更新了告警通知规则 '{updated.name}'。")
+    return {
+        "id": updated.id, "name": updated.name, "event_type": updated.event_type,
+        "channel": updated.channel,
+        "channel_config": json.loads(str(updated.channel_config)),
+        "is_enabled": updated.is_enabled,
+    }
+
+
+@router.delete("/api/notification-rules/{rule_id}", status_code=204)
+def delete_notification_rule(
+    rule_id: str,
+    actor: str = Depends(_require_alerting),
+    db: Session = Depends(get_db),
+) -> None:
+    db_rule = crud.get_notification_rule(db, rule_id)
+    if not db_rule:
+        raise HTTPException(status_code=404, detail="未找到告警通知规则。")
+    crud.delete_notification_rule(db, rule_id)
+    crud.log_action(db, actor, f"删除了告警通知规则 '{db_rule.name}'。")
+    return
+
+
+@router.post("/api/notification-rules/{rule_id}/test")
+def test_notification_rule(
+    rule_id: str,
+    actor: str = Depends(_require_alerting),
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    db_rule = crud.get_notification_rule(db, rule_id)
+    if not db_rule:
+        raise HTTPException(status_code=404, detail="未找到告警通知规则。")
+    from notifications import deliver_notification
+    title = f"测试告警 - {db_rule.name}"
+    message_text = f"这是一条来自链踪 ChainTrace 的测试告警消息。\n规则名称: {db_rule.name}\n事件类型: {db_rule.event_type}\n通道: {db_rule.channel}"
+    ok = deliver_notification(db_rule, title, message_text, db)
+    if ok:
+        return {"status": "ok", "message": f"测试通知已通过 {db_rule.channel} 发送成功。"}
+    else:
+        raise HTTPException(status_code=500, detail=f"测试通知通过 {db_rule.channel} 发送失败，请检查通道配置。")
+
+
+
+# ─────────────────────────────────────────────────────────
+# Alerts
+# ─────────────────────────────────────────────────────────
+
+@router.get("/api/alerts")
+def get_alerts(
+    event_type: Optional[str] = None,
+    limit: int = 200,
+    actor: str = Depends(_require_alerting),
+    db: Session = Depends(get_db),
+) -> List[Dict[str, Any]]:
+    alerts = crud.get_alerts(db, limit=limit, event_type=event_type)
+    return [
+        {
+            "id": a.id, "rule_id": a.rule_id, "event_type": a.event_type,
+            "title": a.title, "message": a.message, "severity": a.severity,
+            "source": a.source, "is_sent": a.is_sent,
+            "sent_at": a.sent_at.isoformat().replace('+00:00', 'Z') if a.sent_at else None,
+            "created_at": a.created_at.isoformat().replace('+00:00', 'Z') if a.created_at else None,
+        }
+        for a in alerts
+    ]
+
+
+@router.get("/api/alerts/stats")
+def get_alert_stats(
+    actor: str = Depends(_require_alerting),
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    return crud.get_alert_stats(db)

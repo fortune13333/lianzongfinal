@@ -587,3 +587,60 @@ def perform_discover_topology(device_id: str) -> List[Dict[str, Any]]:
     except (NetmikoBaseException, NetmikoTimeoutException) as e:
         logging.error(f"Topology SSH failed for {device_id}: {e}")
         raise HTTPException(status_code=504, detail=f"设备 '{device_id}' 连接失败: {e}")
+
+
+# ─────────────────────────────────────────────────────────
+# Alert / Notification Engine
+# ─────────────────────────────────────────────────────────
+
+def evaluate_and_alert(
+    db: Session,
+    event_type: str,
+    title: str,
+    message: str,
+    severity: str = "warning",
+    source: str = "system",
+) -> int:
+    """Find enabled notification rules matching event_type, deliver via their channel.
+
+    Returns the number of rules that were triggered.
+    """
+    import crud as _crud
+    import models as _models
+    from notifications import deliver_notification
+
+    rules = (
+        db.query(_models.NotificationRule)
+        .filter(
+            _models.NotificationRule.event_type == event_type,
+            _models.NotificationRule.is_enabled == True,
+        )
+        .all()
+    )
+    triggered = 0
+    for rule in rules:
+        try:
+            if deliver_notification(rule, title, message, db):
+                triggered += 1
+        except Exception as e:
+            logging.error(f"Notification rule '{rule.name}' delivery failed: {e}")
+
+    if triggered == 0 and len(rules) == 0:
+        logging.info(
+            f"No enabled notification rules for event_type '{event_type}'. "
+            f"Alert '{title}' logged without delivery."
+        )
+        # Still create an Alert record even if no rules match,
+        # so the event is visible in alert history.
+        _crud.create_alert(
+            db,
+            rule_id=None,
+            event_type=event_type,
+            title=title,
+            message=message,
+            severity=severity,
+            source=source,
+            is_sent=False,
+        )
+
+    return triggered

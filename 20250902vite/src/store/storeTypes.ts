@@ -4,6 +4,7 @@
 import {
   Device, Block, AppSettings, User, AuditLogEntry, ConfigTemplate, Policy,
   BackendSettings, DeploymentRecord, WriteToken, DeviceStatus, Script, ScheduledTask,
+  NotificationRule, AlertEntry,
 } from '../types';
 
 // --- Slice Interfaces ---
@@ -27,6 +28,7 @@ export interface DataSlice {
   writeTokens: WriteToken[];
   scripts: Script[];
   scheduledTasks: ScheduledTask[];
+  notificationRules: NotificationRule[];
   blockchains: Record<string, Block[]>;
   isLoading: boolean;
   backendSettings: BackendSettings;
@@ -99,6 +101,13 @@ export interface TaskSlice {
   deleteScheduledTask: (taskId: string) => Promise<void>;
 }
 
+export interface AlertSlice {
+  createNotificationRule: (rule: NotificationRule) => Promise<void>;
+  updateNotificationRule: (ruleId: string, rule: NotificationRule) => Promise<void>;
+  deleteNotificationRule: (ruleId: string) => Promise<void>;
+  testNotificationRule: (ruleId: string) => Promise<void>;
+}
+
 // ── Topology ──────────────────────────────────────────────
 
 export interface TopologyNode {
@@ -132,4 +141,4 @@ export interface TopologySlice {
 }
 
 // FullStore is the union of all slices — used as the generic for StateCreator in slice files.
-export type FullStore = AuthSlice & DataSlice & DeviceSlice & UiSlice & SessionSlice & ScriptSlice & TaskSlice & TopologySlice;
+export type FullStore = AuthSlice & DataSlice & DeviceSlice & UiSlice & SessionSlice & ScriptSlice & TaskSlice & AlertSlice & TopologySlice;

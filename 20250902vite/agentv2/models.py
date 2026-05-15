@@ -147,3 +147,32 @@ class TopologyLink(Base):
     target_platform = Column(String, nullable=True)
     protocol = Column(String, nullable=False, default='cdp')  # 'cdp' | 'lldp'
     discovered_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class NotificationRule(Base):
+    """A notification rule that maps an event type to a delivery channel."""
+    __tablename__ = "notification_rules"
+    id = Column(String, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    event_type = Column(String, nullable=False)  # device_offline, brute_force, compliance_fail, system_error
+    channel = Column(String, nullable=False)     # email, wechat_work, dingtalk
+    channel_config = Column(Text, nullable=False)  # JSON: smtp settings or webhook URL
+    is_enabled = Column(Boolean, default=True, nullable=False)
+    created_by = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class Alert(Base):
+    """A historical record of a sent (or failed) alert notification."""
+    __tablename__ = "alerts"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    rule_id = Column(String, ForeignKey("notification_rules.id", ondelete="SET NULL"), nullable=True)
+    event_type = Column(String, nullable=False)
+    title = Column(String, nullable=False)
+    message = Column(Text, nullable=False)
+    severity = Column(String, nullable=False, default="warning")  # critical, warning, info
+    source = Column(String, nullable=True)
+    is_sent = Column(Boolean, default=False, nullable=False)
+    sent_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

@@ -284,6 +284,15 @@ class ScheduledTaskPayload(BaseModel):
     is_enabled: bool = True
 
 
+class NotificationRulePayload(BaseModel):
+    id: str
+    name: str
+    event_type: str   # device_offline, brute_force, compliance_fail, system_error
+    channel: str       # email, wechat_work, dingtalk
+    channel_config: str  # JSON string: SMTP settings or webhook URL
+    is_enabled: bool = True
+
+
 class LDAPSettingsPayload(BaseModel):
     enabled: bool = False
     server: str = ""
